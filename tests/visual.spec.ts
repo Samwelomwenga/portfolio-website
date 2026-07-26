@@ -5,7 +5,7 @@ test.describe("portfolio visual smoke checks", () => {
     await page.goto("/")
 
     await expect(page.getByRole("heading", { name: /Hey There/i })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "About Samwel Omwenga" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Frontend work with taste, restraint, and a clean handoff." })).toBeVisible()
     await expect(page.getByRole("heading", { name: "What I bring to projects" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "Featured Experience" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "Featured Projects" })).toBeVisible()

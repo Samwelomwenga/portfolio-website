@@ -15,14 +15,16 @@ import {
   Monitor,
   Newspaper,
   PenTool,
+  Route,
   Smartphone,
+  Sparkles,
 } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useEffect, useState } from "react"
 
 import { ContactForm } from "@/components/contact-form"
 import { SectionReveal } from "@/components/section-reveal"
-import { aboutHighlights, assets, blogs, experience, navItems, profile, projects, skills, socialLinks } from "@/portfolio-data"
+import { aboutPrinciples, aboutStats, assets, blogs, experience, navItems, profile, projects, skills, socialLinks } from "@/portfolio-data"
 
 const iconMap = {
   monitor: Monitor,
@@ -323,19 +325,55 @@ function HomePage({ prefersReducedMotion }: { prefersReducedMotion: boolean | nu
       </section>
 
       <SectionReveal id="about" className="section about-section">
-        <div className="section-heading">
-          <p className="eyebrow">About</p>
-          <h2>About Samwel Omwenga</h2>
+        <div className="about-visual">
+          <div className="about-portrait-card">
+            <img src={assets.heroPortrait} alt={`${profile.name} portrait`} />
+            <span className="about-status">
+              <Sparkles aria-hidden="true" />
+              Available for focused UI work
+            </span>
+          </div>
+          <div className="about-note-card">
+            <Route aria-hidden="true" />
+            <span>
+              <strong>Remote-ready, building for focused teams.</strong>
+              <small>Best fit: frontend polish, portfolio systems, and design-to-code workflows.</small>
+            </span>
+          </div>
         </div>
-        <div className="about-copy">
-          <p>
-            I build sharp, responsive web experiences with clear structure, readable interfaces, and careful attention to how content behaves across screen sizes.
+
+        <div className="about-story">
+          <p className="eyebrow">About</p>
+          <h2>Frontend work with taste, restraint, and a clean handoff.</h2>
+          <p className="about-lede">
+            I&apos;m Samwel Omwenga, a frontend developer who likes the part where design intent meets browser reality: spacing that holds, cards that do not collapse, and pages that still feel good after the real content arrives.
           </p>
-          <div className="about-highlights">
-            {aboutHighlights.map(highlight => (
-              <span key={highlight}>{highlight}</span>
+          <p>
+            I care about the quiet details that make a site feel considered: hierarchy, motion timing, empty states, responsive rules, and components that another person can actually maintain.
+          </p>
+
+          <div className="about-stats" aria-label="About highlights">
+            {aboutStats.map(stat => (
+              <span key={stat.label}>
+                <strong>{stat.value}</strong>
+                <small>{stat.label}</small>
+              </span>
             ))}
           </div>
+
+          <div className="about-principles">
+            {aboutPrinciples.map(principle => (
+              <article key={principle.title}>
+                <strong>{principle.title}</strong>
+                <p>{principle.copy}</p>
+              </article>
+            ))}
+          </div>
+
+          <a className="about-link" href="#projects">
+            See the project thinking
+            <ArrowUpRight aria-hidden="true" />
+          </a>
         </div>
       </SectionReveal>
 

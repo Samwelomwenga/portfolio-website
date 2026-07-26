@@ -33,10 +33,25 @@ export const navItems = [
   { label: "Contact", href: "#contact" },
 ] as const
 
-export const aboutHighlights = [
-  "Focused on clean, responsive portfolio and product experiences.",
-  "Comfortable moving from interface planning into polished front-end implementation.",
-  "Keeps layouts readable across desktop, tablet, and mobile screens.",
+export const aboutPrinciples = [
+  {
+    title: "Design with build pressure in mind",
+    copy: "I think about spacing, states, and responsive behavior early so the final interface survives real content.",
+  },
+  {
+    title: "Keep the useful parts visible",
+    copy: "Good UI should help someone decide faster, so I cut vague decoration and keep the next action obvious.",
+  },
+  {
+    title: "Turn rough ideas into working screens",
+    copy: "I move comfortably between structure, component logic, and visual polish until the page feels intentional.",
+  },
+] as const
+
+export const aboutStats = [
+  { value: "03", label: "Core focus areas" },
+  { value: "06", label: "Project stories tracked" },
+  { value: "100%", label: "Responsive review pass" },
 ] as const
 
 export const skills = [
