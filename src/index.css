@@ -182,6 +182,10 @@
   text-transform: uppercase;
 }
 
+.mobile-nav a.active {
+  color: var(--teal);
+}
+
 .mobile-socials {
   display: flex;
   gap: 10px;

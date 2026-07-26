@@ -9,7 +9,7 @@ import {
   Smartphone,
 } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { ContactForm } from "@/components/contact-form"
 import { SectionReveal } from "@/components/section-reveal"
@@ -29,7 +29,47 @@ const socialIconMap = {
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeHref, setActiveHref] = useState<string>(navItems[0]?.href ?? "#home")
   const prefersReducedMotion = useReducedMotion()
+
+  useEffect(() => {
+    const sections = navItems
+      .map(item => document.querySelector<HTMLElement>(item.href))
+      .filter((section): section is HTMLElement => section !== null)
+
+    if (sections.length === 0) {
+      return
+    }
+
+    function updateActiveSection() {
+      const headerOffset = 110
+      const activeSection = sections.reduce((current, section) => {
+        const isAboveHeader = section.getBoundingClientRect().top <= headerOffset
+        return isAboveHeader ? section : current
+      }, sections[0])
+
+      setActiveHref(`#${activeSection.id}`)
+    }
+
+    const observer = new IntersectionObserver(updateActiveSection, {
+      rootMargin: "-28% 0px -62% 0px",
+      threshold: [0, 0.2, 0.6],
+    })
+
+    sections.forEach(section => observer.observe(section))
+    window.addEventListener("scroll", updateActiveSection, { passive: true })
+    updateActiveSection()
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("scroll", updateActiveSection)
+    }
+  }, [])
+
+  function handleNavClick(href: string) {
+    setActiveHref(href)
+    setIsMenuOpen(false)
+  }
 
   return (
     <div className="page-frame">
@@ -38,8 +78,13 @@ function App() {
           <a className="brand" href="#home" aria-label={`${profile.name} home`}>{profile.shortName}</a>
 
           <nav className="desktop-nav" aria-label="Primary navigation">
-            {navItems.map((item, index) => (
-              <a key={item.href} className={index === 0 ? "active" : undefined} href={item.href}>
+            {navItems.map(item => (
+              <a
+                key={item.href}
+                className={item.href === activeHref ? "active" : undefined}
+                href={item.href}
+                onClick={() => handleNavClick(item.href)}
+              >
                 {item.label}
               </a>
             ))}
@@ -78,7 +123,12 @@ function App() {
               exit={{ opacity: 0, y: -8 }}
             >
               {navItems.map(item => (
-                <a key={item.href} href={item.href} onClick={() => setIsMenuOpen(false)}>
+                <a
+                  key={item.href}
+                  className={item.href === activeHref ? "active" : undefined}
+                  href={item.href}
+                  onClick={() => handleNavClick(item.href)}
+                >
                   {item.label}
                 </a>
               ))}
