@@ -24,28 +24,37 @@ export const socialLinks = [
 ] as const
 
 export const navItems = [
-  { label: "Services", href: "#services" },
-  { label: "Works", href: "#works" },
-  { label: "Notes", href: "#notes" },
+  { label: "Home", href: "#home" },
+  { label: "About", href: "#about" },
+  { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
+  { label: "Projects", href: "#projects" },
+  { label: "Blogs", href: "#blogs" },
+  { label: "Contact", href: "#contact" },
 ] as const
 
-export const services = [
+export const aboutHighlights = [
+  "Focused on clean, responsive portfolio and product experiences.",
+  "Comfortable moving from interface planning into polished front-end implementation.",
+  "Keeps layouts readable across desktop, tablet, and mobile screens.",
+] as const
+
+export const skills = [
   {
-    title: "Website Design",
-    count: "76 Projects",
+    title: "Frontend Development",
+    count: "React, TypeScript, Vite",
     tone: "teal",
     icon: "monitor",
   },
   {
-    title: "Mobile App Design",
-    count: "63 Projects",
+    title: "Responsive UI",
+    count: "Mobile-first layouts",
     tone: "yellow",
     icon: "smartphone",
   },
   {
-    title: "Brand Identity",
-    count: "47 Projects",
+    title: "Design Systems",
+    count: "Reusable components",
     tone: "orange",
     icon: "badge",
   },
@@ -78,71 +87,44 @@ export const experience = [
   },
 ] as const
 
-export const works = [
+export const projects = [
   {
-    title: "App Design",
-    subtitle: "Food Delivery App",
+    title: "Mobile App Interface",
+    subtitle: "Food delivery product flow",
     image: workApp,
     tone: "yellow",
     href: "#",
   },
   {
-    title: "Web Design",
-    subtitle: "Agency Website",
+    title: "Portfolio Website",
+    subtitle: "Responsive personal brand site",
     image: workWeb,
     tone: "teal",
     href: "#",
   },
   {
-    title: "Brand Identity",
-    subtitle: "Brand Identity",
+    title: "Identity System",
+    subtitle: "Visual direction and UI kit",
     image: workCollage,
     tone: "mint",
     href: "#",
   },
 ] as const
 
-export const testimonials = [
-  {
-    name: "John Allendane",
-    role: "Creative manager",
-    quote:
-      "A complete search of the internet has found these results satisfactory result is the most popular phrase on the web.",
-    avatar: "JA",
-    color: "yellow",
-  },
-  {
-    name: "Anamika Sandula",
-    role: "Project manager",
-    quote:
-      "A complete search of the internet has found these results satisfactory result is the most popular phrase on the web.",
-    avatar: "AS",
-    color: "teal",
-  },
-  {
-    name: "Souther Hakcax",
-    role: "Marketing manager",
-    quote:
-      "A complete search of the internet has found these results satisfactory result is the most popular phrase on the web.",
-    avatar: "SH",
-    color: "orange",
-  },
-] as const
-
-export const notes = [
+export const blogs = [
   {
     date: "24 Jan 2026",
-    title: "Designing calm product decisions",
+    title: "Designing responsive sections without layout drift",
     category: "Process",
   },
   {
     date: "12 Feb 2026",
-    title: "Why simple interfaces convert",
+    title: "Why simple portfolio interfaces convert",
     category: "Interface",
   },
   {
     date: "08 Mar 2026",
-    title: "Working with identity systems",
+    title: "Working with identity systems in React",
     category: "Brand",
   },
 ] as const

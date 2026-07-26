@@ -144,8 +144,7 @@
 }
 
 .mobile-menu-button,
-.icon-link,
-.testimonial-controls button {
+.icon-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -160,8 +159,7 @@
 }
 
 .mobile-menu-button svg,
-.icon-link svg,
-.testimonial-controls svg {
+.icon-link svg {
   width: 18px;
   height: 18px;
 }
@@ -182,6 +180,12 @@
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.mobile-socials {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
 }
 
 .hero {
@@ -332,18 +336,56 @@
   letter-spacing: 0;
 }
 
-.services-section {
+.about-section {
+  display: grid;
+  gap: 28px;
+  background: var(--ivory);
+}
+
+.about-copy {
+  display: grid;
+  gap: 22px;
+}
+
+.about-copy > p {
+  max-width: 740px;
+  margin: 0;
+  color: #263a39;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.9;
+}
+
+.about-highlights {
+  display: grid;
+  gap: 12px;
+}
+
+.about-highlights span {
+  display: block;
+  padding: 14px 16px;
+  border-left: 3px solid var(--teal);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #263a39;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+  box-shadow: 0 18px 40px rgb(13 35 34 / 0.06);
+}
+
+.skills-section {
   display: grid;
   gap: 34px;
   background: #ffffff;
 }
 
-.service-list {
+.skill-list {
   display: grid;
   gap: 14px;
 }
 
-.service-card {
+.skill-card {
   display: flex;
   align-items: center;
   gap: 18px;
@@ -355,7 +397,7 @@
   box-shadow: 0 22px 50px rgb(13 35 34 / 0.07);
 }
 
-.service-icon {
+.skill-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -367,30 +409,30 @@
   background: var(--teal);
 }
 
-.service-card[data-tone="yellow"] .service-icon {
+.skill-card[data-tone="yellow"] .skill-icon {
   background: var(--gold);
 }
 
-.service-card[data-tone="orange"] .service-icon {
+.skill-card[data-tone="orange"] .skill-icon {
   background: #ef633f;
 }
 
-.service-icon svg {
+.skill-icon svg {
   width: 20px;
   height: 20px;
 }
 
-.service-card strong,
-.service-card small {
+.skill-card strong,
+.skill-card small {
   display: block;
 }
 
-.service-card strong {
+.skill-card strong {
   font-size: 16px;
   font-weight: 800;
 }
 
-.service-card small {
+.skill-card small {
   margin-top: 2px;
   color: #3e4a49;
   font-size: 12px;
@@ -511,7 +553,7 @@
   background: var(--gold);
 }
 
-.works-section {
+.projects-section {
   background: #ffffff;
 }
 
@@ -537,7 +579,7 @@
   height: 15px;
 }
 
-.works-grid {
+.projects-grid {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(246px, 78%);
@@ -547,7 +589,7 @@
   scroll-snap-type: x mandatory;
 }
 
-.work-card {
+.project-card {
   position: relative;
   display: grid;
   min-height: 224px;
@@ -559,16 +601,16 @@
   scroll-snap-align: start;
 }
 
-.work-card[data-tone="teal"] {
+.project-card[data-tone="teal"] {
   background: var(--teal);
 }
 
-.work-card[data-tone="mint"] {
+.project-card[data-tone="mint"] {
   background: var(--mint);
   color: var(--ink);
 }
 
-.work-card::after {
+.project-card::after {
   position: absolute;
   inset: auto -18px -26px 28px;
   height: 122px;
@@ -578,7 +620,7 @@
   content: "";
 }
 
-.work-copy {
+.project-copy {
   position: relative;
   z-index: 2;
   display: grid;
@@ -586,20 +628,20 @@
   padding: 24px 24px 0;
 }
 
-.work-copy strong {
+.project-copy strong {
   font-size: 22px;
   font-weight: 800;
   line-height: 1.1;
 }
 
-.work-copy small {
+.project-copy small {
   margin-top: 4px;
   font-size: 12px;
   font-weight: 700;
   opacity: 0.82;
 }
 
-.work-card img {
+.project-card img {
   position: absolute;
   right: -38px;
   bottom: -8px;
@@ -611,107 +653,16 @@
   box-shadow: 0 20px 34px rgb(13 35 34 / 0.14);
 }
 
-.testimonials-section {
-  background: var(--ivory-2);
-}
-
-.centered {
-  text-align: center;
-}
-
-.centered p {
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.testimonial-stage {
-  display: grid;
-  justify-items: center;
-  gap: 18px;
-}
-
-.testimonial-card {
-  display: grid;
-  justify-items: center;
-  width: min(100%, 460px);
-  min-height: 244px;
-  padding: 30px 26px;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 24px 58px rgb(13 35 34 / 0.08);
-  text-align: center;
-}
-
-.avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 54px;
-  height: 54px;
-  margin-bottom: 18px;
-  border-radius: 999px;
-  color: var(--ink);
-  background: var(--gold);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.avatar[data-color="teal"] {
-  color: white;
-  background: var(--teal);
-}
-
-.avatar[data-color="orange"] {
-  color: white;
-  background: #ef633f;
-}
-
-.testimonial-card p {
-  max-width: 330px;
-  margin: 0;
-  color: #203433;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.9;
-}
-
-.testimonial-card strong {
-  margin-top: 20px;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.testimonial-card small {
-  color: #5e6866;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.testimonial-controls {
-  display: flex;
-  gap: 12px;
-}
-
-.testimonial-controls button {
-  width: 38px;
-  height: 38px;
-}
-
-.testimonial-controls button:last-child {
-  background: var(--teal);
-  color: #ffffff;
-}
-
-.notes-section {
+.blogs-section {
   background: #ffffff;
 }
 
-.notes-list {
+.blogs-list {
   display: grid;
   border-top: 1px solid var(--line);
 }
 
-.note-row {
+.blog-row {
   display: grid;
   grid-template-columns: 1fr;
   gap: 7px;
@@ -719,15 +670,15 @@
   border-bottom: 1px solid var(--line);
 }
 
-.note-row span,
-.note-row small {
+.blog-row span,
+.blog-row small {
   color: #66716f;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.note-row strong {
+.blog-row strong {
   color: var(--ink);
   font-size: 18px;
   font-weight: 800;
@@ -746,6 +697,13 @@
 .contact-copy p {
   color: var(--ink);
   font-size: 20px;
+  font-weight: 800;
+}
+
+.contact-copy .eyebrow {
+  margin: 0 0 8px;
+  color: var(--orange);
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1014,13 +972,22 @@
     padding: 84px 56px;
   }
 
-  .services-section {
+  .about-section {
+    grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .about-copy {
+    padding-top: 10px;
+  }
+
+  .skills-section {
     grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1fr);
     gap: 58px;
     align-items: center;
   }
 
-  .service-list {
+  .skill-list {
     gap: 18px;
   }
 
@@ -1067,7 +1034,7 @@
     align-items: end;
   }
 
-  .works-grid {
+  .projects-grid {
     grid-auto-flow: initial;
     grid-auto-columns: initial;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1075,7 +1042,7 @@
     padding-bottom: 0;
   }
 
-  .work-card {
+  .project-card {
     min-height: 262px;
   }
 

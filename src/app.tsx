@@ -1,8 +1,6 @@
 import {
   ArrowUpRight,
   BadgeCheck,
-  ChevronLeft,
-  ChevronRight,
   Github,
   Linkedin,
   Mail,
@@ -15,7 +13,7 @@ import { useState } from "react"
 
 import { ContactForm } from "@/components/contact-form"
 import { SectionReveal } from "@/components/section-reveal"
-import { assets, experience, navItems, notes, profile, services, socialLinks, testimonials, works } from "@/portfolio-data"
+import { aboutHighlights, assets, blogs, experience, navItems, profile, projects, skills, socialLinks } from "@/portfolio-data"
 
 const iconMap = {
   monitor: Monitor,
@@ -31,23 +29,13 @@ const socialIconMap = {
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [testimonialIndex, setTestimonialIndex] = useState(0)
   const prefersReducedMotion = useReducedMotion()
-  const activeTestimonial = testimonials[testimonialIndex] ?? testimonials[0]
-
-  function showPreviousTestimonial() {
-    setTestimonialIndex(index => (index === 0 ? testimonials.length - 1 : index - 1))
-  }
-
-  function showNextTestimonial() {
-    setTestimonialIndex(index => (index === testimonials.length - 1 ? 0 : index + 1))
-  }
 
   return (
     <div className="page-frame">
       <div className="site-shell">
         <header className="site-header">
-          <a className="brand" href="#top" aria-label={`${profile.name} home`}>{profile.shortName}</a>
+          <a className="brand" href="#home" aria-label={`${profile.name} home`}>{profile.shortName}</a>
 
           <nav className="desktop-nav" aria-label="Primary navigation">
             {navItems.map((item, index) => (
@@ -94,12 +82,23 @@ function App() {
                   {item.label}
                 </a>
               ))}
+              <span className="mobile-socials" aria-label="Social links">
+                {socialLinks.map((link) => {
+                  const Icon = socialIconMap[link.icon]
+
+                  return (
+                    <a className="icon-link" href={link.href} aria-label={link.label} key={link.label}>
+                      <Icon aria-hidden="true" />
+                    </a>
+                  )
+                })}
+              </span>
             </motion.nav>
           )}
         </AnimatePresence>
 
-        <main id="top">
-          <section className="hero" data-testid="hero">
+        <main>
+          <section id="home" className="hero" data-testid="hero">
             <motion.div
               className="hero-copy"
               initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
@@ -163,25 +162,42 @@ function App() {
             </motion.div>
           </section>
 
-          <SectionReveal id="services" className="section services-section">
-            <div className="service-list">
-              {services.map((service) => {
-                const Icon = iconMap[service.icon]
+          <SectionReveal id="about" className="section about-section">
+            <div className="section-heading">
+              <p className="eyebrow">About</p>
+              <h2>About Samwel Omwenga</h2>
+            </div>
+            <div className="about-copy">
+              <p>
+                I build sharp, responsive web experiences with clear structure, readable interfaces, and careful attention to how content behaves across screen sizes.
+              </p>
+              <div className="about-highlights">
+                {aboutHighlights.map(highlight => (
+                  <span key={highlight}>{highlight}</span>
+                ))}
+              </div>
+            </div>
+          </SectionReveal>
+
+          <SectionReveal id="skills" className="section skills-section">
+            <div className="skill-list">
+              {skills.map((skill) => {
+                const Icon = iconMap[skill.icon]
 
                 return (
                   <motion.article
-                    className="service-card"
-                    data-tone={service.tone}
-                    key={service.title}
+                    className="skill-card"
+                    data-tone={skill.tone}
+                    key={skill.title}
                     whileHover={prefersReducedMotion ? undefined : { y: -5, scale: 1.01 }}
                     whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
                   >
-                    <span className="service-icon">
+                    <span className="skill-icon">
                       <Icon aria-hidden="true" />
                     </span>
                     <span>
-                      <strong>{service.title}</strong>
-                      <small>{service.count}</small>
+                      <strong>{skill.title}</strong>
+                      <small>{skill.count}</small>
                     </span>
                   </motion.article>
                 )
@@ -189,22 +205,22 @@ function App() {
             </div>
 
             <div className="section-copy">
-              <p className="eyebrow">Services</p>
-              <h2>What do I help?</h2>
+              <p className="eyebrow">Skills</p>
+              <h2>What I bring to projects</h2>
               <p>
-                I will help you with finginga solution and solve your problems, We use process design to create digital products.Besids that also help their business.
+                I turn product ideas and personal brands into focused interfaces that are easy to scan, easy to use, and ready for real screens.
               </p>
               <p>
-                We use process design to create digital products. Besides that also help their business.
+                My work balances front-end implementation, visual detail, accessibility, and responsive behavior so sections stay clear instead of fighting for space.
               </p>
               <div className="stats-grid">
                 <span>
-                  <strong>285+</strong>
-                  <small>Project Completed</small>
+                  <strong>3</strong>
+                  <small>Core Skill Areas</small>
                 </span>
                 <span>
-                  <strong>190+</strong>
-                  <small>Happy Clients</small>
+                  <strong>100%</strong>
+                  <small>Responsive Focus</small>
                 </span>
               </div>
             </div>
@@ -232,104 +248,66 @@ function App() {
             </div>
           </SectionReveal>
 
-          <SectionReveal id="works" className="section works-section">
+          <SectionReveal id="projects" className="section projects-section">
             <div className="section-heading row-heading">
               <div>
-                <p className="eyebrow">Works</p>
-                <h2>My Latest Works</h2>
-                <p>Perfect solution for digital experience</p>
+                <p className="eyebrow">Projects</p>
+                <h2>Featured Projects</h2>
+                <p>Selected work shaped for clear digital experiences</p>
               </div>
-              <a className="text-action" href="#">
-                Explore More Works
+              <a className="text-action" href="#contact">
+                Discuss a project
                 <ArrowUpRight aria-hidden="true" />
               </a>
             </div>
 
-            <div className="works-grid">
-              {works.map(work => (
+            <div className="projects-grid">
+              {projects.map(project => (
                 <motion.a
-                  key={work.title}
-                  className="work-card"
-                  data-tone={work.tone}
-                  href={work.href}
-                  aria-label={`Open ${work.title} project`}
+                  key={project.title}
+                  className="project-card"
+                  data-tone={project.tone}
+                  href={project.href}
+                  aria-label={`Open ${project.title} project`}
                   whileHover={prefersReducedMotion ? undefined : { y: -8, rotate: -0.6 }}
                   whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
                 >
-                  <span className="work-copy">
-                    <strong>{work.title}</strong>
-                    <small>{work.subtitle}</small>
+                  <span className="project-copy">
+                    <strong>{project.title}</strong>
+                    <small>{project.subtitle}</small>
                   </span>
-                  <img src={work.image} alt="" aria-hidden="true" />
+                  <img src={project.image} alt="" aria-hidden="true" />
                 </motion.a>
               ))}
             </div>
           </SectionReveal>
 
-          <SectionReveal className="section testimonials-section">
-            <div className="section-heading centered">
-              <p className="eyebrow">Reviews</p>
-              <h2>People talk about us</h2>
-              <p>I got a job that was in accordance with the salary and field of work. The process of submitting an application was quite cosy</p>
-            </div>
-
-            <div className="testimonial-stage">
-              <AnimatePresence mode="wait">
-                <motion.article
-                  className="testimonial-card"
-                  key={activeTestimonial.name}
-                  initial={prefersReducedMotion ? false : { opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -24 }}
-                  transition={{ duration: 0.35 }}
-                >
-                  <span className="avatar" data-color={activeTestimonial.color}>{activeTestimonial.avatar}</span>
-                  <p>
-                    &quot;
-                    {activeTestimonial.quote}
-                    &quot;
-                  </p>
-                  <strong>{activeTestimonial.name}</strong>
-                  <small>{activeTestimonial.role}</small>
-                </motion.article>
-              </AnimatePresence>
-
-              <div className="testimonial-controls">
-                <button type="button" aria-label="Previous testimonial" onClick={showPreviousTestimonial}>
-                  <ChevronLeft aria-hidden="true" />
-                </button>
-                <button type="button" aria-label="Next testimonial" onClick={showNextTestimonial}>
-                  <ChevronRight aria-hidden="true" />
-                </button>
-              </div>
-            </div>
-          </SectionReveal>
-
-          <SectionReveal id="notes" className="section notes-section">
+          <SectionReveal id="blogs" className="section blogs-section">
             <div className="section-heading row-heading">
               <div>
-                <p className="eyebrow">Notes</p>
-                <h2>Design Notes</h2>
+                <p className="eyebrow">Blogs</p>
+                <h2>Latest Blogs</h2>
               </div>
-              <a className="text-action" href="#">
-                View all notes
+              <a className="text-action" href="#contact">
+                Share a topic
                 <ArrowUpRight aria-hidden="true" />
               </a>
             </div>
-            <div className="notes-list">
-              {notes.map(note => (
-                <a href="#" className="note-row" key={note.title} aria-label={`Read ${note.title}`}>
-                  <span>{note.category}</span>
-                  <strong>{note.title}</strong>
-                  <small>{note.date}</small>
+            <div className="blogs-list">
+              {blogs.map(blog => (
+                <a href="#" className="blog-row" key={blog.title} aria-label={`Read ${blog.title}`}>
+                  <span>{blog.category}</span>
+                  <strong>{blog.title}</strong>
+                  <small>{blog.date}</small>
                 </a>
               ))}
             </div>
           </SectionReveal>
 
-          <SectionReveal className="section contact-section">
+          <SectionReveal id="contact" className="section contact-section">
             <div className="contact-copy">
-              <h2>Let&apos;s make something amazing toghteher.</h2>
+              <p className="eyebrow">Contact</p>
+              <h2>Let&apos;s make something useful together.</h2>
               <p>
                 Start by
                 {" "}
@@ -340,18 +318,16 @@ function App() {
               <ContactForm />
             </div>
             <aside className="footer-info">
-              <strong>Information</strong>
-              <p>145 New York, FL 5467, USA</p>
-              <a href="#services">Services</a>
-              <a href="#works">Works</a>
-              <a href="#notes">Notes</a>
-              <a href="#experience">Experience</a>
+              <strong>Socials</strong>
+              {socialLinks.map(link => (
+                <a href={link.href} key={link.label}>{link.label}</a>
+              ))}
             </aside>
           </SectionReveal>
         </main>
 
         <footer className="site-footer">
-          <a className="brand" href="#top">{profile.shortName}</a>
+          <a className="brand" href="#home">{profile.shortName}</a>
           <span>© 2026. All Rights Reserved</span>
           <span>
             Built by

@@ -5,11 +5,12 @@ test.describe("portfolio visual smoke checks", () => {
     await page.goto("/")
 
     await expect(page.getByRole("heading", { name: /Hey There/i })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "What do I help?" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "About Samwel Omwenga" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "What I bring to projects" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "My Work Experience" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "My Latest Works" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "People talk about us" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "Design Notes" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Featured Projects" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Latest Blogs" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Let's make something useful together." })).toBeVisible()
     await expect(page.getByRole("button", { name: "Send message" })).toBeDisabled()
 
     const hero = page.getByTestId("hero")
