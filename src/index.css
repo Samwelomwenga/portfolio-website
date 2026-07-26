@@ -79,7 +79,7 @@
   body {
     min-width: 320px;
     margin: 0;
-    background: var(--mustard);
+    background: var(--ivory);
     color: var(--ink);
     font-family: var(--font-body);
     font-size: 16px;
@@ -101,12 +101,11 @@
 .page-frame {
   min-height: 100svh;
   padding: 0;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(13 35 34 / 0.04)), var(--mustard);
+  background: var(--ivory);
 }
 
 .site-shell {
   width: 100%;
-  max-width: 1180px;
   min-height: 100svh;
   margin: 0 auto;
   overflow: hidden;
@@ -868,13 +867,8 @@
 }
 
 @media (min-width: 700px) {
-  .page-frame {
-    padding: 34px;
-  }
-
   .site-shell {
     min-height: auto;
-    box-shadow: 0 34px 90px rgb(13 35 34 / 0.18);
   }
 
   .site-header {
@@ -1125,10 +1119,6 @@
 }
 
 @media (min-width: 1024px) {
-  .page-frame {
-    padding: 54px 60px;
-  }
-
   .site-header {
     padding-inline: 86px;
   }
