@@ -13,8 +13,8 @@ export function SectionReveal({ children, className, id }: SectionRevealProps) {
     <motion.section
       id={id}
       className={className}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 34 }}
-      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1 }}
       viewport={{ once: true, amount: 0.22 }}
       transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
     >
