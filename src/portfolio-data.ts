@@ -9,6 +9,20 @@ export const assets = {
   certifiedStamp,
 }
 
+export const profile = {
+  name: "Samwel Omwenga",
+  shortName: "Samwel",
+  email: "banjan10@gmail.com",
+  githubUrl: "https://github.com/samwelomwenga",
+  linkedinUrl: "https://www.linkedin.com/in/samwelomwenga",
+} as const
+
+export const socialLinks = [
+  { label: "GitHub", href: profile.githubUrl, icon: "github" },
+  { label: "LinkedIn", href: profile.linkedinUrl, icon: "linkedin" },
+  { label: "Email", href: `mailto:${profile.email}`, icon: "email" },
+] as const
+
 export const navItems = [
   { label: "Services", href: "#services" },
   { label: "Works", href: "#works" },

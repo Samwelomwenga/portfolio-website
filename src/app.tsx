@@ -3,9 +3,11 @@ import {
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
+  Github,
+  Linkedin,
+  Mail,
   Menu,
   Monitor,
-  Phone,
   Smartphone,
 } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
@@ -13,12 +15,18 @@ import { useState } from "react"
 
 import { ContactForm } from "@/components/contact-form"
 import { SectionReveal } from "@/components/section-reveal"
-import { assets, experience, navItems, notes, services, testimonials, works } from "@/portfolio-data"
+import { assets, experience, navItems, notes, profile, services, socialLinks, testimonials, works } from "@/portfolio-data"
 
 const iconMap = {
   monitor: Monitor,
   smartphone: Smartphone,
   badge: BadgeCheck,
+} as const
+
+const socialIconMap = {
+  github: Github,
+  linkedin: Linkedin,
+  email: Mail,
 } as const
 
 function App() {
@@ -39,7 +47,7 @@ function App() {
     <div className="page-frame">
       <div className="site-shell">
         <header className="site-header">
-          <a className="brand" href="#top" aria-label="Binjan home">Binjan</a>
+          <a className="brand" href="#top" aria-label={`${profile.name} home`}>{profile.shortName}</a>
 
           <nav className="desktop-nav" aria-label="Primary navigation">
             {navItems.map((item, index) => (
@@ -50,10 +58,15 @@ function App() {
           </nav>
 
           <div className="header-contact">
-            <a href="tel:+001313345678">+001 (313) 345 678</a>
-            <a className="icon-link" href="tel:+001313345678" aria-label="Call Binjan">
-              <Phone aria-hidden="true" />
-            </a>
+            {socialLinks.map((link) => {
+              const Icon = socialIconMap[link.icon]
+
+              return (
+                <a className="icon-link" href={link.href} aria-label={link.label} key={link.label}>
+                  <Icon aria-hidden="true" />
+                </a>
+              )
+            })}
           </div>
 
           <button
@@ -95,10 +108,14 @@ function App() {
             >
               <h1>
                 Hey There,
-                <span>I&apos;m Binjan</span>
+                <span>
+                  I&apos;m
+                  {" "}
+                  {profile.name}
+                </span>
               </h1>
-              <a className="email-link" href="mailto:banjan10@gmail.com">
-                banjan10@gmail.com
+              <a className="email-link" href={`mailto:${profile.email}`}>
+                {profile.email}
               </a>
             </motion.div>
 
@@ -119,7 +136,7 @@ function App() {
             >
               <div className="paint-stroke paint-stroke-one" aria-hidden="true" />
               <div className="paint-stroke paint-stroke-two" aria-hidden="true" />
-              <img src={assets.heroPortrait} alt="Binjan portrait" />
+              <img src={assets.heroPortrait} alt={`${profile.name} portrait`} />
             </motion.div>
 
             <motion.div
@@ -316,7 +333,7 @@ function App() {
               <p>
                 Start by
                 {" "}
-                <a href="mailto:banjan10@gmail.com">saying hi</a>
+                <a href={`mailto:${profile.email}`}>saying hi</a>
               </p>
             </div>
             <div className="contact-panel">
@@ -334,9 +351,13 @@ function App() {
         </main>
 
         <footer className="site-footer">
-          <a className="brand" href="#top">Binjan</a>
-          <span>© 2020. All Rights Reserved</span>
-          <span>Design By Orix Creative Agency</span>
+          <a className="brand" href="#top">{profile.shortName}</a>
+          <span>© 2026. All Rights Reserved</span>
+          <span>
+            Built by
+            {" "}
+            {profile.name}
+          </span>
         </footer>
       </div>
     </div>

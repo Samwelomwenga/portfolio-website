@@ -927,12 +927,7 @@
   }
 
   .header-contact {
-    gap: 18px;
-  }
-
-  .header-contact > a:first-child {
-    font-size: 12px;
-    font-weight: 800;
+    gap: 10px;
   }
 
   .hero {
