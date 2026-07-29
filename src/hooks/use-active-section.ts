@@ -1,5 +1,5 @@
 import type { RefObject } from "react"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 const ACTIVE_OFFSET = 120
 
@@ -16,34 +16,34 @@ export function useActiveSection(
 ) {
   const [activeId, setActiveId] = useState<string>(sectionIds[0] ?? "")
 
-  const detect = useCallback(() => {
-    const host = scrollRef.current
-    if (!host) {
-      return
-    }
-
-    const hostTop = host.getBoundingClientRect().top
-    const threshold = host.scrollTop + ACTIVE_OFFSET
-    let current = sectionIds[0] ?? ""
-
-    for (const id of sectionIds) {
-      const section = host.querySelector<HTMLElement>(`[data-section="${id}"]`)
-      if (!section) {
-        continue
-      }
-      const top = host.scrollTop + section.getBoundingClientRect().top - hostTop
-      if (top <= threshold) {
-        current = id
-      }
-    }
-
-    setActiveId(current)
-  }, [scrollRef, sectionIds])
-
   useEffect(() => {
     const host = scrollRef.current
     if (!enabled || !host) {
       return
+    }
+
+    function detect() {
+      const host = scrollRef.current
+      if (!host) {
+        return
+      }
+
+      const hostTop = host.getBoundingClientRect().top
+      const threshold = host.scrollTop + ACTIVE_OFFSET
+      let current = sectionIds[0] ?? ""
+
+      for (const id of sectionIds) {
+        const section = host.querySelector<HTMLElement>(`[data-section="${id}"]`)
+        if (!section) {
+          continue
+        }
+        const top = host.scrollTop + section.getBoundingClientRect().top - hostTop
+        if (top <= threshold) {
+          current = id
+        }
+      }
+
+      setActiveId(current)
     }
 
     host.addEventListener("scroll", detect, { passive: true })
@@ -53,9 +53,9 @@ export function useActiveSection(
       host.removeEventListener("scroll", detect)
       window.cancelAnimationFrame(frame)
     }
-  }, [scrollRef, detect, enabled])
+  }, [scrollRef, sectionIds, enabled])
 
-  const jumpTo = useCallback((id: string) => {
+  function jumpTo(id: string) {
     const host = scrollRef.current
     const target = host?.querySelector<HTMLElement>(`[data-section="${id}"]`)
     if (!host || !target) {
@@ -65,7 +65,7 @@ export function useActiveSection(
     const top = host.scrollTop + target.getBoundingClientRect().top - host.getBoundingClientRect().top
     host.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
     setActiveId(id)
-  }, [scrollRef])
+  }
 
   return { activeId, jumpTo }
 }

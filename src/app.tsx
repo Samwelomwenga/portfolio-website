@@ -35,7 +35,7 @@ import {
 import { ArrowUpRight } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AssistantConsole } from "@/components/assistant-console"
 import { ContactForm } from "@/components/contact-form"
 import { ExperienceTimeline } from "@/components/experience-timeline"
@@ -121,38 +121,57 @@ function App() {
   const displayedActive = route === "home" ? activeId : route
 
   useEffect(() => {
-    const sync = () => setRoute(getRouteFromHash())
-    window.addEventListener("hashchange", sync)
-    return () => window.removeEventListener("hashchange", sync)
+    function scrollToHashSection() {
+      const hash = window.location.hash.slice(1)
+      if (!isSectionId(hash)) {
+        return
+      }
+
+      const host = scrollRef.current
+      const target = host?.querySelector<HTMLElement>(`[data-section="${hash}"]`)
+      if (!host || !target) {
+        return
+      }
+
+      const top = host.scrollTop + target.getBoundingClientRect().top - host.getBoundingClientRect().top
+      host.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
+    }
+
+    function syncRouteFromHash() {
+      const nextRoute = getRouteFromHash()
+      setRoute(nextRoute)
+
+      if (nextRoute !== "home") {
+        scrollRef.current?.scrollTo({ top: 0, behavior: "auto" })
+        return
+      }
+
+      window.requestAnimationFrame(scrollToHashSection)
+    }
+
+    window.addEventListener("hashchange", syncRouteFromHash)
+    const frame = window.requestAnimationFrame(syncRouteFromHash)
+
+    return () => {
+      window.removeEventListener("hashchange", syncRouteFromHash)
+      window.cancelAnimationFrame(frame)
+    }
   }, [])
 
-  // Reset the terminal scroll when entering an archive; on home, honor a hash
-  // section link the first time the page loads.
-  useEffect(() => {
-    if (route !== "home") {
-      scrollRef.current?.scrollTo({ top: 0, behavior: "auto" })
-      return
-    }
-    const hash = window.location.hash.slice(1)
-    if (isSectionId(hash)) {
-      window.requestAnimationFrame(() => jumpTo(hash))
-    }
-  }, [route, jumpTo])
-
-  const handleNavigate = useCallback((id: SectionId) => {
-    // From an archive, switch the hash to the section; the route-change effect
-    // above returns home and scrolls to it. On home, jump straight away.
+  function handleNavigate(id: SectionId) {
+    // From an archive, switch the hash to the section; the hash sync returns
+    // home and scrolls to it. On home, jump straight away.
     if (getRouteFromHash() !== "home") {
       window.location.hash = `#${id}`
       return
     }
     window.history.replaceState(null, "", `#${id}`)
     jumpTo(id)
-  }, [jumpTo])
+  }
 
-  const goToArchive = useCallback((target: ArchiveRoute) => {
+  function goToArchive(target: ArchiveRoute) {
     window.location.hash = `#/${target}`
-  }, [])
+  }
 
   return (
     <TerminalFrame

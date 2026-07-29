@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 export type ThemeName = "tokyo" | "cappuccino"
 export type ColorMode = "dark" | "light" | "auto"
@@ -37,10 +37,10 @@ export type TerminalTheme = {
 }
 
 export function useTerminalTheme(): TerminalTheme {
-  const [theme, setThemeState] = useState<ThemeName>(() =>
+  const [theme, setTheme] = useState<ThemeName>(() =>
     readStored(THEME_KEY, ["tokyo", "cappuccino"] as const, DEFAULT_THEME),
   )
-  const [mode, setModeState] = useState<ColorMode>(() =>
+  const [mode, setMode] = useState<ColorMode>(() =>
     readStored(MODE_KEY, ["dark", "light", "auto"] as const, DEFAULT_MODE),
   )
   const [systemDark, setSystemDark] = useState<boolean>(() => prefersDark())
@@ -61,25 +61,25 @@ export function useTerminalTheme(): TerminalTheme {
     root.dataset.effectiveMode = effectiveMode
   }, [theme, mode, effectiveMode])
 
-  const setTheme = useCallback((next: ThemeName) => {
-    setThemeState(next)
+  function updateTheme(next: ThemeName) {
+    setTheme(next)
     try {
       localStorage.setItem(THEME_KEY, next)
     }
     catch {
       // Ignore storage failures (private mode, disabled storage).
     }
-  }, [])
+  }
 
-  const setMode = useCallback((next: ColorMode) => {
-    setModeState(next)
+  function updateMode(next: ColorMode) {
+    setMode(next)
     try {
       localStorage.setItem(MODE_KEY, next)
     }
     catch {
       // Ignore storage failures (private mode, disabled storage).
     }
-  }, [])
+  }
 
-  return { theme, mode, effectiveMode, setTheme, setMode }
+  return { theme, mode, effectiveMode, setTheme: updateTheme, setMode: updateMode }
 }
