@@ -27,7 +27,7 @@ export function NoteCard({ state, kicker, title, className, children }: NoteCard
         </span>
       )}
       {title && (
-        <h3 className="mb-2.5 text-sm leading-tight font-bold tracking-[-0.02em]">{title}</h3>
+        <h3 className="mb-2.5 text-sm leading-tight font-extrabold tracking-[0.06em] text-[color:var(--card-accent)] uppercase">{title}</h3>
       )}
       {children}
     </article>

@@ -16,9 +16,10 @@ import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
 import {
-  aboutCards,
+  aboutParagraphs,
   blogFilters,
   blogs,
+  certifications,
   contactCommands,
   experience,
   hero,
@@ -39,6 +40,9 @@ const commandFor = (id: SectionId) => navItems.find(item => item.id === id)?.com
 const featuredExperience = experience.filter(item => item.featured)
 const featuredProjects = projects.filter(project => project.featured)
 const featuredBlogs = blogs.filter(blog => blog.featured)
+
+// Only surface an archive link once a section has more entries than fit comfortably on the home screen.
+const ARCHIVE_THRESHOLD = 6
 
 function getRouteFromHash(): Route {
   const hash = window.location.hash.slice(1)
@@ -204,25 +208,21 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       </Screen>
 
       <Screen id="about">
-        <SectionHeading title="About">
-          A concise picture of what I build, how I work, and the problems I want to be trusted with.
-        </SectionHeading>
-        <div className="grid gap-3.5 wide:grid-cols-2">
-          {aboutCards.map(card => (
-            <NoteCard key={card.title} state={card.state} kicker={card.kicker} title={card.title}>
-              <p className="text-sm text-muted">{card.body}</p>
-            </NoteCard>
+        <SectionHeading title="About" />
+        <div className="grid max-w-[72ch] gap-4">
+          {aboutParagraphs.map(paragraph => (
+            <p key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">{paragraph}</p>
           ))}
         </div>
       </Screen>
 
       <Screen id="skills">
         <SectionHeading title="Skills">
-          Grouped like a terminal inventory instead of a loose badge wall, so capabilities are quick to scan.
+          Grouped like a terminal inventory — languages, frameworks, and tools.
         </SectionHeading>
         <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
           {skillGroups.map(group => (
-            <NoteCard key={group.title} state={group.state} kicker={group.kicker} title={group.title}>
+            <NoteCard key={group.title} state={group.state} title={group.title}>
               <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
                 {group.tags.map(tag => (
                   <li key={tag} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{tag}</li>
@@ -230,6 +230,14 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
               </ul>
             </NoteCard>
           ))}
+        </div>
+        <div className="grid gap-2">
+          <span className="text-[0.6875rem] font-extrabold tracking-[0.12em] text-muted uppercase">certifications</span>
+          <div className="flex flex-wrap gap-2">
+            {certifications.map(certification => (
+              <span key={certification} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{certification}</span>
+            ))}
+          </div>
         </div>
       </Screen>
 
@@ -239,7 +247,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
             <p className="text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">experience</p>
             <h2 className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight tracking-[-0.02em] text-balance">Featured Experience</h2>
           </div>
-          <ArchiveLink onClick={() => onArchive("experience")}>More experience</ArchiveLink>
+          {experience.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("experience")}>More experience</ArchiveLink>}
         </div>
         <ExperienceTimeline items={featuredExperience} />
       </Screen>
@@ -249,7 +257,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
           <SectionHeading title="Projects">
             Filter the project cards without leaving the terminal frame.
           </SectionHeading>
-          <ArchiveLink onClick={() => onArchive("projects")}>More projects</ArchiveLink>
+          {projects.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("projects")}>More projects</ArchiveLink>}
         </div>
         <FilterBar options={projectFilters} active={projectFilter} onChange={id => setProjectFilter(id as ProjectFilter)} label="Project filters" />
         <ProjectGrid items={shownProjects} />
@@ -260,7 +268,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
           <SectionHeading title="Blogs">
             A lean index for writing on process, interface craft, and implementation.
           </SectionHeading>
-          <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>
+          {blogs.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>}
         </div>
         <FilterBar options={blogFilters} active={blogFilter} onChange={id => setBlogFilter(id as BlogFilter)} label="Blog filters" />
         <BlogGrid items={shownBlogs} />
@@ -270,7 +278,12 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
         <div className="grid gap-4.5 wide:grid-cols-[minmax(13.75rem,0.58fr)_minmax(22.5rem,1.42fr)] wide:items-start">
           <div className="grid max-w-[22.5rem] content-start gap-3">
             <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight tracking-[-0.02em]">Contact</h2>
-            <p className="text-sm text-muted">Keep the contact surface simple — GitHub, LinkedIn, and email.</p>
+            <p className="text-sm text-muted">
+              Based in
+              {profile.location}
+              {" "}
+              — reach me on GitHub, LinkedIn, or email.
+            </p>
             <div className="rounded-md border border-border bg-surface p-3">
               {contactCommands.map(row => (
                 <div key={row.command} className="grid min-h-[2.125rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 text-[0.8125rem]">
