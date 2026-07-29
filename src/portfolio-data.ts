@@ -1,256 +1,307 @@
-import certifiedStamp from "@/assets/images/certified-stamp.webp"
-import heroPortrait from "@/assets/images/hero-portrait.png"
-import workApp from "@/assets/images/work-app.webp"
-import workCollage from "@/assets/images/work-collage.webp"
-import workWeb from "@/assets/images/work-web.webp"
-
-export const assets = {
-  heroPortrait,
-  certifiedStamp,
-}
+export type StateColor = "yellow" | "pink" | "green" | "blue" | "cyan" | "orange"
+export type StatusTone = "default" | "done" | "warn"
 
 export const profile = {
   name: "Samwel Omwenga",
   shortName: "Samwel",
+  title: "Software Engineer",
   email: "banjan10@gmail.com",
   githubUrl: "https://github.com/samwelomwenga",
   linkedinUrl: "https://www.linkedin.com/in/samwelomwenga",
+  workspaceMeta: "portfolio / main / software-engineer",
 } as const
 
 export const socialLinks = [
-  { label: "GitHub", href: profile.githubUrl, icon: "github" },
-  { label: "LinkedIn", href: profile.linkedinUrl, icon: "linkedin" },
-  { label: "Email", href: `mailto:${profile.email}`, icon: "email" },
+  { label: "github", href: profile.githubUrl, meta: "code · projects", icon: "github", state: "yellow" },
+  { label: "linkedin", href: profile.linkedinUrl, meta: "profile · work", icon: "linkedin", state: "pink" },
+  { label: "email", href: `mailto:${profile.email}`, meta: profile.email, icon: "email", state: "blue" },
 ] as const
 
 export const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Skills", href: "#skills" },
-  { label: "Experience", href: "#experience" },
-  { label: "Projects", href: "#projects" },
-  { label: "Blogs", href: "#blogs" },
-  { label: "Contact", href: "#contact" },
+  { id: "home", tab: "~/home", label: "home", meta: "main · overview", state: "yellow", command: "$ ./introduce" },
+  { id: "about", tab: "~/about", label: "about", meta: "bio · working style", state: "pink", command: "$ cat about.md" },
+  { id: "skills", tab: "~/skills", label: "skills", meta: "stack · grouped", state: "green", command: "$ list --grouped" },
+  { id: "experience", tab: "~/experience", label: "experience", meta: "timeline · current", state: "blue", command: "$ tail experience.log" },
+  { id: "projects", tab: "~/projects", label: "projects", meta: "case studies · visual", state: "cyan", command: "$ open projects.cards" },
+  { id: "blogs", tab: "~/blogs", label: "blogs", meta: "drafts · notes", state: "orange", command: "$ open blog.index" },
+  { id: "contact", tab: "~/contact", label: "contact", meta: "email · socials", state: "green", command: "$ ./contact.sh" },
 ] as const
 
-export const aboutPrinciples = [
+export type SectionId = (typeof navItems)[number]["id"]
+
+export const hero = {
+  firstName: "Samwel",
+  lastName: "Omwenga",
+  about:
+    "I build web and mobile products that turn ideas into stable, polished interfaces. I focus on React, TypeScript, and responsive front-end systems that stay production-ready as the real content arrives.",
+} as const
+
+export const assistantPrompts = [
+  { label: "recruiter summary", prompt: "Summarize my best projects for a recruiter" },
+  { label: "stack overview", prompt: "Explain my React and web experience" },
+  { label: "client intro", prompt: "Write a short intro for a client conversation" },
+] as const
+
+export const assistantSeedPrompt = "Summarize my strongest project work"
+
+export const assistantResponses = {
+  recruiter:
+    "Samwel Omwenga builds practical product interfaces across web and mobile, with a focus on React, TypeScript, responsive systems, and developer-ready UI details.",
+  stack:
+    "The stack story is frontend-heavy and implementation-minded: React screens, TypeScript structure, responsive layouts, dashboard states, and reusable design-system components.",
+  client:
+    "Hi, I build clean software interfaces that turn product ideas into usable web and mobile experiences. I can help shape the UX and ship the front-end implementation.",
+  fallback:
+    "I can summarize projects, rewrite the intro for a specific audience, surface matching skills, or turn the portfolio sections into a concise pitch.",
+} as const
+
+export const aboutCards = [
   {
-    title: "Design with build pressure in mind",
-    copy: "I think about spacing, states, and responsive behavior early so the final interface survives real content.",
+    kicker: "Local",
+    title: "current focus",
+    body: "I design and build reliable product interfaces, with attention to state, motion, implementation details, and the small moments that make software feel finished.",
+    state: "blue",
   },
   {
-    title: "Keep the useful parts visible",
-    copy: "Good UI should help someone decide faster, so I cut vague decoration and keep the next action obvious.",
-  },
-  {
-    title: "Turn rough ideas into working screens",
-    copy: "I move comfortably between structure, component logic, and visual polish until the page feels intentional.",
+    kicker: "Over SSH",
+    title: "working style",
+    body: "I think about spacing, states, and responsive behavior early so the final interface survives real content, then keep the useful parts visible with a clean handoff.",
+    state: "green",
   },
 ] as const
 
-export const aboutStats = [
-  { value: "03", label: "Core focus areas" },
-  { value: "06", label: "Project stories tracked" },
-  { value: "100%", label: "Responsive review pass" },
-] as const
-
-export const skills = [
+export const skillGroups = [
   {
-    title: "Frontend Development",
-    count: "React, TypeScript, Vite",
-    tone: "teal",
-    icon: "monitor",
+    kicker: "Local",
+    title: "frontend",
+    state: "blue",
+    tags: ["React", "TypeScript", "Vite", "CSS systems", "accessibility"],
   },
   {
-    title: "Responsive UI",
-    count: "Mobile-first layouts",
-    tone: "yellow",
-    icon: "smartphone",
+    kicker: "Over SSH",
+    title: "product",
+    state: "green",
+    tags: ["responsive UI", "design systems", "prototyping", "dashboards", "handoff"],
   },
   {
-    title: "Design Systems",
-    count: "Reusable components",
-    tone: "orange",
-    icon: "badge",
+    kicker: "Thin client",
+    title: "tooling",
+    state: "yellow",
+    tags: ["Tailwind", "Motion", "Playwright", "component APIs", "testing"],
   },
 ] as const
 
-export const experience = [
+export type ExperienceItem = {
+  company: string
+  period: string
+  role: string
+  description: string
+  state: StateColor
+  featured: boolean
+}
+
+export const experience: readonly ExperienceItem[] = [
   {
     company: "Independent Studio",
-    date: "2024 - Present",
+    period: "2024 - Present",
     role: "Frontend Developer",
-    color: "teal",
-    featured: true,
     description:
       "Builds responsive React interfaces, portfolio systems, and product pages with careful attention to layout stability and accessible interaction states.",
+    state: "blue",
+    featured: true,
   },
   {
     company: "New Man Services",
-    date: "2022 - 2024",
+    period: "2022 - 2024",
     role: "UI/UX Designer",
-    color: "orange",
-    featured: true,
     description:
       "Designed and refined web interfaces, reusable UI patterns, and handoff-ready screens for product and service workflows.",
+    state: "orange",
+    featured: true,
   },
   {
     company: "Global Solution",
-    date: "2020 - 2022",
+    period: "2020 - 2022",
     role: "Product Design Collaborator",
-    color: "yellow",
-    featured: true,
     description:
       "Worked across landing pages, user journeys, and brand-led interface concepts for digital campaigns and early product ideas.",
+    state: "yellow",
+    featured: true,
   },
   {
     company: "Digital Studio Lab",
-    date: "2019 - 2020",
+    period: "2019 - 2020",
     role: "Web Support Specialist",
-    color: "teal",
-    featured: false,
     description:
       "Maintained marketing pages, corrected responsive bugs, and supported content updates across client-facing web properties.",
+    state: "green",
+    featured: false,
   },
   {
     company: "Creative Desk",
-    date: "2018 - 2019",
+    period: "2018 - 2019",
     role: "Junior Web Designer",
-    color: "orange",
-    featured: false,
     description:
       "Prepared visual concepts, layout explorations, and simple front-end prototypes for portfolio and small business websites.",
+    state: "pink",
+    featured: false,
   },
-] as const
+]
 
-export const projects = [
+export type ProjectItem = {
+  title: string
+  blurb: string
+  filter: "app" | "web" | "system"
+  statusLabel: string
+  statusTone: StatusTone
+  typeLabel: string
+  state: StateColor
+  featured: boolean
+}
+
+export const projects: readonly ProjectItem[] = [
   {
     title: "Mobile App Interface",
-    subtitle: "Food delivery product flow",
-    summary: "A compact ordering experience focused on fast menu scanning, checkout clarity, and repeat-user flows.",
-    image: workApp,
-    tone: "yellow",
-    lens: "interface",
-    year: "2026",
-    tags: ["Mobile UI", "Ordering", "Prototype"],
+    blurb: "A compact ordering experience focused on fast menu scanning, checkout clarity, and repeat-user flows.",
+    filter: "app",
+    statusLabel: "case study",
+    statusTone: "done",
+    typeLabel: "mobile app",
+    state: "blue",
     featured: true,
-    href: "#",
   },
   {
-    title: "Portfolio Website",
-    subtitle: "Responsive personal brand site",
-    summary: "A responsive portfolio system with section previews, archive pages, and motion that avoids layout collisions.",
-    image: workWeb,
-    tone: "teal",
-    lens: "web",
-    year: "2026",
-    tags: ["React", "Responsive", "Portfolio"],
+    title: "Portfolio Terminal",
+    blurb: "A responsive portfolio system with themeable navigation, compact panes, and motion that avoids layout collisions.",
+    filter: "web",
+    statusLabel: "live",
+    statusTone: "done",
+    typeLabel: "web system",
+    state: "green",
     featured: true,
-    href: "#",
   },
   {
     title: "Identity System",
-    subtitle: "Visual direction and UI kit",
-    summary: "A practical identity kit translating brand direction into color, component, and layout rules.",
-    image: workCollage,
-    tone: "mint",
-    lens: "system",
-    year: "2025",
-    tags: ["Brand", "Components", "Guidelines"],
+    blurb: "A practical identity kit translating brand direction into color, component, and layout rules.",
+    filter: "system",
+    statusLabel: "case study",
+    statusTone: "done",
+    typeLabel: "design system",
+    state: "cyan",
     featured: true,
-    href: "#",
   },
   {
     title: "Operations Dashboard",
-    subtitle: "Metrics and status console",
-    summary: "A dense dashboard concept for checking workload, recent activity, and priority signals at a glance.",
-    image: workWeb,
-    tone: "teal",
-    lens: "web",
-    year: "2025",
-    tags: ["Dashboard", "Tables", "States"],
+    blurb: "A dense dashboard concept for checking workload, recent activity, and priority signals at a glance.",
+    filter: "web",
+    statusLabel: "draft",
+    statusTone: "default",
+    typeLabel: "dashboard",
+    state: "pink",
     featured: false,
-    href: "#",
   },
   {
     title: "Booking Flow",
-    subtitle: "Service scheduling journey",
-    summary: "A service booking flow that reduces decision points while keeping date, package, and contact details visible.",
-    image: workApp,
-    tone: "yellow",
-    lens: "interface",
-    year: "2024",
-    tags: ["Forms", "Scheduling", "UX"],
+    blurb: "A service booking flow that reduces decision points while keeping date, package, and contact details visible.",
+    filter: "app",
+    statusLabel: "planned",
+    statusTone: "warn",
+    typeLabel: "product flow",
+    state: "yellow",
     featured: false,
-    href: "#",
   },
   {
     title: "Component Kit",
-    subtitle: "Reusable interface parts",
-    summary: "A small design system covering buttons, cards, form fields, and empty states for consistent delivery.",
-    image: workCollage,
-    tone: "mint",
-    lens: "system",
-    year: "2024",
-    tags: ["Design System", "UI Kit", "Tokens"],
+    blurb: "A small design system covering buttons, cards, form fields, and empty states for consistent delivery.",
+    filter: "system",
+    statusLabel: "live",
+    statusTone: "done",
+    typeLabel: "ui kit",
+    state: "orange",
     featured: false,
-    href: "#",
   },
+]
+
+export const projectFilters = [
+  { id: "all", label: "all" },
+  { id: "app", label: "apps" },
+  { id: "web", label: "web" },
+  { id: "system", label: "systems" },
 ] as const
 
-export const blogs = [
+export type ProjectFilter = (typeof projectFilters)[number]["id"]
+
+export type BlogItem = {
+  title: string
+  blurb: string
+  meta: string
+  filter: "process" | "interface" | "engineering"
+  state: StateColor
+  featured: boolean
+}
+
+export const blogs: readonly BlogItem[] = [
   {
-    date: "24 Jan 2026",
     title: "Designing responsive sections without layout drift",
-    category: "Process",
-    lens: "process",
-    readTime: "5 min",
+    blurb: "How fixed section structure, measured breakpoints, and motion choices keep portfolio pages from colliding.",
+    meta: "draft / process",
+    filter: "process",
+    state: "cyan",
     featured: true,
-    summary: "How fixed section structure, measured breakpoints, and motion choices keep portfolio pages from colliding.",
   },
   {
-    date: "12 Feb 2026",
     title: "Why simple portfolio interfaces convert",
-    category: "Interface",
-    lens: "interface",
-    readTime: "4 min",
+    blurb: "A note on making portfolio content easy to scan without reducing the work to a generic template.",
+    meta: "draft / interface craft",
+    filter: "interface",
+    state: "pink",
     featured: true,
-    summary: "A note on making portfolio content easy to scan without reducing the work to a generic template.",
   },
   {
-    date: "08 Mar 2026",
     title: "Working with identity systems in React",
-    category: "Brand",
-    lens: "build",
-    readTime: "6 min",
+    blurb: "A practical way to turn brand choices into reusable front-end decisions and maintainable components.",
+    meta: "draft / engineering",
+    filter: "engineering",
+    state: "yellow",
     featured: true,
-    summary: "A practical way to turn brand choices into reusable front-end decisions and maintainable components.",
   },
   {
-    date: "18 Apr 2026",
     title: "Choosing breakpoints around content",
-    category: "Build",
-    lens: "build",
-    readTime: "7 min",
+    blurb: "Why responsive breakpoints should follow content pressure instead of device names alone.",
+    meta: "draft / engineering",
+    filter: "engineering",
+    state: "blue",
     featured: false,
-    summary: "Why responsive breakpoints should follow content pressure instead of device names alone.",
   },
   {
-    date: "07 May 2026",
     title: "Making project cards easier to compare",
-    category: "Interface",
-    lens: "interface",
-    readTime: "3 min",
+    blurb: "Card structure, visual rhythm, and metadata choices that make project libraries easier to browse.",
+    meta: "draft / interface craft",
+    filter: "interface",
+    state: "green",
     featured: false,
-    summary: "Card structure, visual rhythm, and metadata choices that make project libraries easier to browse.",
   },
   {
-    date: "19 Jun 2026",
     title: "A cleaner process for portfolio updates",
-    category: "Process",
-    lens: "process",
-    readTime: "5 min",
+    blurb: "How to keep a portfolio current by separating featured work, archives, and reusable content fields.",
+    meta: "draft / process",
+    filter: "process",
+    state: "orange",
     featured: false,
-    summary: "How to keep a portfolio current by separating featured work, archives, and reusable content fields.",
   },
+]
+
+export const blogFilters = [
+  { id: "all", label: "all" },
+  { id: "process", label: "process" },
+  { id: "interface", label: "interface" },
+  { id: "engineering", label: "engineering" },
+] as const
+
+export type BlogFilter = (typeof blogFilters)[number]["id"]
+
+export const contactCommands = [
+  { command: "open github.com/samwelomwenga", action: "github", href: profile.githubUrl },
+  { command: "open linkedin.com/in/samwelomwenga", action: "linkedin", href: profile.linkedinUrl },
+  { command: `mailto ${profile.email}`, action: "copy", href: null },
 ] as const

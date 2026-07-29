@@ -1,709 +1,411 @@
-import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
-import {
-  ArrowUpRight,
-  BadgeCheck,
-  Briefcase,
-  CalendarDays,
-  Code2,
-  Github,
-  Layers,
-  LayoutGrid,
-  Linkedin,
-  Mail,
-  Menu,
-  Monitor,
-  Newspaper,
-  PenTool,
-  Route,
-  Smartphone,
-  Sparkles,
-} from "lucide-react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useEffect, useState } from "react"
+import type { BlogFilter, BlogItem, ProjectFilter, ProjectItem, SectionId } from "@/portfolio-data"
+import { ArrowUpRight } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 
+import { useCallback, useEffect, useRef, useState } from "react"
+import { AssistantConsole } from "@/components/assistant-console"
 import { ContactForm } from "@/components/contact-form"
-import { SectionReveal } from "@/components/section-reveal"
-import { aboutPrinciples, aboutStats, assets, blogs, experience, navItems, profile, projects, skills, socialLinks } from "@/portfolio-data"
-
-const iconMap = {
-  monitor: Monitor,
-  smartphone: Smartphone,
-  badge: BadgeCheck,
-} as const
-
-const socialIconMap = {
-  github: Github,
-  linkedin: Linkedin,
-  email: Mail,
-} as const
-
-const filterIconMap = {
-  all: LayoutGrid,
-  interface: Smartphone,
-  web: Monitor,
-  system: Layers,
-  process: CalendarDays,
-  build: Code2,
-} as const
+import { ExperienceTimeline } from "@/components/experience-timeline"
+import { ProjectCard } from "@/components/project-card"
+import { FilterBar } from "@/components/terminal/filter-bar"
+import { NoteCard } from "@/components/terminal/note-card"
+import { PromptLine } from "@/components/terminal/prompt-line"
+import { StatusPill } from "@/components/terminal/status-pill"
+import { TerminalFrame } from "@/components/terminal/terminal-frame"
+import { useActiveSection } from "@/hooks/use-active-section"
+import { useTerminalTheme } from "@/hooks/use-terminal-theme"
+import {
+  aboutCards,
+  blogFilters,
+  blogs,
+  contactCommands,
+  experience,
+  hero,
+  navItems,
+  profile,
+  projectFilters,
+  projects,
+  skillGroups,
+} from "@/portfolio-data"
 
 const archiveRoutes = ["experience", "projects", "blogs"] as const
-
 type ArchiveRoute = (typeof archiveRoutes)[number]
-type PageRoute = "home" | ArchiveRoute
-type ProjectLens = "all" | (typeof projects)[number]["lens"]
-type BlogLens = "all" | (typeof blogs)[number]["lens"]
-type ExperienceItem = (typeof experience)[number]
-type BlogItem = (typeof blogs)[number]
+type Route = "home" | ArchiveRoute
 
-interface LensOption {
-  detail: string
-  icon: keyof typeof filterIconMap
-  id: string
-  label: string
-}
-
+const sectionIds = navItems.map(item => item.id)
+const isSectionId = (value: string): value is SectionId => (sectionIds as readonly string[]).includes(value)
+const commandFor = (id: SectionId) => navItems.find(item => item.id === id)?.command ?? "$"
 const featuredExperience = experience.filter(item => item.featured)
 const featuredProjects = projects.filter(project => project.featured)
 const featuredBlogs = blogs.filter(blog => blog.featured)
 
-const projectLenses = [
-  { id: "all", label: "Whole Board", detail: "Every project", icon: "all" },
-  { id: "interface", label: "App Flows", detail: "Screens and journeys", icon: "interface" },
-  { id: "web", label: "Web Builds", detail: "Sites and dashboards", icon: "web" },
-  { id: "system", label: "Systems", detail: "Kits and identity", icon: "system" },
-] as const satisfies readonly LensOption[]
-
-const blogLenses = [
-  { id: "all", label: "Reading Desk", detail: "All posts", icon: "all" },
-  { id: "process", label: "Process Notes", detail: "Workflow decisions", icon: "process" },
-  { id: "interface", label: "Interface Ideas", detail: "UX and layout", icon: "interface" },
-  { id: "build", label: "Build Logs", detail: "React and systems", icon: "build" },
-] as const satisfies readonly LensOption[]
-
-function getRouteFromHash(): PageRoute {
+function getRouteFromHash(): Route {
   const hash = window.location.hash.slice(1)
-  const route = hash.startsWith("/") ? hash.slice(1) : ""
-
-  return archiveRoutes.includes(route as ArchiveRoute) ? route as ArchiveRoute : "home"
-}
-
-function scrollToHash(hash: string) {
-  if (!hash || hash.startsWith("#/")) {
-    return
+  if (hash.startsWith("/")) {
+    const candidate = hash.slice(1)
+    return archiveRoutes.includes(candidate as ArchiveRoute) ? candidate as ArchiveRoute : "home"
   }
-
-  document.querySelector(hash)?.scrollIntoView({ block: "start" })
+  return "home"
 }
 
 function App() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [route, setRoute] = useState<PageRoute>(() => getRouteFromHash())
-  const [activeHref, setActiveHref] = useState<string>(navItems[0]?.href ?? "#home")
+  const { theme, mode, setTheme, setMode } = useTerminalTheme()
   const prefersReducedMotion = useReducedMotion()
-  const displayedActiveHref = route === "home" ? activeHref : `#${route}`
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [route, setRoute] = useState<Route>(() => getRouteFromHash())
+
+  const { activeId, jumpTo } = useActiveSection(scrollRef, sectionIds, route === "home")
+  const displayedActive = route === "home" ? activeId : route
 
   useEffect(() => {
-    function syncRoute() {
-      setRoute(getRouteFromHash())
-    }
-
-    window.addEventListener("hashchange", syncRoute)
-
-    return () => window.removeEventListener("hashchange", syncRoute)
+    const sync = () => setRoute(getRouteFromHash())
+    window.addEventListener("hashchange", sync)
+    return () => window.removeEventListener("hashchange", sync)
   }, [])
 
+  // Reset the terminal scroll when entering an archive; on home, honor a hash
+  // section link the first time the page loads.
   useEffect(() => {
     if (route !== "home") {
-      window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }))
+      scrollRef.current?.scrollTo({ top: 0, behavior: "auto" })
       return
     }
+    const hash = window.location.hash.slice(1)
+    if (isSectionId(hash)) {
+      window.requestAnimationFrame(() => jumpTo(hash))
+    }
+  }, [route, jumpTo])
 
-    window.requestAnimationFrame(() => scrollToHash(window.location.hash))
-  }, [route])
-
-  useEffect(() => {
-    if (route !== "home") {
+  const handleNavigate = useCallback((id: SectionId) => {
+    // From an archive, switch the hash to the section; the route-change effect
+    // above returns home and scrolls to it. On home, jump straight away.
+    if (getRouteFromHash() !== "home") {
+      window.location.hash = `#${id}`
       return
     }
+    window.history.replaceState(null, "", `#${id}`)
+    jumpTo(id)
+  }, [jumpTo])
 
-    const sections = navItems
-      .map(item => document.querySelector<HTMLElement>(item.href))
-      .filter((section): section is HTMLElement => section !== null)
-
-    if (sections.length === 0) {
-      return
-    }
-
-    function updateActiveSection() {
-      const headerOffset = 110
-      const activeSection = sections.reduce((current, section) => {
-        const isAboveHeader = section.getBoundingClientRect().top <= headerOffset
-        return isAboveHeader ? section : current
-      }, sections[0])
-
-      setActiveHref(`#${activeSection.id}`)
-    }
-
-    const observer = new IntersectionObserver(updateActiveSection, {
-      rootMargin: "-28% 0px -62% 0px",
-      threshold: [0, 0.2, 0.6],
-    })
-
-    sections.forEach(section => observer.observe(section))
-    window.addEventListener("scroll", updateActiveSection, { passive: true })
-    window.requestAnimationFrame(updateActiveSection)
-
-    return () => {
-      observer.disconnect()
-      window.removeEventListener("scroll", updateActiveSection)
-    }
-  }, [route])
-
-  function handleNavClick(href: string) {
-    setActiveHref(href)
-    setIsMenuOpen(false)
-  }
+  const goToArchive = useCallback((target: ArchiveRoute) => {
+    window.location.hash = `#/${target}`
+  }, [])
 
   return (
-    <div className="page-frame">
-      <div className="site-shell">
-        <header className="site-header">
-          <a className="brand" href="#home" aria-label={`${profile.name} home`} onClick={() => handleNavClick("#home")}>{profile.shortName}</a>
+    <TerminalFrame
+      theme={theme}
+      mode={mode}
+      activeId={displayedActive}
+      onNavigate={handleNavigate}
+      onThemeChange={setTheme}
+      onModeChange={setMode}
+      scrollRef={scrollRef}
+    >
+      <motion.div
+        key={route}
+        initial={prefersReducedMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {route === "home"
+          ? <HomeScreens onNavigate={handleNavigate} onArchive={goToArchive} />
+          : <ArchiveScreen route={route} onNavigate={handleNavigate} />}
+      </motion.div>
+    </TerminalFrame>
+  )
+}
 
-          <nav className="desktop-nav" aria-label="Primary navigation">
-            {navItems.map(item => (
-              <a
-                key={item.href}
-                className={item.href === displayedActiveHref ? "active" : undefined}
-                href={item.href}
-                onClick={() => handleNavClick(item.href)}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
+type ScreenProps = {
+  id: SectionId
+  children: ReactNode
+}
 
-          <div className="header-contact">
-            {socialLinks.map((link) => {
-              const Icon = socialIconMap[link.icon]
+function Screen({ id, children }: ScreenProps) {
+  return (
+    <section
+      id={`screen-${id}`}
+      data-section={id}
+      className="relative grid content-start gap-5 border-b border-border p-[clamp(1.25rem,4vw,2.75rem)] scroll-mt-5 last:border-b-0 wide:min-h-[calc(100svh-2.375rem)]"
+    >
+      <PromptLine section={id} command={commandFor(id)} />
+      {children}
+    </section>
+  )
+}
 
-              return (
-                <a className="icon-link" href={link.href} aria-label={link.label} key={link.label}>
-                  <Icon aria-hidden="true" />
-                </a>
-              )
-            })}
-          </div>
+type SectionHeadingProps = {
+  title: string
+  children?: ReactNode
+}
 
-          <button
-            className="mobile-menu-button"
-            type="button"
-            aria-label="Open navigation"
-            aria-expanded={isMenuOpen}
-            onClick={() => setIsMenuOpen(open => !open)}
-          >
-            <Menu aria-hidden="true" />
-          </button>
-        </header>
-
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.nav
-              className="mobile-nav"
-              aria-label="Mobile navigation"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-            >
-              {navItems.map(item => (
-                <a
-                  key={item.href}
-                  className={item.href === displayedActiveHref ? "active" : undefined}
-                  href={item.href}
-                  onClick={() => handleNavClick(item.href)}
-                >
-                  {item.label}
-                </a>
-              ))}
-              <span className="mobile-socials" aria-label="Social links">
-                {socialLinks.map((link) => {
-                  const Icon = socialIconMap[link.icon]
-
-                  return (
-                    <a className="icon-link" href={link.href} aria-label={link.label} key={link.label}>
-                      <Icon aria-hidden="true" />
-                    </a>
-                  )
-                })}
-              </span>
-            </motion.nav>
-          )}
-        </AnimatePresence>
-
-        {route === "home" ? <HomePage prefersReducedMotion={prefersReducedMotion} /> : <ArchivePage route={route} />}
-
-        <footer className="site-footer">
-          <a className="brand" href="#home" onClick={() => handleNavClick("#home")}>{profile.shortName}</a>
-          <span>© 2026. All Rights Reserved</span>
-          <span>
-            Built by
-            {" "}
-            {profile.name}
-          </span>
-        </footer>
-      </div>
+function SectionHeading({ title, children }: SectionHeadingProps) {
+  return (
+    <div className="grid max-w-[48.75rem] gap-2">
+      <h2 className="text-[clamp(1.75rem,5vw,2.875rem)] leading-tight tracking-[-0.02em] text-balance">{title}</h2>
+      {children && <p className="max-w-[65ch] text-base text-muted">{children}</p>}
     </div>
   )
 }
 
-function HomePage({ prefersReducedMotion }: { prefersReducedMotion: boolean | null }) {
+type ArchiveLinkProps = {
+  children: ReactNode
+  onClick: () => void
+}
+
+function ArchiveLink({ children, onClick }: ArchiveLinkProps) {
   return (
-    <main>
-      <section id="home" className="hero" data-testid="hero">
-        <motion.div
-          className="hero-copy"
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <h1>
-            Hey There,
-            <span>
-              I&apos;m
+    <button type="button" onClick={onClick} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold whitespace-nowrap text-state-orange">
+      {children}
+      <ArrowUpRight className="size-3.5" aria-hidden="true" />
+    </button>
+  )
+}
+
+type HomeScreensProps = {
+  onNavigate: (id: SectionId) => void
+  onArchive: (route: ArchiveRoute) => void
+}
+
+function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
+  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all")
+  const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
+  const shownProjects = projectFilter === "all" ? featuredProjects : featuredProjects.filter(p => p.filter === projectFilter)
+  const shownBlogs = blogFilter === "all" ? featuredBlogs : featuredBlogs.filter(b => b.filter === blogFilter)
+
+  return (
+    <>
+      <Screen id="home">
+        <div className="grid gap-3.5 wide:grid-cols-[minmax(0,1fr)_minmax(21.25rem,0.92fr)] wide:items-center wide:gap-x-[clamp(1.125rem,3vw,2.125rem)]">
+          <div className="grid content-start gap-4 wide:col-start-1 wide:row-start-1">
+            <h1 className="text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] tracking-[-0.03em] text-balance">
+              <span className="font-extrabold text-term-green">{hero.firstName}</span>
               {" "}
-              {profile.name}
-            </span>
-          </h1>
-          <a className="email-link" href={`mailto:${profile.email}`}>
-            {profile.email}
-          </a>
-        </motion.div>
-
-        <motion.p
-          className="hero-note"
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        >
-          I design beautifully simple things, and I love what I do.
-        </motion.p>
-
-        <motion.div
-          className="portrait-wrap"
-          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.18, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="paint-stroke paint-stroke-one" aria-hidden="true" />
-          <div className="paint-stroke paint-stroke-two" aria-hidden="true" />
-          <img src={assets.heroPortrait} alt={`${profile.name} portrait`} />
-        </motion.div>
-
-        <motion.div
-          className="experience-badge"
-          initial={prefersReducedMotion ? false : { opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.28, duration: 0.65 }}
-        >
-          <strong>10</strong>
-          <span>
-            Years
-            <br />
-            Experience
-          </span>
-        </motion.div>
-
-        <motion.div
-          className="certification"
-          initial={prefersReducedMotion ? false : { opacity: 0, x: 16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.34, duration: 0.65 }}
-        >
-          <img src={assets.certifiedStamp} alt="IDF certified professional UI/UX designer" />
-        </motion.div>
-      </section>
-
-      <SectionReveal id="about" className="section about-section">
-        <div className="about-visual">
-          <div className="about-portrait-card">
-            <img src={assets.heroPortrait} alt={`${profile.name} portrait`} />
-            <span className="about-status">
-              <Sparkles aria-hidden="true" />
-              Available for focused UI work
-            </span>
+              <span className="font-extrabold text-term-yellow">{hero.lastName}</span>
+            </h1>
+            <p className="flex flex-wrap items-center gap-1.5 text-[clamp(1.125rem,2vw,1.75rem)] leading-snug tracking-[0.02em]">
+              <span className="font-extrabold text-term-green">&lt;</span>
+              <span className="font-extrabold text-term-yellow">Software</span>
+              <span className="font-extrabold text-term-red">Engineer</span>
+              <span className="font-extrabold text-term-yellow">/&gt;</span>
+            </p>
+            <p className="max-w-[62ch] text-[clamp(0.875rem,1.25vw,1rem)] leading-relaxed text-muted text-pretty">{hero.about}</p>
           </div>
-          <div className="about-note-card">
-            <Route aria-hidden="true" />
-            <span>
-              <strong>Remote-ready, building for focused teams.</strong>
-              <small>Best fit: frontend polish, portfolio systems, and design-to-code workflows.</small>
-            </span>
+
+          <div className="wide:col-start-2 wide:row-span-2 wide:row-start-1">
+            <AssistantConsole />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 wide:col-start-1 wide:row-start-2">
+            <ActionButton primary onClick={() => onNavigate("projects")}>view projects</ActionButton>
+            <ActionButton onClick={() => onNavigate("contact")}>contact</ActionButton>
           </div>
         </div>
+      </Screen>
 
-        <div className="about-story">
-          <p className="eyebrow">About</p>
-          <h2>Frontend work with taste, restraint, and a clean handoff.</h2>
-          <p className="about-lede">
-            I&apos;m Samwel Omwenga, a frontend developer who likes the part where design intent meets browser reality: spacing that holds, cards that do not collapse, and pages that still feel good after the real content arrives.
-          </p>
-          <p>
-            I care about the quiet details that make a site feel considered: hierarchy, motion timing, empty states, responsive rules, and components that another person can actually maintain.
-          </p>
-
-          <div className="about-stats" aria-label="About highlights">
-            {aboutStats.map(stat => (
-              <span key={stat.label}>
-                <strong>{stat.value}</strong>
-                <small>{stat.label}</small>
-              </span>
-            ))}
-          </div>
-
-          <div className="about-principles">
-            {aboutPrinciples.map(principle => (
-              <article key={principle.title}>
-                <strong>{principle.title}</strong>
-                <p>{principle.copy}</p>
-              </article>
-            ))}
-          </div>
-
-          <a className="about-link" href="#projects">
-            See the project thinking
-            <ArrowUpRight aria-hidden="true" />
-          </a>
+      <Screen id="about">
+        <SectionHeading title="About">
+          A concise picture of what I build, how I work, and the problems I want to be trusted with.
+        </SectionHeading>
+        <div className="grid gap-3.5 wide:grid-cols-2">
+          {aboutCards.map(card => (
+            <NoteCard key={card.title} state={card.state} kicker={card.kicker} title={card.title}>
+              <p className="text-sm text-muted">{card.body}</p>
+            </NoteCard>
+          ))}
         </div>
-      </SectionReveal>
+      </Screen>
 
-      <SectionReveal id="skills" className="section skills-section">
-        <div className="skill-list">
-          {skills.map((skill) => {
-            const Icon = iconMap[skill.icon]
-
-            return (
-              <motion.article
-                className="skill-card"
-                data-tone={skill.tone}
-                key={skill.title}
-                whileHover={prefersReducedMotion ? undefined : { y: -5, scale: 1.01 }}
-                whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
-              >
-                <span className="skill-icon">
-                  <Icon aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>{skill.title}</strong>
-                  <small>{skill.count}</small>
-                </span>
-              </motion.article>
-            )
-          })}
+      <Screen id="skills">
+        <SectionHeading title="Skills">
+          Grouped like a terminal inventory instead of a loose badge wall, so capabilities are quick to scan.
+        </SectionHeading>
+        <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+          {skillGroups.map(group => (
+            <NoteCard key={group.title} state={group.state} kicker={group.kicker} title={group.title}>
+              <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+                {group.tags.map(tag => (
+                  <li key={tag} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{tag}</li>
+                ))}
+              </ul>
+            </NoteCard>
+          ))}
         </div>
+      </Screen>
 
-        <div className="section-copy">
-          <p className="eyebrow">Skills</p>
-          <h2>What I bring to projects</h2>
-          <p>
-            I turn product ideas and personal brands into focused interfaces that are easy to scan, easy to use, and ready for real screens.
-          </p>
-          <p>
-            My work balances front-end implementation, visual detail, accessibility, and responsive behavior so sections stay clear instead of fighting for space.
-          </p>
-          <div className="stats-grid">
-            <span>
-              <strong>3</strong>
-              <small>Core Skill Areas</small>
-            </span>
-            <span>
-              <strong>100%</strong>
-              <small>Responsive Focus</small>
-            </span>
+      <Screen id="experience">
+        <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
+          <div className="grid gap-2">
+            <p className="text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">experience</p>
+            <h2 className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight tracking-[-0.02em] text-balance">Featured Experience</h2>
           </div>
-        </div>
-      </SectionReveal>
-
-      <SectionReveal id="experience" className="section experience-section">
-        <div className="section-heading row-heading">
-          <div>
-            <p className="eyebrow">Experience</p>
-            <h2>Featured Experience</h2>
-          </div>
-          <a className="text-action" href="#/experience">
-            More experience
-            <ArrowUpRight aria-hidden="true" />
-          </a>
+          <ArchiveLink onClick={() => onArchive("experience")}>More experience</ArchiveLink>
         </div>
         <ExperienceTimeline items={featuredExperience} />
-      </SectionReveal>
+      </Screen>
 
-      <SectionReveal id="projects" className="section projects-section">
-        <div className="section-heading row-heading">
-          <div>
-            <p className="eyebrow">Projects</p>
-            <h2>Featured Projects</h2>
-            <p>Selected work shaped for clear digital experiences</p>
+      <Screen id="projects">
+        <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
+          <SectionHeading title="Projects">
+            Filter the project cards without leaving the terminal frame.
+          </SectionHeading>
+          <ArchiveLink onClick={() => onArchive("projects")}>More projects</ArchiveLink>
+        </div>
+        <FilterBar options={projectFilters} active={projectFilter} onChange={id => setProjectFilter(id as ProjectFilter)} label="Project filters" />
+        <ProjectGrid items={shownProjects} />
+      </Screen>
+
+      <Screen id="blogs">
+        <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
+          <SectionHeading title="Blogs">
+            A lean index for writing on process, interface craft, and implementation.
+          </SectionHeading>
+          <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>
+        </div>
+        <FilterBar options={blogFilters} active={blogFilter} onChange={id => setBlogFilter(id as BlogFilter)} label="Blog filters" />
+        <BlogGrid items={shownBlogs} />
+      </Screen>
+
+      <Screen id="contact">
+        <div className="grid gap-4.5 wide:grid-cols-[minmax(13.75rem,0.58fr)_minmax(22.5rem,1.42fr)] wide:items-start">
+          <div className="grid max-w-[22.5rem] content-start gap-3">
+            <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight tracking-[-0.02em]">Contact</h2>
+            <p className="text-sm text-muted">Keep the contact surface simple — GitHub, LinkedIn, and email.</p>
+            <div className="rounded-md border border-border bg-surface p-3">
+              {contactCommands.map(row => (
+                <div key={row.command} className="grid min-h-[2.125rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 text-[0.8125rem]">
+                  <span className="font-extrabold text-success">$</span>
+                  <code className="min-w-0 truncate text-fg">{row.command}</code>
+                  {row.href
+                    ? <a href={row.href} target="_blank" rel="noreferrer"><StatusPill>{row.action}</StatusPill></a>
+                    : <CopyEmailButton />}
+                </div>
+              ))}
+            </div>
           </div>
-          <a className="text-action" href="#/projects">
-            More projects
-            <ArrowUpRight aria-hidden="true" />
-          </a>
-        </div>
-
-        <div className="projects-grid">
-          {featuredProjects.map(project => (
-            <ProjectCard key={project.title} project={project} prefersReducedMotion={prefersReducedMotion} />
-          ))}
-        </div>
-      </SectionReveal>
-
-      <SectionReveal id="blogs" className="section blogs-section">
-        <div className="section-heading row-heading">
-          <div>
-            <p className="eyebrow">Blogs</p>
-            <h2>Featured Blogs</h2>
-          </div>
-          <a className="text-action" href="#/blogs">
-            More blogs
-            <ArrowUpRight aria-hidden="true" />
-          </a>
-        </div>
-        <BlogList items={featuredBlogs} />
-      </SectionReveal>
-
-      <SectionReveal id="contact" className="section contact-section">
-        <div className="contact-copy">
-          <p className="eyebrow">Contact</p>
-          <h2>Let&apos;s make something useful together.</h2>
-          <p>
-            Start by
-            {" "}
-            <a href={`mailto:${profile.email}`}>saying hi</a>
-          </p>
-        </div>
-        <div className="contact-panel">
           <ContactForm />
         </div>
-        <aside className="footer-info">
-          <strong>Socials</strong>
-          {socialLinks.map(link => (
-            <a href={link.href} key={link.label}>{link.label}</a>
-          ))}
-        </aside>
-      </SectionReveal>
-    </main>
+      </Screen>
+    </>
   )
 }
 
-function ArchivePage({ route }: { route: ArchiveRoute }) {
-  if (route === "experience") {
-    return <ExperienceArchive />
-  }
-
-  if (route === "projects") {
-    return <ProjectsArchive />
-  }
-
-  return <BlogsArchive />
+type ArchiveScreenProps = {
+  route: ArchiveRoute
+  onNavigate: (id: SectionId) => void
 }
 
-function ArchiveShell({ children, copy, eyebrow, icon: Icon, title }: {
-  children: ReactNode
-  copy: string
-  eyebrow: string
-  icon: LucideIcon
+type ArchiveMeta = {
   title: string
-}) {
-  return (
-    <main className="archive-main">
-      <section className="archive-hero">
-        <a className="text-action" href="#home">
-          Home
-          <ArrowUpRight aria-hidden="true" />
-        </a>
-        <span className="archive-icon" aria-hidden="true">
-          <Icon />
-        </span>
-        <p className="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
-        <p>{copy}</p>
-      </section>
-      {children}
-    </main>
-  )
+  blurb: string
 }
 
-function ExperienceArchive() {
+function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
+  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all")
+  const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
+
+  const shownProjects = projectFilter === "all" ? projects : projects.filter(p => p.filter === projectFilter)
+  const shownBlogs = blogFilter === "all" ? blogs : blogs.filter(b => b.filter === blogFilter)
+
+  const titles: Record<ArchiveRoute, ArchiveMeta> = {
+    experience: { title: "All Experience", blurb: "The fuller path behind the featured roles on the home page." },
+    projects: { title: "Project Library", blurb: "A broader view of selected interface, web, and system work." },
+    blogs: { title: "Blog Library", blurb: "Notes on process, interface decisions, and front-end implementation." },
+  }
+
   return (
-    <ArchiveShell
-      eyebrow="Experience"
-      icon={Briefcase}
-      title="All Experience"
-      copy="The fuller path behind the featured roles on the home page."
+    <section
+      data-section={route}
+      className="relative grid content-start gap-5 p-[clamp(1.25rem,4vw,2.75rem)]"
     >
-      <section className="section archive-section">
-        <ExperienceTimeline items={experience} />
-      </section>
-    </ArchiveShell>
+      <button type="button" onClick={() => onNavigate("home")} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold text-state-orange">
+        <ArrowUpRight className="size-3.5 rotate-180" aria-hidden="true" />
+        Back to terminal
+      </button>
+      <SectionHeading title={titles[route].title}>{titles[route].blurb}</SectionHeading>
+
+      {route === "experience" && <ExperienceTimeline items={experience} />}
+
+      {route === "projects" && (
+        <>
+          <FilterBar options={projectFilters} active={projectFilter} onChange={id => setProjectFilter(id as ProjectFilter)} label="Project filters" />
+          <ProjectGrid items={shownProjects} />
+        </>
+      )}
+
+      {route === "blogs" && (
+        <>
+          <FilterBar options={blogFilters} active={blogFilter} onChange={id => setBlogFilter(id as BlogFilter)} label="Blog filters" />
+          <BlogGrid items={shownBlogs} />
+        </>
+      )}
+    </section>
   )
 }
 
-function ProjectsArchive() {
-  const [activeLens, setActiveLens] = useState<ProjectLens>("all")
-  const filteredProjects = activeLens === "all" ? projects : projects.filter(project => project.lens === activeLens)
-
-  return (
-    <ArchiveShell
-      eyebrow="Projects"
-      icon={PenTool}
-      title="Project Library"
-      copy="A broader view of selected interface, web, and system work."
-    >
-      <section className="section archive-section">
-        <LensRail
-          active={activeLens}
-          countFor={id => (id === "all" ? projects.length : projects.filter(project => project.lens === id).length)}
-          onChange={id => setActiveLens(id as ProjectLens)}
-          options={projectLenses}
-        />
-        <div className="projects-grid archive-projects-grid">
-          {filteredProjects.map(project => (
-            <ProjectCard key={project.title} project={project} showDetails />
-          ))}
-        </div>
-      </section>
-    </ArchiveShell>
-  )
+type ProjectGridProps = {
+  items: readonly ProjectItem[]
 }
 
-function BlogsArchive() {
-  const [activeLens, setActiveLens] = useState<BlogLens>("all")
-  const filteredBlogs = activeLens === "all" ? blogs : blogs.filter(blog => blog.lens === activeLens)
-
+function ProjectGrid({ items }: ProjectGridProps) {
   return (
-    <ArchiveShell
-      eyebrow="Blogs"
-      icon={Newspaper}
-      title="Blog Library"
-      copy="Notes on process, interface decisions, and front-end implementation."
-    >
-      <section className="section archive-section">
-        <LensRail
-          active={activeLens}
-          countFor={id => (id === "all" ? blogs.length : blogs.filter(blog => blog.lens === id).length)}
-          onChange={id => setActiveLens(id as BlogLens)}
-          options={blogLenses}
-        />
-        <BlogList items={filteredBlogs} showSummaries />
-      </section>
-    </ArchiveShell>
-  )
-}
-
-function LensRail({ active, countFor, onChange, options }: {
-  active: string
-  countFor: (id: string) => number
-  onChange: (id: string) => void
-  options: readonly LensOption[]
-}) {
-  return (
-    <div className="lens-rail" aria-label="Filter lenses">
-      {options.map((option) => {
-        const Icon = filterIconMap[option.icon]
-
-        return (
-          <button
-            className="lens-button"
-            data-active={option.id === active}
-            key={option.id}
-            type="button"
-            aria-pressed={option.id === active}
-            onClick={() => onChange(option.id)}
-          >
-            <Icon aria-hidden="true" />
-            <span>
-              <strong>{option.label}</strong>
-              <small>{option.detail}</small>
-            </span>
-            <em>{countFor(option.id)}</em>
-          </button>
-        )
-      })}
+    <div className="grid gap-3.5 sm:grid-cols-2">
+      {items.map(project => <ProjectCard key={project.title} project={project} />)}
     </div>
   )
 }
 
-function ExperienceTimeline({ items }: { items: readonly ExperienceItem[] }) {
-  return (
-    <div className="timeline">
-      {items.map(item => (
-        <article className="timeline-row" key={`${item.company}-${item.role}`}>
-          <div className="timeline-company">
-            <h3>{item.company}</h3>
-            <p>{item.date}</p>
-          </div>
-          <span className="timeline-pin" data-color={item.color} aria-hidden="true" />
-          <div className="timeline-role">
-            <h3>{item.role}</h3>
-            <p>{item.description}</p>
-          </div>
-        </article>
-      ))}
-    </div>
-  )
+type BlogGridProps = {
+  items: readonly BlogItem[]
 }
 
-function ProjectCard({ prefersReducedMotion, project, showDetails = false }: {
-  prefersReducedMotion?: boolean | null
-  project: (typeof projects)[number]
-  showDetails?: boolean
-}) {
+function BlogGrid({ items }: BlogGridProps) {
   return (
-    <motion.a
-      className="project-card"
-      data-tone={project.tone}
-      href={project.href}
-      aria-label={`Open ${project.title} project`}
-      whileHover={prefersReducedMotion ? undefined : { y: -8, rotate: -0.6 }}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
-    >
-      <span className="project-copy">
-        <span className="project-meta">{project.year}</span>
-        <strong>{project.title}</strong>
-        <small>{project.subtitle}</small>
-        {showDetails && (
-          <>
-            <p>{project.summary}</p>
-            <span className="tag-row">
-              {project.tags.map(tag => (
-                <em key={tag}>{tag}</em>
-              ))}
-            </span>
-          </>
-        )}
-      </span>
-      <img src={project.image} alt="" aria-hidden="true" />
-    </motion.a>
-  )
-}
-
-function BlogList({ items, showSummaries = false }: { items: readonly BlogItem[], showSummaries?: boolean }) {
-  return (
-    <div className="blogs-list">
+    <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
       {items.map(blog => (
-        <a href="#" className="blog-row" key={blog.title} aria-label={`Read ${blog.title}`}>
-          <span>{blog.category}</span>
-          <strong>{blog.title}</strong>
-          {showSummaries && <p>{blog.summary}</p>}
-          <small>
-            {blog.date}
-            {" / "}
-            {blog.readTime}
-          </small>
-        </a>
+        <NoteCard key={blog.title} state={blog.state} kicker="draft">
+          <div className="grid gap-1.5">
+            <span className="text-xs text-muted">{blog.meta}</span>
+            <h3 className="text-lg leading-snug tracking-[-0.01em]">{blog.title}</h3>
+            <p className="text-sm text-muted">{blog.blurb}</p>
+          </div>
+        </NoteCard>
       ))}
     </div>
+  )
+}
+
+type ActionButtonProps = {
+  children: ReactNode
+  primary?: boolean
+  onClick: () => void
+}
+
+function ActionButton({ children, primary, onClick }: ActionButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={primary
+        ? "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-3 text-xs font-extrabold tracking-[0.02em] text-[color:var(--bg)]"
+        : "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-border bg-surface px-3 text-xs font-extrabold tracking-[0.02em] text-fg hover:border-line"}
+    >
+      {children}
+    </button>
+  )
+}
+
+function CopyEmailButton() {
+  const [copied, setCopied] = useState(false)
+
+  function copy() {
+    navigator.clipboard?.writeText(profile.email).then(() => setCopied(true)).catch(() => setCopied(false))
+  }
+
+  return (
+    <button type="button" onClick={copy} aria-label="Copy email address">
+      <StatusPill tone={copied ? "done" : "default"}>{copied ? "copied" : "copy"}</StatusPill>
+    </button>
   )
 }
 

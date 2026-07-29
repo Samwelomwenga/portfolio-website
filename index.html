@@ -1,13 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="tokyo" data-mode="auto" data-effective-mode="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Samwel Omwenga portfolio website for UI/UX design, work experience, latest projects, blogs, and contact."
+      content="Samwel Omwenga — Software Engineer. A terminal-inspired portfolio covering skills, experience, projects, blogs, and contact."
     />
-    <title>Samwel Omwenga Portfolio Website</title>
+    <title>Samwel Omwenga | Terminal Portfolio</title>
+    <script>
+      // Apply the saved theme/mode before paint to avoid a flash of the wrong palette.
+      ;(function () {
+        try {
+          var root = document.documentElement
+          var theme = localStorage.getItem("portfolio-theme")
+          var mode = localStorage.getItem("portfolio-mode")
+          if (theme === "tokyo" || theme === "cappuccino") root.dataset.theme = theme
+          if (mode === "dark" || mode === "light" || mode === "auto") root.dataset.mode = mode
+          var resolved = root.dataset.mode || "auto"
+          if (resolved === "auto") {
+            resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+          }
+          root.dataset.effectiveMode = resolved
+        } catch (_) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
