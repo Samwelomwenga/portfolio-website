@@ -227,5 +227,5 @@ export type BlogFilter = (typeof blogFilters)[number]["id"]
 export const contactCommands = [
   { command: "open github.com/samwelomwenga", action: "github", href: profile.githubUrl },
   { command: "open linkedin.com/in/samwelomwenga", action: "linkedin", href: profile.linkedinUrl },
-  { command: `mailto ${profile.email}`, action: "copy", href: null },
+  { command: "open x.com/Samwel_codes", action: "x", href: profile.xUrl },
 ] as const

@@ -282,16 +282,14 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
               Based in
               {profile.location}
               {" "}
-              — reach me on GitHub, LinkedIn, or email.
+              — reach me on GitHub, LinkedIn, or X.
             </p>
             <div className="rounded-md border border-border bg-surface p-3">
               {contactCommands.map(row => (
                 <div key={row.command} className="grid min-h-[2.125rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 text-[0.8125rem]">
                   <span className="font-extrabold text-success">$</span>
                   <code className="min-w-0 truncate text-fg">{row.command}</code>
-                  {row.href
-                    ? <a href={row.href} target="_blank" rel="noreferrer"><StatusPill>{row.action}</StatusPill></a>
-                    : <CopyEmailButton />}
+                  <a href={row.href} target="_blank" rel="noreferrer"><StatusPill>{row.action}</StatusPill></a>
                 </div>
               ))}
             </div>
@@ -404,20 +402,6 @@ function ActionButton({ children, primary, onClick }: ActionButtonProps) {
         : "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-border bg-surface px-3 text-xs font-extrabold tracking-[0.02em] text-fg hover:border-line"}
     >
       {children}
-    </button>
-  )
-}
-
-function CopyEmailButton() {
-  const [copied, setCopied] = useState(false)
-
-  function copy() {
-    navigator.clipboard?.writeText(profile.email).then(() => setCopied(true)).catch(() => setCopied(false))
-  }
-
-  return (
-    <button type="button" onClick={copy} aria-label="Copy email address">
-      <StatusPill tone={copied ? "done" : "default"}>{copied ? "copied" : "copy"}</StatusPill>
     </button>
   )
 }
