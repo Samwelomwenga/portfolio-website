@@ -2,35 +2,20 @@ import type { ReactNode } from "react"
 import type { BlogFilter, BlogItem, ProjectFilter, ProjectItem, SectionId } from "@/portfolio-data"
 import {
   SiCss,
-  SiCssHex,
   SiDotnet,
-  SiDotnetHex,
   SiExpo,
-  SiExpoHex,
   SiFigma,
-  SiFigmaHex,
   SiFirebase,
-  SiFirebaseHex,
   SiGit,
-  SiGitHex,
   SiHtml5,
-  SiHtml5Hex,
   SiJavascript,
-  SiJavascriptHex,
   SiNextdotjs,
-  SiNextdotjsHex,
   SiPostgresql,
-  SiPostgresqlHex,
   SiPostman,
-  SiPostmanHex,
   SiReact,
-  SiReactHex,
   SiSupabase,
-  SiSupabaseHex,
   SiTailwindcss,
-  SiTailwindcssHex,
   SiTypescript,
-  SiTypescriptHex,
 } from "@icons-pack/react-simple-icons"
 import { ArrowUpRight } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
@@ -47,6 +32,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
+import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
   blogFilters,
@@ -78,28 +64,28 @@ const ARCHIVE_THRESHOLD = 6
 
 type SkillIconEntry = {
   Icon: typeof SiReact
-  color: string
+  iconClass: string
 }
 
 const skillIcons: Record<string, SkillIconEntry> = {
-  "HTML5": { Icon: SiHtml5, color: SiHtml5Hex },
-  "CSS3": { Icon: SiCss, color: SiCssHex },
-  "JavaScript": { Icon: SiJavascript, color: SiJavascriptHex },
-  "TypeScript": { Icon: SiTypescript, color: SiTypescriptHex },
-  "C#": { Icon: SiDotnet, color: SiDotnetHex },
-  "Postgres": { Icon: SiPostgresql, color: SiPostgresqlHex },
-  "React": { Icon: SiReact, color: SiReactHex },
-  "Next.js": { Icon: SiNextdotjs, color: SiNextdotjsHex },
-  "React Native": { Icon: SiReact, color: SiReactHex },
-  "Expo Router": { Icon: SiExpo, color: SiExpoHex },
-  "Tailwind CSS": { Icon: SiTailwindcss, color: SiTailwindcssHex },
-  ".NET Core": { Icon: SiDotnet, color: SiDotnetHex },
-  "EF Core": { Icon: SiDotnet, color: SiDotnetHex },
-  "Git": { Icon: SiGit, color: SiGitHex },
-  "Postman": { Icon: SiPostman, color: SiPostmanHex },
-  "Figma": { Icon: SiFigma, color: SiFigmaHex },
-  "Supabase": { Icon: SiSupabase, color: SiSupabaseHex },
-  "Firebase": { Icon: SiFirebase, color: SiFirebaseHex },
+  "HTML5": { Icon: SiHtml5, iconClass: "text-[#E34F26]" },
+  "CSS3": { Icon: SiCss, iconClass: "text-[#1572B6]" },
+  "JavaScript": { Icon: SiJavascript, iconClass: "text-[#F7DF1E]" },
+  "TypeScript": { Icon: SiTypescript, iconClass: "text-[#3178C6]" },
+  "C#": { Icon: SiDotnet, iconClass: "text-[#512BD4]" },
+  "Postgres": { Icon: SiPostgresql, iconClass: "text-[#4169E1]" },
+  "React": { Icon: SiReact, iconClass: "text-[#61DAFB]" },
+  "Next.js": { Icon: SiNextdotjs, iconClass: "text-[#000000]" },
+  "React Native": { Icon: SiReact, iconClass: "text-[#61DAFB]" },
+  "Expo Router": { Icon: SiExpo, iconClass: "text-[#000020]" },
+  "Tailwind CSS": { Icon: SiTailwindcss, iconClass: "text-[#06B6D4]" },
+  ".NET Core": { Icon: SiDotnet, iconClass: "text-[#512BD4]" },
+  "EF Core": { Icon: SiDotnet, iconClass: "text-[#512BD4]" },
+  "Git": { Icon: SiGit, iconClass: "text-[#F05032]" },
+  "Postman": { Icon: SiPostman, iconClass: "text-[#FF6C37]" },
+  "Figma": { Icon: SiFigma, iconClass: "text-[#F24E1E]" },
+  "Supabase": { Icon: SiSupabase, iconClass: "text-[#3FCF8E]" },
+  "Firebase": { Icon: SiFirebase, iconClass: "text-[#DD2C00]" },
 } satisfies Record<string, SkillIconEntry>
 
 function getRouteFromHash(): Route {
@@ -225,7 +211,7 @@ type SectionHeadingProps = {
 function SectionHeading({ title, headingId, children }: SectionHeadingProps) {
   return (
     <div className="grid max-w-[48.75rem] gap-2">
-      <h2 id={headingId} className="text-[clamp(1.75rem,5vw,2.875rem)] leading-tight tracking-[-0.02em] text-balance">{title}</h2>
+      <h2 id={headingId} className="text-[clamp(1.75rem,5vw,2.875rem)] leading-tight text-balance">{title}</h2>
       {children && <p className="max-w-[65ch] text-base text-muted">{children}</p>}
     </div>
   )
@@ -261,7 +247,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="home">
         <div className="grid gap-3.5 wide:grid-cols-[minmax(0,1fr)_minmax(21.25rem,0.92fr)] wide:items-center wide:gap-x-[clamp(1.125rem,3vw,2.125rem)]">
           <div className="grid content-start gap-4 wide:col-start-1 wide:row-start-1">
-            <h1 id="screen-home-title" className="text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] tracking-[-0.03em] text-balance">
+            <h1 id="screen-home-title" className="text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] text-balance">
               <span className="font-extrabold text-term-green">{hero.firstName}</span>
               {" "}
               <span className="font-extrabold text-term-yellow">{hero.lastName}</span>
@@ -324,7 +310,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <div className="grid gap-2">
             <p className="text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">experience</p>
-            <h2 id="screen-experience-title" className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight tracking-[-0.02em] text-balance">Featured Experience</h2>
+            <h2 id="screen-experience-title" className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight text-balance">Featured Experience</h2>
           </div>
           {experience.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("experience")}>More experience</ArchiveLink>}
         </div>
@@ -356,7 +342,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="contact">
         <div className="grid gap-4.5 wide:grid-cols-[minmax(13.75rem,0.58fr)_minmax(22.5rem,1.42fr)] wide:items-start">
           <div className="grid max-w-[22.5rem] content-start gap-3">
-            <h2 id="screen-contact-title" className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight tracking-[-0.02em]">Contact</h2>
+            <h2 id="screen-contact-title" className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight">Contact</h2>
             <p className="text-sm text-muted">
               Based in
               {profile.location}
@@ -387,7 +373,7 @@ function SkillChip({ tag }: { tag: string }) {
     <li data-skill={tag} className="inline-flex min-h-8 items-center gap-1.5 rounded-sm border border-border bg-surface py-1 pr-2.5 pl-1 text-xs font-bold text-fg">
       {icon && (
         <span className="grid size-5 shrink-0 place-items-center rounded-sm bg-white/95">
-          <icon.Icon aria-hidden="true" className="size-3.5" color={icon.color} focusable="false" size={14} title="" />
+          <icon.Icon aria-hidden="true" className={cn("size-3.5", icon.iconClass)} focusable="false" title="" />
         </span>
       )}
       <span>{tag}</span>
@@ -473,7 +459,7 @@ function BlogGrid({ items }: BlogGridProps) {
         <NoteCard key={blog.title} state={blog.state} kicker="draft">
           <div className="grid gap-1.5">
             <span className="text-xs text-muted">{blog.meta}</span>
-            <h3 className="text-lg leading-snug tracking-[-0.01em]">{blog.title}</h3>
+            <h3 className="text-lg leading-snug">{blog.title}</h3>
             <p className="text-sm text-muted">{blog.blurb}</p>
           </div>
         </NoteCard>

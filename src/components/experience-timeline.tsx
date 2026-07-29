@@ -1,5 +1,5 @@
 import type { ExperienceItem } from "@/portfolio-data"
-import { stateStyle } from "@/lib/utils"
+import { cn, stateAccentClass } from "@/lib/utils"
 
 type ExperienceTimelineProps = {
   items: readonly ExperienceItem[]
@@ -12,11 +12,13 @@ export function ExperienceTimeline({ items }: ExperienceTimelineProps) {
       {items.map((item, index) => (
         <article
           key={`${item.company}-${item.role}`}
-          style={stateStyle(item.state)}
-          className="grid min-h-[5.5rem] items-start gap-x-3 gap-y-1.5 [grid-template-columns:1.75rem_minmax(0,1fr)] wide:gap-[clamp(1rem,2.5vw,1.75rem)] wide:[grid-template-columns:minmax(9.5rem,0.4fr)_2.75rem_minmax(0,1fr)]"
+          className={cn(
+            stateAccentClass(item.state),
+            "grid min-h-[5.5rem] items-start gap-x-3 gap-y-1.5 [grid-template-columns:1.75rem_minmax(0,1fr)] wide:gap-[clamp(1rem,2.5vw,1.75rem)] wide:[grid-template-columns:minmax(9.5rem,0.4fr)_2.75rem_minmax(0,1fr)]",
+          )}
         >
           <div className="col-start-2 row-start-1 grid gap-1 wide:col-start-1">
-            <strong className="text-base leading-tight tracking-[-0.02em]">{item.company}</strong>
+            <strong className="text-base leading-tight">{item.company}</strong>
             <time className="text-[0.6875rem] tracking-[0.01em] text-muted">{item.period}</time>
           </div>
 
@@ -33,7 +35,7 @@ export function ExperienceTimeline({ items }: ExperienceTimelineProps) {
           </div>
 
           <div className="col-start-2 row-start-2 grid gap-1.5 wide:col-start-3 wide:row-start-1">
-            <h3 className="text-[clamp(1.0625rem,2vw,1.25rem)] leading-snug tracking-[-0.03em]">{item.role}</h3>
+            <h3 className="text-[clamp(1.0625rem,2vw,1.25rem)] leading-snug">{item.role}</h3>
             <p className="max-w-[74ch] text-sm leading-relaxed text-muted">{item.description}</p>
           </div>
         </article>

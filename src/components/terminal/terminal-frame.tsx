@@ -2,12 +2,12 @@ import type { LucideIcon } from "lucide-react"
 import type { ReactNode, RefObject } from "react"
 import type { ColorMode, ThemeName } from "@/hooks/use-terminal-theme"
 
-import type { SectionId } from "@/portfolio-data"
-import { SiGithub, SiGithubHex, SiX, SiXHex } from "@icons-pack/react-simple-icons"
+import type { SectionId, StateColor } from "@/portfolio-data"
+import { SiGithub, SiX } from "@icons-pack/react-simple-icons"
 import { Linkedin, Monitor, Moon, Sun } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ThemeDialog } from "@/components/terminal/theme-dialog"
-import { cn } from "@/lib/utils"
+import { cn, stateAccentClass } from "@/lib/utils"
 import { navItems, profile, socialLinks } from "@/portfolio-data"
 
 type SocialIconName = (typeof socialLinks)[number]["icon"]
@@ -80,7 +80,7 @@ function Sidebar({ activeId, onNavigate }: SidebarProps) {
       <div className="border-b border-border p-3.5">
         <p className="mb-2 text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">workspace</p>
         <div className="grid gap-2">
-          <strong className="text-[clamp(1.375rem,4vw,1.75rem)] leading-tight tracking-[-0.02em]">{profile.name}</strong>
+          <strong className="text-[clamp(1.375rem,4vw,1.75rem)] leading-tight">{profile.name}</strong>
           <span className="text-xs break-words text-muted">{profile.workspaceMeta}</span>
         </div>
       </div>
@@ -112,7 +112,7 @@ function Sidebar({ activeId, onNavigate }: SidebarProps) {
 }
 
 type TreeLinkProps = {
-  state: string
+  state: StateColor
   main: string
   meta: string
   active?: boolean
@@ -125,6 +125,7 @@ type TreeLinkProps = {
 function TreeLink({ state, main, meta, active, href, icon, suffix, onClick }: TreeLinkProps) {
   const hasEndSlot = Boolean(icon || suffix)
   const className = cn(
+    stateAccentClass(state),
     "grid min-h-12 w-full items-center gap-x-2 gap-y-px rounded-sm px-2 py-1.5 text-left text-muted transition-colors hover:bg-surface/85 hover:text-fg data-[active=true]:bg-surface/85 data-[active=true]:text-fg",
     hasEndSlot ? "grid-cols-[0.625rem_minmax(0,1fr)_auto]" : "grid-cols-[0.625rem_minmax(0,1fr)]",
   )
@@ -132,13 +133,12 @@ function TreeLink({ state, main, meta, active, href, icon, suffix, onClick }: Tr
   const dot = (
     <span
       aria-hidden="true"
-      className="row-span-2 mt-2 size-2 self-start rounded-full"
-      style={{ background: `var(--state-${state})` }}
+      className="row-span-2 mt-2 size-2 self-start rounded-full bg-[color:var(--card-accent)]"
     />
   )
   const body = (
     <>
-      <span className="col-start-2 truncate text-[0.8125rem] leading-tight font-extrabold tracking-[-0.01em] text-fg">{main}</span>
+      <span className="col-start-2 truncate text-[0.8125rem] leading-tight font-extrabold text-fg">{main}</span>
       <span className="col-start-2 truncate text-[0.6875rem] leading-tight text-muted">{meta}</span>
       {icon && (
         <span className="col-start-3 row-span-2 grid size-7 place-items-center self-center rounded-sm border border-border bg-white/95">
@@ -169,11 +169,11 @@ function TreeLink({ state, main, meta, active, href, icon, suffix, onClick }: Tr
 function SocialIcon({ icon }: { icon: SocialIconName }) {
   switch (icon) {
     case "github":
-      return <SiGithub aria-hidden="true" className="size-[0.9375rem]" color={SiGithubHex} focusable="false" size={15} title="" />
+      return <SiGithub aria-hidden="true" className="size-[0.9375rem] text-[#181717]" focusable="false" title="" />
     case "linkedin":
-      return <Linkedin aria-hidden="true" className="size-[0.9375rem]" color="#0A66C2" focusable="false" size={15} strokeWidth={2.2} />
+      return <Linkedin aria-hidden="true" className="size-[0.9375rem] text-[#0A66C2] [stroke-width:2.2]" focusable="false" />
     case "x":
-      return <SiX aria-hidden="true" className="size-[0.9375rem]" color={SiXHex} focusable="false" size={15} title="" />
+      return <SiX aria-hidden="true" className="size-[0.9375rem] text-[#000000]" focusable="false" title="" />
   }
 }
 
@@ -267,7 +267,7 @@ function ModeSwitch({ mode, onModeChange }: ModeSwitchProps) {
             compact && !open && "border-l-0",
           )}
         >
-          <Icon className="size-[1.0625rem]" strokeWidth={1.8} aria-hidden="true" />
+          <Icon className="size-[1.0625rem] [stroke-width:1.8]" aria-hidden="true" />
         </button>
       ))}
     </div>

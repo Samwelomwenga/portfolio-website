@@ -9,9 +9,6 @@ type ThemeDialogProps = {
   onThemeChange: (theme: ThemeName) => void
 }
 
-const DOT_GRADIENT
-  = "conic-gradient(var(--accent) 25%, var(--success) 25% 50%, var(--warn) 50% 75%, var(--danger) 75%)"
-
 /** Bottom-right settings launcher plus its modal theme picker. */
 export function ThemeDialog({ theme, onThemeChange }: ThemeDialogProps) {
   const [open, setOpen] = useState(false)
@@ -57,7 +54,7 @@ export function ThemeDialog({ theme, onThemeChange }: ThemeDialogProps) {
         aria-expanded={open}
         className="fixed right-2 bottom-4 left-2 z-40 inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-md border border-line bg-base/90 px-3 text-xs font-extrabold tracking-[0.02em] text-muted backdrop-blur-md transition-colors hover:border-accent hover:text-fg sm:right-4 sm:left-auto sm:justify-start"
       >
-        <span className="size-[0.5625rem] rounded-full" style={{ background: DOT_GRADIENT }} aria-hidden="true" />
+        <span className="theme-spectrum-dot size-[0.5625rem] rounded-full" aria-hidden="true" />
         {activeLabel}
         {" "}
         [/]

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 
 import type { StateColor } from "@/portfolio-data"
-import { cn, stateStyle } from "@/lib/utils"
+import { cn, stateAccentClass } from "@/lib/utils"
 
 type NoteCardProps = {
   state: StateColor
@@ -15,8 +15,8 @@ type NoteCardProps = {
 export function NoteCard({ state, kicker, title, className, children }: NoteCardProps) {
   return (
     <article
-      style={stateStyle(state)}
       className={cn(
+        stateAccentClass(state),
         "relative overflow-hidden rounded-md border border-border border-t-4 border-t-[color:var(--card-accent)] bg-surface p-5.5",
         className,
       )}

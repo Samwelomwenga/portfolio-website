@@ -2,6 +2,7 @@ import { useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import { StatusPill } from "@/components/terminal/status-pill"
+import { cn } from "@/lib/utils"
 import { assistantPrompts, assistantResponses, assistantSeedPrompt } from "@/portfolio-data"
 
 const TYPE_INTERVAL_MS = 24
@@ -98,9 +99,11 @@ export function AssistantConsole() {
           </p>
         </div>
         <div
-          className="status-pulse flex items-center gap-2 pt-0.5 text-xs data-[ready=true]:text-success"
+          className={cn(
+            "status-pulse flex items-center gap-2 pt-0.5 text-xs",
+            shownReady ? "text-success" : "text-warn",
+          )}
           data-ready={shownReady}
-          style={{ color: shownReady ? undefined : "var(--warn)" }}
         >
           {shownReady ? "Ready for next prompt" : "Working"}
         </div>

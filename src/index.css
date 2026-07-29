@@ -36,6 +36,50 @@
   --color-state-orange: var(--state-orange);
 }
 
+@utility card-accent-yellow {
+  --card-accent: var(--state-yellow);
+}
+
+@utility card-accent-pink {
+  --card-accent: var(--state-pink);
+}
+
+@utility card-accent-green {
+  --card-accent: var(--state-green);
+}
+
+@utility card-accent-blue {
+  --card-accent: var(--state-blue);
+}
+
+@utility card-accent-cyan {
+  --card-accent: var(--state-cyan);
+}
+
+@utility card-accent-orange {
+  --card-accent: var(--state-orange);
+}
+
+@utility project-preview-header {
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--card-accent) 10%, transparent), transparent 42%), var(--panel);
+}
+
+@utility project-preview-placeholder {
+  border-color: color-mix(in oklch, var(--card-accent) 44%, var(--border));
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--card-accent) 12%, transparent), transparent 48%),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 1.0625rem,
+      color-mix(in oklch, var(--border) 36%, transparent) 1.125rem 1.1875rem
+    );
+}
+
+@utility theme-spectrum-dot {
+  background: conic-gradient(var(--accent) 25%, var(--success) 25% 50%, var(--warn) 50% 75%, var(--danger) 75%);
+}
+
 :root {
   color-scheme: dark;
   --bg: oklch(22.6% 0.021 280.5);
