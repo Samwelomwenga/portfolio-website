@@ -1,5 +1,6 @@
 // eslint.config.mjs
 import antfu from "@antfu/eslint-config"
+import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect"
 
 export default antfu({
   react: true,
@@ -8,7 +9,7 @@ export default antfu({
     indent: 2,
     quotes: "double",
   },
-}, {
+}, reactYouMightNotNeedAnEffect.configs.recommended, {
   rules: {
     "@typescript-eslint/no-floating-promises": "off",
     "ts/no-floating-promises": "off",
