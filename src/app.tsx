@@ -207,6 +207,7 @@ function Screen({ id, children }: ScreenProps) {
     <section
       id={`screen-${id}`}
       data-section={id}
+      aria-labelledby={`screen-${id}-title`}
       className="relative grid content-start gap-5 border-b border-border p-[clamp(1.25rem,4vw,2.75rem)] scroll-mt-5 last:border-b-0 wide:min-h-[calc(100svh-2.375rem)]"
     >
       <PromptLine section={id} command={commandFor(id)} />
@@ -217,13 +218,14 @@ function Screen({ id, children }: ScreenProps) {
 
 type SectionHeadingProps = {
   title: string
+  headingId?: string
   children?: ReactNode
 }
 
-function SectionHeading({ title, children }: SectionHeadingProps) {
+function SectionHeading({ title, headingId, children }: SectionHeadingProps) {
   return (
     <div className="grid max-w-[48.75rem] gap-2">
-      <h2 className="text-[clamp(1.75rem,5vw,2.875rem)] leading-tight tracking-[-0.02em] text-balance">{title}</h2>
+      <h2 id={headingId} className="text-[clamp(1.75rem,5vw,2.875rem)] leading-tight tracking-[-0.02em] text-balance">{title}</h2>
       {children && <p className="max-w-[65ch] text-base text-muted">{children}</p>}
     </div>
   )
@@ -259,7 +261,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="home">
         <div className="grid gap-3.5 wide:grid-cols-[minmax(0,1fr)_minmax(21.25rem,0.92fr)] wide:items-center wide:gap-x-[clamp(1.125rem,3vw,2.125rem)]">
           <div className="grid content-start gap-4 wide:col-start-1 wide:row-start-1">
-            <h1 className="text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] tracking-[-0.03em] text-balance">
+            <h1 id="screen-home-title" className="text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] tracking-[-0.03em] text-balance">
               <span className="font-extrabold text-term-green">{hero.firstName}</span>
               {" "}
               <span className="font-extrabold text-term-yellow">{hero.lastName}</span>
@@ -285,7 +287,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       </Screen>
 
       <Screen id="about">
-        <SectionHeading title="About" />
+        <SectionHeading title="About" headingId="screen-about-title" />
         <div className="grid max-w-[72ch] gap-4">
           {aboutParagraphs.map(paragraph => (
             <p key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">{paragraph}</p>
@@ -294,7 +296,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       </Screen>
 
       <Screen id="skills">
-        <SectionHeading title="Skills">
+        <SectionHeading title="Skills" headingId="screen-skills-title">
           Grouped like a terminal inventory — languages, frameworks, and tools.
         </SectionHeading>
         <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
@@ -322,7 +324,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <div className="grid gap-2">
             <p className="text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">experience</p>
-            <h2 className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight tracking-[-0.02em] text-balance">Featured Experience</h2>
+            <h2 id="screen-experience-title" className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight tracking-[-0.02em] text-balance">Featured Experience</h2>
           </div>
           {experience.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("experience")}>More experience</ArchiveLink>}
         </div>
@@ -331,7 +333,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
 
       <Screen id="projects">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
-          <SectionHeading title="Projects">
+          <SectionHeading title="Projects" headingId="screen-projects-title">
             Filter the project cards without leaving the terminal frame.
           </SectionHeading>
           {projects.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("projects")}>More projects</ArchiveLink>}
@@ -342,7 +344,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
 
       <Screen id="blogs">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
-          <SectionHeading title="Blogs">
+          <SectionHeading title="Blogs" headingId="screen-blogs-title">
             A lean index for writing on process, interface craft, and implementation.
           </SectionHeading>
           {blogs.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>}
@@ -354,7 +356,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="contact">
         <div className="grid gap-4.5 wide:grid-cols-[minmax(13.75rem,0.58fr)_minmax(22.5rem,1.42fr)] wide:items-start">
           <div className="grid max-w-[22.5rem] content-start gap-3">
-            <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight tracking-[-0.02em]">Contact</h2>
+            <h2 id="screen-contact-title" className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight tracking-[-0.02em]">Contact</h2>
             <p className="text-sm text-muted">
               Based in
               {profile.location}
@@ -418,14 +420,16 @@ function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
 
   return (
     <section
+      id={`screen-${route}`}
       data-section={route}
+      aria-labelledby={`screen-${route}-title`}
       className="relative grid content-start gap-5 p-[clamp(1.25rem,4vw,2.75rem)]"
     >
       <button type="button" onClick={() => onNavigate("home")} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold text-state-orange">
         <ArrowUpRight className="size-3.5 rotate-180" aria-hidden="true" />
         Back to terminal
       </button>
-      <SectionHeading title={titles[route].title}>{titles[route].blurb}</SectionHeading>
+      <SectionHeading title={titles[route].title} headingId={`screen-${route}-title`}>{titles[route].blurb}</SectionHeading>
 
       {route === "experience" && <ExperienceTimeline items={experience} />}
 

@@ -22,6 +22,7 @@ export function ContactForm() {
 
   return (
     <form
+      aria-label="Contact form"
       className="grid gap-3.5 rounded-md border border-border bg-surface p-[clamp(1.125rem,2.4vw,1.75rem)]"
       onSubmit={handleSubmit}
     >

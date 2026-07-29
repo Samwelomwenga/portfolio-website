@@ -42,7 +42,7 @@ export function TerminalFrame({
   return (
     <>
       <a
-        href="#terminal-scroll"
+        href="#portfolio-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2.5 focus:left-2.5 focus:z-[100] focus:rounded-sm focus:border focus:border-border focus:bg-surface focus:px-2.5 focus:py-2 focus:text-xs"
       >
         Skip to portfolio
@@ -51,12 +51,17 @@ export function TerminalFrame({
       <div className="grid h-[100svh] grid-cols-1 wide:grid-cols-[minmax(14.375rem,18.75rem)_minmax(0,1fr)]">
         <Sidebar activeId={activeId} onNavigate={onNavigate} />
 
-        <section className="grid min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-panel" aria-label="Portfolio terminal">
+        <main
+          id="portfolio-main"
+          tabIndex={-1}
+          className="grid min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-panel outline-none"
+          aria-label="Portfolio terminal"
+        >
           <TabBar activeId={activeId} mode={mode} onNavigate={onNavigate} onModeChange={onModeChange} />
           <div id="terminal-scroll" ref={scrollRef} className="min-h-0 overflow-auto scroll-pt-6 term-scrollbar">
             {children}
           </div>
-        </section>
+        </main>
       </div>
 
       <ThemeDialog theme={theme} onThemeChange={onThemeChange} />
@@ -189,7 +194,9 @@ function TabBar({ activeId, mode, onNavigate, onModeChange }: TabBarProps) {
             type="button"
             role="tab"
             aria-selected={item.id === activeId}
+            aria-controls={`screen-${item.id}`}
             data-active={item.id === activeId}
+            id={`tab-${item.id}`}
             onClick={() => onNavigate(item.id)}
             className="min-h-[2.375rem] min-w-[6.75rem] shrink-0 border-r border-border px-3.5 text-left text-xs font-bold tracking-[0.02em] text-muted transition-colors data-[active=true]:bg-accent data-[active=true]:text-[color:var(--bg)]"
           >

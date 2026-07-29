@@ -70,13 +70,16 @@ export function AssistantConsole() {
   const shownReady = target !== "" && shownTyped === target
 
   return (
-    <div className="grid max-h-[38.75rem] grid-rows-[auto_minmax(0,1fr)_auto_auto] overflow-hidden rounded-md border border-line bg-panel shadow-[0_1.5rem_5rem_color-mix(in_oklch,black_32%,transparent)] wide:max-h-[38.75rem]">
+    <section
+      aria-labelledby="assistant-console-title"
+      className="grid max-h-[38.75rem] grid-rows-[auto_minmax(0,1fr)_auto_auto] overflow-hidden rounded-md border border-line bg-panel shadow-[0_1.5rem_5rem_color-mix(in_oklch,black_32%,transparent)] wide:max-h-[38.75rem]"
+    >
       <div className="flex flex-wrap items-center gap-3 border-b border-border bg-surface/50 px-3.5 py-3">
         <div className="pixel-mark grid size-9 shrink-0 place-items-center rounded-sm border border-state-orange/60" aria-hidden="true">
           AI
         </div>
         <div className="grid min-w-0 flex-1 gap-0.5">
-          <strong className="truncate text-[0.8125rem] tracking-[0.01em]">personal ai assistant</strong>
+          <strong id="assistant-console-title" className="truncate text-[0.8125rem] tracking-[0.01em]">personal ai assistant</strong>
           <span className="truncate text-[0.6875rem] text-muted">portfolio helper · custom prompts</span>
         </div>
         <StatusPill tone="done">online</StatusPill>
@@ -140,6 +143,6 @@ export function AssistantConsole() {
           run
         </button>
       </form>
-    </div>
+    </section>
   )
 }
