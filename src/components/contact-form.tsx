@@ -1,4 +1,5 @@
 import { useForm, ValidationError } from "@formspree/react"
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +12,12 @@ const labelClass = "text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] 
 const fieldClass = "min-h-[2.875rem] rounded-sm border-border bg-panel px-3 text-fg shadow-none focus-visible:border-line focus-visible:ring-0"
 
 export function ContactForm() {
-  const [state, handleSubmit] = useForm(formId)
+  const { executeRecaptcha } = useGoogleReCaptcha()
+  // Formspree resolves this function at submit time and sends the token as the
+  // g-recaptcha-response field (verified against the Custom reCAPTCHA secret).
+  const [state, handleSubmit] = useForm(formId, {
+    data: { "g-recaptcha-response": executeRecaptcha },
+  })
   const hasErrors = Array.isArray(state.errors) ? state.errors.length > 0 : Boolean(state.errors)
 
   return (
