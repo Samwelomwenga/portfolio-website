@@ -12,6 +12,7 @@ export default antfu({
   rules: {
     "@typescript-eslint/no-floating-promises": "off",
     "ts/no-floating-promises": "off",
+    "ts/consistent-type-definitions": ["error", "type"],
     "no-console": ["warn"],
     "node/prefer-global/process": ["off"],
     "node/no-process-env": ["error"],
