@@ -21,6 +21,14 @@ test.describe("terminal portfolio", () => {
     await expect(page.getByRole("heading", { name: "Projects", exact: true })).toBeVisible()
   })
 
+  test("skills show brand icons", async ({ page }) => {
+    await page.getByRole("tab", { name: "~/skills" }).click()
+
+    for (const skill of ["HTML5", "React", "Git"]) {
+      await expect(page.locator(`[data-skill="${skill}"] svg`)).toBeVisible()
+    }
+  })
+
   test("theme dialog switches palette and persists", async ({ page }) => {
     await page.getByRole("button", { name: /tokyo night/ }).click()
     const dialog = page.getByRole("dialog", { name: "Theme settings" })

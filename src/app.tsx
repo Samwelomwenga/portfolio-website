@@ -1,5 +1,37 @@
 import type { ReactNode } from "react"
 import type { BlogFilter, BlogItem, ProjectFilter, ProjectItem, SectionId } from "@/portfolio-data"
+import {
+  SiCss,
+  SiCssHex,
+  SiDotnet,
+  SiDotnetHex,
+  SiExpo,
+  SiExpoHex,
+  SiFigma,
+  SiFigmaHex,
+  SiFirebase,
+  SiFirebaseHex,
+  SiGit,
+  SiGitHex,
+  SiHtml5,
+  SiHtml5Hex,
+  SiJavascript,
+  SiJavascriptHex,
+  SiNextdotjs,
+  SiNextdotjsHex,
+  SiPostgresql,
+  SiPostgresqlHex,
+  SiPostman,
+  SiPostmanHex,
+  SiReact,
+  SiReactHex,
+  SiSupabase,
+  SiSupabaseHex,
+  SiTailwindcss,
+  SiTailwindcssHex,
+  SiTypescript,
+  SiTypescriptHex,
+} from "@icons-pack/react-simple-icons"
 import { ArrowUpRight } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
 
@@ -43,6 +75,32 @@ const featuredBlogs = blogs.filter(blog => blog.featured)
 
 // Only surface an archive link once a section has more entries than fit comfortably on the home screen.
 const ARCHIVE_THRESHOLD = 6
+
+type SkillIconEntry = {
+  Icon: typeof SiReact
+  color: string
+}
+
+const skillIcons: Record<string, SkillIconEntry> = {
+  "HTML5": { Icon: SiHtml5, color: SiHtml5Hex },
+  "CSS3": { Icon: SiCss, color: SiCssHex },
+  "JavaScript": { Icon: SiJavascript, color: SiJavascriptHex },
+  "TypeScript": { Icon: SiTypescript, color: SiTypescriptHex },
+  "C#": { Icon: SiDotnet, color: SiDotnetHex },
+  "Postgres": { Icon: SiPostgresql, color: SiPostgresqlHex },
+  "React": { Icon: SiReact, color: SiReactHex },
+  "Next.js": { Icon: SiNextdotjs, color: SiNextdotjsHex },
+  "React Native": { Icon: SiReact, color: SiReactHex },
+  "Expo Router": { Icon: SiExpo, color: SiExpoHex },
+  "Tailwind CSS": { Icon: SiTailwindcss, color: SiTailwindcssHex },
+  ".NET Core": { Icon: SiDotnet, color: SiDotnetHex },
+  "EF Core": { Icon: SiDotnet, color: SiDotnetHex },
+  "Git": { Icon: SiGit, color: SiGitHex },
+  "Postman": { Icon: SiPostman, color: SiPostmanHex },
+  "Figma": { Icon: SiFigma, color: SiFigmaHex },
+  "Supabase": { Icon: SiSupabase, color: SiSupabaseHex },
+  "Firebase": { Icon: SiFirebase, color: SiFirebaseHex },
+} satisfies Record<string, SkillIconEntry>
 
 function getRouteFromHash(): Route {
   const hash = window.location.hash.slice(1)
@@ -225,7 +283,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
             <NoteCard key={group.title} state={group.state} title={group.title}>
               <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
                 {group.tags.map(tag => (
-                  <li key={tag} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{tag}</li>
+                  <SkillChip key={tag} tag={tag} />
                 ))}
               </ul>
             </NoteCard>
@@ -298,6 +356,21 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
         </div>
       </Screen>
     </>
+  )
+}
+
+function SkillChip({ tag }: { tag: string }) {
+  const icon = skillIcons[tag]
+
+  return (
+    <li data-skill={tag} className="inline-flex min-h-8 items-center gap-1.5 rounded-sm border border-border bg-surface py-1 pr-2.5 pl-1 text-xs font-bold text-fg">
+      {icon && (
+        <span className="grid size-5 shrink-0 place-items-center rounded-sm bg-white/95">
+          <icon.Icon aria-hidden="true" className="size-3.5" color={icon.color} focusable="false" size={14} title="" />
+        </span>
+      )}
+      <span>{tag}</span>
+    </li>
   )
 }
 

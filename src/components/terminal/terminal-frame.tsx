@@ -3,11 +3,14 @@ import type { ReactNode, RefObject } from "react"
 import type { ColorMode, ThemeName } from "@/hooks/use-terminal-theme"
 
 import type { SectionId } from "@/portfolio-data"
-import { Monitor, Moon, Sun } from "lucide-react"
+import { SiGithub, SiGithubHex, SiX, SiXHex } from "@icons-pack/react-simple-icons"
+import { Linkedin, Monitor, Moon, Sun } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ThemeDialog } from "@/components/terminal/theme-dialog"
 import { cn } from "@/lib/utils"
 import { navItems, profile, socialLinks } from "@/portfolio-data"
+
+type SocialIconName = (typeof socialLinks)[number]["icon"]
 
 const modeOptions: { id: ColorMode, icon: LucideIcon, label: string }[] = [
   { id: "dark", icon: Moon, label: "dark" },
@@ -95,7 +98,7 @@ function Sidebar({ activeId, onNavigate }: SidebarProps) {
         <div>
           <div className="px-2 py-1.5 text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">socials</div>
           {socialLinks.map(link => (
-            <TreeLink key={link.label} state={link.state} main={link.label} meta={link.meta} href={link.href} suffix="open" />
+            <TreeLink key={link.label} state={link.state} main={link.label} meta={link.meta} href={link.href} icon={link.icon} />
           ))}
         </div>
       </nav>
@@ -109,14 +112,16 @@ type TreeLinkProps = {
   meta: string
   active?: boolean
   href?: string
+  icon?: SocialIconName
   suffix?: string
   onClick?: () => void
 }
 
-function TreeLink({ state, main, meta, active, href, suffix, onClick }: TreeLinkProps) {
+function TreeLink({ state, main, meta, active, href, icon, suffix, onClick }: TreeLinkProps) {
+  const hasEndSlot = Boolean(icon || suffix)
   const className = cn(
     "grid min-h-12 w-full items-center gap-x-2 gap-y-px rounded-sm px-2 py-1.5 text-left text-muted transition-colors hover:bg-surface/85 hover:text-fg data-[active=true]:bg-surface/85 data-[active=true]:text-fg",
-    suffix ? "grid-cols-[0.625rem_minmax(0,1fr)_auto]" : "grid-cols-[0.625rem_minmax(0,1fr)]",
+    hasEndSlot ? "grid-cols-[0.625rem_minmax(0,1fr)_auto]" : "grid-cols-[0.625rem_minmax(0,1fr)]",
   )
 
   const dot = (
@@ -130,7 +135,12 @@ function TreeLink({ state, main, meta, active, href, suffix, onClick }: TreeLink
     <>
       <span className="col-start-2 truncate text-[0.8125rem] leading-tight font-extrabold tracking-[-0.01em] text-fg">{main}</span>
       <span className="col-start-2 truncate text-[0.6875rem] leading-tight text-muted">{meta}</span>
-      {suffix && <span className="col-start-3 row-span-2 self-center text-[0.6875rem] text-muted">{suffix}</span>}
+      {icon && (
+        <span className="col-start-3 row-span-2 grid size-7 place-items-center self-center rounded-sm border border-border bg-white/95">
+          <SocialIcon icon={icon} />
+        </span>
+      )}
+      {!icon && suffix && <span className="col-start-3 row-span-2 self-center text-[0.6875rem] text-muted">{suffix}</span>}
     </>
   )
 
@@ -149,6 +159,17 @@ function TreeLink({ state, main, meta, active, href, suffix, onClick }: TreeLink
       {body}
     </button>
   )
+}
+
+function SocialIcon({ icon }: { icon: SocialIconName }) {
+  switch (icon) {
+    case "github":
+      return <SiGithub aria-hidden="true" className="size-[0.9375rem]" color={SiGithubHex} focusable="false" size={15} title="" />
+    case "linkedin":
+      return <Linkedin aria-hidden="true" className="size-[0.9375rem]" color="#0A66C2" focusable="false" size={15} strokeWidth={2.2} />
+    case "x":
+      return <SiX aria-hidden="true" className="size-[0.9375rem]" color={SiXHex} focusable="false" size={15} title="" />
+  }
 }
 
 type TabBarProps = {
