@@ -5,24 +5,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
-const formId = import.meta.env.VITE_FORMSPREE_FORM_ID as string | undefined
+const formId = import.meta.env.VITE_FORMSPREE_FORM_ID as string
 
 const labelClass = "text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] text-muted"
 const fieldClass = "min-h-[2.875rem] rounded-sm border-border bg-panel px-3 text-fg shadow-none focus-visible:border-line focus-visible:ring-0"
 
 export function ContactForm() {
-  const isConfigured = Boolean(formId)
-  const [state, handleSubmit] = useForm(formId ?? "missing-form-id")
+  const [state, handleSubmit] = useForm(formId)
   const hasErrors = Array.isArray(state.errors) ? state.errors.length > 0 : Boolean(state.errors)
 
   return (
     <form
       className="grid gap-3.5 rounded-md border border-border bg-surface p-[clamp(1.125rem,2.4vw,1.75rem)]"
-      onSubmit={isConfigured
-        ? handleSubmit
-        : (event) => {
-            event.preventDefault()
-          }}
+      onSubmit={handleSubmit}
     >
       <div className="grid gap-1.5">
         <Label htmlFor="name" className={labelClass}>name</Label>
@@ -43,16 +38,15 @@ export function ContactForm() {
 
       <Button
         type="submit"
-        disabled={!isConfigured || state.submitting}
+        disabled={state.submitting}
         className="min-h-[2.375rem] w-full rounded-sm border border-accent bg-accent px-3 text-xs font-black tracking-[0.02em] text-[color:var(--bg)] hover:bg-accent/90 sm:w-auto sm:justify-self-start"
       >
         {state.submitting ? "sending" : "send message"}
       </Button>
 
       <p className="min-h-[1.375rem] text-xs text-muted" aria-live="polite">
-        {!isConfigured && "Set VITE_FORMSPREE_FORM_ID to enable submissions."}
-        {isConfigured && state.succeeded && "Message sent. Thank you."}
-        {isConfigured && hasErrors && !state.succeeded && "Something went wrong. Try again."}
+        {state.succeeded && "Message sent. Thank you."}
+        {hasErrors && !state.succeeded && "Something went wrong. Try again."}
       </p>
     </form>
   )
