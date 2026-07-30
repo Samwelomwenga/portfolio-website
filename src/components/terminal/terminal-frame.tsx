@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode, RefObject } from "react"
-import type { ColorMode, ThemeName } from "@/hooks/use-terminal-theme"
+import type { ColorMode, EffectiveMode, ThemeName } from "@/hooks/use-terminal-theme"
 
 import type { SectionId, StateColor } from "@/portfolio-data"
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons"
@@ -21,6 +21,7 @@ const modeOptions: { id: ColorMode, icon: LucideIcon, label: string }[] = [
 type TerminalFrameProps = {
   theme: ThemeName
   mode: ColorMode
+  effectiveMode: EffectiveMode
   activeId: string
   onNavigate: (id: SectionId) => void
   onThemeChange: (theme: ThemeName) => void
@@ -32,6 +33,7 @@ type TerminalFrameProps = {
 export function TerminalFrame({
   theme,
   mode,
+  effectiveMode,
   activeId,
   onNavigate,
   onThemeChange,
@@ -64,7 +66,7 @@ export function TerminalFrame({
         </main>
       </div>
 
-      <ThemeDialog theme={theme} onThemeChange={onThemeChange} />
+      <ThemeDialog theme={theme} effectiveMode={effectiveMode} onThemeChange={onThemeChange} onModeChange={onModeChange} />
     </>
   )
 }

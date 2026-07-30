@@ -30,18 +30,96 @@ test.describe("terminal portfolio", () => {
   })
 
   test("theme dialog switches palette and persists", async ({ page }) => {
-    await page.getByRole("button", { name: /tokyo night/ }).click()
+    await page.getByRole("button", { name: /tokyo/ }).click()
     const dialog = page.getByRole("dialog", { name: "Theme settings" })
     await expect(dialog).toBeVisible()
 
-    await dialog.getByRole("button", { name: "cappuccino" }).click()
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "cappuccino")
+    await dialog.getByRole("button", { name: "catppuccin", exact: true }).click()
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "catppuccin")
+    await expect(page.locator("html")).toHaveAttribute("data-effective-mode", "dark")
 
     await page.keyboard.press("Escape")
     await expect(dialog).toBeHidden()
 
     await page.reload()
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "cappuccino")
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "catppuccin")
+    await expect(page.locator("html")).toHaveAttribute("data-effective-mode", "dark")
+  })
+
+  test("theme dialog exposes the Herdr theme catalog", async ({ page }) => {
+    await page.getByRole("button", { name: /tokyo/ }).click()
+    const dialog = page.getByRole("dialog", { name: "Theme settings" })
+
+    for (const theme of [
+      "terminal",
+      "dracula",
+      "nord",
+      "one dark",
+      "rose pine",
+      "catppuccin latte",
+      "tokyo day",
+      "gruvbox light",
+      "one light",
+      "kanagawa lotus",
+      "rose pine dawn",
+    ]) {
+      await expect(dialog.getByRole("button", { name: theme, exact: true })).toBeVisible()
+    }
+  })
+
+  test("theme dialog exposes downloaded VS Code themes", async ({ page }) => {
+    await page.getByRole("button", { name: /tokyo/ }).click()
+    const dialog = page.getByRole("dialog", { name: "Theme settings" })
+
+    for (const theme of [
+      "Night Owl",
+      "Better Solarized Dark",
+      "Better Selenized Dark",
+      "poimandres",
+      "poimandres-storm",
+      "Sapphire (Dim)",
+      "City Lights",
+      "Winter is Coming (Dark Black)",
+      "Vue Theme High Contrast",
+      "Dark (Visual Studio - C/C++)",
+      "Visual Studio 2019 Light",
+    ]) {
+      await expect(dialog.getByRole("button", { name: theme, exact: true })).toBeVisible()
+    }
+
+    await expect(dialog.getByRole("button", { name: /No Italics|Italics/ })).toHaveCount(0)
+  })
+
+  test("theme catalog scrolls within the viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 720 })
+    await page.getByRole("button", { name: /tokyo/ }).click()
+
+    const dialog = page.getByRole("dialog", { name: "Theme settings" })
+    const metrics = await dialog.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const scroller = element.querySelector<HTMLElement>("[data-theme-list]")
+
+      return {
+        dialogHeight: rect.height,
+        viewportHeight: window.innerHeight,
+        listCanScroll: scroller ? scroller.scrollHeight > scroller.clientHeight : false,
+        listOverflow: scroller ? getComputedStyle(scroller).overflowY : "",
+      }
+    })
+
+    expect(metrics.dialogHeight).toBeLessThanOrEqual(metrics.viewportHeight)
+    expect(metrics.listCanScroll).toBe(true)
+    expect(metrics.listOverflow).toMatch(/auto|scroll/)
+  })
+
+  test("selecting a light catalog theme sets light mode", async ({ page }) => {
+    await page.getByRole("button", { name: /tokyo/ }).click()
+    const dialog = page.getByRole("dialog", { name: "Theme settings" })
+
+    await dialog.getByRole("button", { name: "Night Owl Light", exact: true }).click()
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "night-owl")
+    await expect(page.locator("html")).toHaveAttribute("data-mode", "light")
+    await expect(page.locator("html")).toHaveAttribute("data-effective-mode", "light")
   })
 
   test("keyboard shortcut opens the theme dialog", async ({ page }) => {
@@ -66,6 +144,19 @@ test.describe("terminal portfolio", () => {
     await pickMode("light")
     await expect(page.locator("html")).toHaveAttribute("data-effective-mode", "light")
     await pickMode("dark")
+    await expect(page.locator("html")).toHaveAttribute("data-effective-mode", "dark")
+  })
+
+  test("auto mode falls back to dark when color scheme media is unavailable", async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(window, "matchMedia", {
+        configurable: true,
+        value: undefined,
+      })
+    })
+    await page.goto("/")
+
+    await expect(page.locator("html")).toHaveAttribute("data-mode", "auto")
     await expect(page.locator("html")).toHaveAttribute("data-effective-mode", "dark")
   })
 

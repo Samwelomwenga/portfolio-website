@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="tokyo" data-mode="auto" data-effective-mode="dark">
+<html lang="en" data-theme="tokyo-night" data-mode="auto">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,13 +13,94 @@
       ;(function () {
         try {
           var root = document.documentElement
-          var theme = localStorage.getItem("portfolio-theme")
-          var mode = localStorage.getItem("portfolio-mode")
-          if (theme === "tokyo" || theme === "cappuccino") root.dataset.theme = theme
+          var theme = null
+          var mode = null
+          try {
+            theme = localStorage.getItem("portfolio-theme")
+            mode = localStorage.getItem("portfolio-mode")
+          } catch (_) {}
+          function normalizeTheme(value) {
+            value = (value || "").toLowerCase().replaceAll("_", "-").replaceAll(" ", "-")
+            var aliases = {
+              "better-selenized-light": "better-selenized",
+              "better-solarized-light": "better-solarized",
+              cappuccino: "catppuccin",
+              "catppuccin-latte": "catppuccin",
+              "catppuccin-mocha": "catppuccin",
+              dawn: "rose-pine",
+              "gruvbox-dark": "gruvbox",
+              "gruvbox-light": "gruvbox",
+              latte: "catppuccin",
+              light: "catppuccin",
+              lotus: "kanagawa",
+              "night-owl-light": "night-owl",
+              "night-owl-light-no-italics": "night-owl",
+              "night-owl-no-italics": "night-owl",
+              onedark: "one-dark",
+              "one-light": "one-dark",
+              onelight: "one-dark",
+              rosepine: "rose-pine",
+              "rosepine-dawn": "rose-pine",
+              "rose-pine-dawn": "rose-pine",
+              "solarized-dark": "solarized",
+              "solarized-light": "solarized",
+              tokyo: "tokyo-night",
+              "tokyo-day": "tokyo-night",
+              tokyonight: "tokyo-night",
+              "tokyonight-day": "tokyo-night",
+              "tokyo-night-day": "tokyo-night",
+              "better-solarized-italics": "better-solarized",
+              "poimandres-noitalics": "poimandres",
+              "poimandres-noitalics-storm": "poimandres-storm",
+              "visual-studio-2019-light": "visual-studio-2019",
+              "visual-studio-cpp-2017-light": "visual-studio-cpp-2017",
+              "visual-studio-cpp-light": "visual-studio-cpp",
+              "winter-is-coming-black-no-italics": "winter-is-coming-black",
+              "winter-is-coming-light": "winter-is-coming",
+              "winter-is-coming-light-no-italics": "winter-is-coming",
+              "winter-is-coming-no-italics": "winter-is-coming",
+            }
+            var allowed = [
+              "better-selenized",
+              "better-solarized",
+              "catppuccin",
+              "city-lights",
+              "dracula",
+              "gruvbox",
+              "kanagawa",
+              "night-owl",
+              "nord",
+              "one-dark",
+              "poimandres",
+              "poimandres-storm",
+              "rose-pine",
+              "sapphire",
+              "sapphire-bright",
+              "sapphire-dim",
+              "solarized",
+              "terminal",
+              "tokyo-night",
+              "vesper",
+              "visual-studio-2019",
+              "visual-studio-cpp",
+              "visual-studio-cpp-2017",
+              "vue",
+              "vue-high-contrast",
+              "winter-is-coming",
+              "winter-is-coming-black",
+            ]
+            if (aliases[value]) return aliases[value]
+            if (allowed.indexOf(value) !== -1) return value
+            return "tokyo-night"
+          }
+          root.dataset.theme = normalizeTheme(theme)
           if (mode === "dark" || mode === "light" || mode === "auto") root.dataset.mode = mode
           var resolved = root.dataset.mode || "auto"
           if (resolved === "auto") {
-            resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+            resolved = "dark"
+            if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
+              resolved = "light"
+            }
           }
           root.dataset.effectiveMode = resolved
         } catch (_) {}

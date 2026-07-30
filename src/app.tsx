@@ -98,7 +98,7 @@ function getRouteFromHash(): Route {
 }
 
 function App() {
-  const { theme, mode, setTheme, setMode } = useTerminalTheme()
+  const { theme, mode, effectiveMode, setTheme, setMode } = useTerminalTheme()
   const prefersReducedMotion = useReducedMotion()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [route, setRoute] = useState<Route>(() => getRouteFromHash())
@@ -163,6 +163,7 @@ function App() {
     <TerminalFrame
       theme={theme}
       mode={mode}
+      effectiveMode={effectiveMode}
       activeId={displayedActive}
       onNavigate={handleNavigate}
       onThemeChange={setTheme}
