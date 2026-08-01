@@ -33,6 +33,14 @@ test.describe("terminal portfolio", () => {
     }
   })
 
+  test("experience timeline reveals the featured role", async ({ page }) => {
+    await page.getByRole("tab", { name: "~/experience" }).click()
+
+    await expect(page.getByRole("heading", { name: "Featured Experience" })).toBeVisible()
+    await expect(page.getByText("Africa Cloud Space", { exact: true })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Full-Stack Developer" })).toBeVisible()
+  })
+
   test("theme dialog switches palette and persists", async ({ page }) => {
     await page.getByRole("button", { name: /tokyo/ }).click()
     const dialog = page.getByRole("dialog", { name: "Theme settings" })
