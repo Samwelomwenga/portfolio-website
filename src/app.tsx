@@ -351,7 +351,6 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="experience">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <div className="grid gap-2">
-            <p className="text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">experience</p>
             <h2 id="screen-experience-title" className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight text-balance">Featured Experience</h2>
           </div>
           {experience.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("experience")}>More experience</ArchiveLink>}
