@@ -113,7 +113,6 @@ export const experience: readonly ExperienceItem[] = [
 export type ProjectItem = {
   title: string
   blurb: string
-  filter: "web" | "system"
   statusLabel: string
   statusTone: StatusTone
   typeLabel: string
@@ -125,7 +124,6 @@ export const projects: readonly ProjectItem[] = [
   {
     title: "Learning Portal Redesign",
     blurb: "Rebuilt Africa Cloud Space's parent and student portal in Next.js with AI-powered revision tools, personalized learning pathways, analytics, and gamification.",
-    filter: "web",
     statusLabel: "live",
     statusTone: "done",
     typeLabel: "web app",
@@ -135,7 +133,6 @@ export const projects: readonly ProjectItem[] = [
   {
     title: "eTIMS Integration",
     blurb: "Integrated Kenya's eTIMS e-invoicing into internal software with .NET Core, improving tax-invoice data accuracy and synchronization for clients.",
-    filter: "system",
     statusLabel: "live",
     statusTone: "done",
     typeLabel: "backend",
@@ -145,7 +142,6 @@ export const projects: readonly ProjectItem[] = [
   {
     title: "Portfolio Terminal",
     blurb: "This site — a themeable, terminal-style portfolio built with React, TypeScript, and Tailwind CSS.",
-    filter: "web",
     statusLabel: "live",
     statusTone: "done",
     typeLabel: "web system",
@@ -153,14 +149,6 @@ export const projects: readonly ProjectItem[] = [
     featured: false,
   },
 ]
-
-export const projectFilters = [
-  { id: "all", label: "all" },
-  { id: "web", label: "web" },
-  { id: "system", label: "systems" },
-] as const
-
-export type ProjectFilter = (typeof projectFilters)[number]["id"]
 
 export type BlogItem = {
   title: string
