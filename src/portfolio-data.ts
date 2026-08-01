@@ -154,7 +154,6 @@ export type BlogItem = {
   title: string
   blurb: string
   meta: string
-  filter: "process" | "interface" | "engineering"
   state: StateColor
   featured: boolean
 }
@@ -164,7 +163,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Building AI revision tools in Next.js",
     blurb: "Notes on wiring learning-science features — revision tools, pathways, and analytics — into a responsive Next.js portal.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "cyan",
     featured: true,
   },
@@ -172,7 +170,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Designing responsive learning dashboards",
     blurb: "How layout structure and clear states keep dense analytics dashboards readable across screen sizes.",
     meta: "draft / interface craft",
-    filter: "interface",
     state: "pink",
     featured: true,
   },
@@ -180,7 +177,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Integrating eTIMS with .NET Core",
     blurb: "A practical write-up on connecting internal software to Kenya's eTIMS e-invoicing with accurate, synchronized data.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "yellow",
     featured: true,
   },
@@ -188,7 +184,6 @@ export const blogs: readonly BlogItem[] = [
     title: "React Native navigation with Expo Router",
     blurb: "Structuring mobile navigation and shared layouts using Expo Router in a React Native app.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "blue",
     featured: false,
   },
@@ -196,7 +191,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Postgres and Supabase for rapid product builds",
     blurb: "Using Postgres and Supabase to move from idea to a working, secure backend quickly.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "green",
     featured: false,
   },
@@ -204,20 +198,10 @@ export const blogs: readonly BlogItem[] = [
     title: "Shipping a themeable terminal portfolio",
     blurb: "Design and build notes on this site — tokens, theming, and a terminal-style layout in React and Tailwind.",
     meta: "draft / process",
-    filter: "process",
     state: "orange",
     featured: false,
   },
 ]
-
-export const blogFilters = [
-  { id: "all", label: "all" },
-  { id: "process", label: "process" },
-  { id: "interface", label: "interface" },
-  { id: "engineering", label: "engineering" },
-] as const
-
-export type BlogFilter = (typeof blogFilters)[number]["id"]
 
 export const contactCommands = [
   { command: "open github.com/samwelomwenga", action: "github", href: profile.githubUrl },
