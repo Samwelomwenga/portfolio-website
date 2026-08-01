@@ -14,6 +14,8 @@ type RevealProps = {
   y?: number
   /** Delay before the reveal starts, in seconds. */
   delay?: number
+  /** Entrance duration in seconds. Defaults to `duration.base`. */
+  duration?: number
 } & Omit<HTMLMotionProps<"div">, "children">
 
 /**
@@ -21,7 +23,7 @@ type RevealProps = {
  * Movement is dropped automatically for reduced-motion users (opacity is kept)
  * by the root <MotionConfig reducedMotion="user">.
  */
-export function Reveal({ children, as = "div", y = 16, delay = 0, ...props }: RevealProps) {
+export function Reveal({ children, as = "div", y = 16, delay = 0, duration: durationSeconds = duration.base, ...props }: RevealProps) {
   const MotionTag = motion[as] as typeof motion.div
   return (
     <MotionTag
@@ -33,7 +35,7 @@ export function Reveal({ children, as = "div", y = 16, delay = 0, ...props }: Re
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: duration.base, ease: easing.out, delay },
+          transition: { duration: durationSeconds, ease: easing.out, delay },
         },
       }}
       {...props}

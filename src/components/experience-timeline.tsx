@@ -73,6 +73,8 @@ function TimelineEntry({ item, index, total, progress }: TimelineEntryProps) {
   return (
     <Reveal
       as="article"
+      y={32}
+      duration={0.8}
       className={cn(
         stateAccentClass(item.state),
         "grid min-h-[5.5rem] items-start gap-x-3 gap-y-1.5 [grid-template-columns:1.75rem_minmax(0,1fr)] wide:gap-[clamp(1rem,2.5vw,1.75rem)] wide:[grid-template-columns:minmax(9.5rem,0.4fr)_2.75rem_minmax(0,1fr)]",
