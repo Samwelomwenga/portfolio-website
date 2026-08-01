@@ -184,6 +184,19 @@ test.describe("terminal portfolio", () => {
     await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
   })
 
+  test("contact form exposes labeled fields and a live status region", async ({ page }) => {
+    await page.getByRole("tab", { name: "~/contact" }).click()
+
+    await expect(page.getByRole("heading", { name: "Contact", exact: true })).toBeVisible()
+    await expect(page.getByLabel("name")).toBeVisible()
+    await expect(page.getByLabel("email")).toBeVisible()
+    await expect(page.getByLabel("message")).toBeVisible()
+    await expect(page.getByRole("button", { name: "send message" })).toBeVisible()
+    // The submit-state feedback lives in a persistent aria-live region so the
+    // idle → submitting → success/error swap is announced, not just animated.
+    await expect(page.getByRole("status")).toBeVisible()
+  })
+
   test("archive route reveals non-featured work", async ({ page }) => {
     await page.goto("/#/projects")
     await expect(page.getByRole("heading", { name: "Project Library" })).toBeVisible()
