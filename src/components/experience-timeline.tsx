@@ -112,6 +112,16 @@ function TimelineEntry({ item, index, total, progress }: TimelineEntryProps) {
         <p className="max-w-[74ch] text-sm leading-relaxed text-muted">
           <RollingText text={item.description} split="words" />
         </p>
+        {item.points && item.points.length > 0 && (
+          <ul className="mt-1 grid max-w-[74ch] list-none gap-1.5 p-0 text-sm leading-relaxed text-muted">
+            {item.points.map(point => (
+              <li key={point} className="grid grid-cols-[0.75rem_minmax(0,1fr)] items-start gap-2">
+                <span aria-hidden="true" className="mt-[0.4em] size-1.5 rounded-full bg-[color:var(--card-accent)]" />
+                <RollingText text={point} split="words" />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </Reveal>
   )

@@ -87,6 +87,8 @@ export type ExperienceItem = {
   period: string
   role: string
   description: string
+  /** Optional highlight bullets shown under the description. */
+  points?: readonly string[]
   state: StateColor
   featured: boolean
 }
@@ -98,6 +100,11 @@ export const experience: readonly ExperienceItem[] = [
     role: "Full-Stack Developer",
     description:
       "Led the redesign of the parent and student portal in Next.js with AI-powered revision tools, personalized learning pathways, performance analytics, and gamification, and integrated Kenya's eTIMS e-invoicing via .NET Core to improve tax-invoice accuracy and synchronization.",
+    points: [
+      "Redesigned the parent and student portal in Next.js with AI-powered revision tools and personalized learning pathways.",
+      "Built performance analytics and gamification that lifted student engagement.",
+      "Integrated Kenya's eTIMS e-invoicing via .NET Core for accurate, synchronized tax invoices.",
+    ],
     state: "blue",
     featured: true,
   },
