@@ -109,6 +109,30 @@ export const consoleReveal: Variants = {
   },
 }
 
+export type RouteDirection = -1 | 0 | 1
+
+/**
+ * Route-level home/archive transition. Direction `1` is home -> archive,
+ * direction `-1` is archive -> home. The movement stays intentionally small so
+ * the section-level animations remain the primary motion focus.
+ */
+export const routeTransition: Variants = {
+  enter: (direction: RouteDirection) => ({
+    opacity: 0,
+    x: direction * 24,
+  }),
+  center: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: duration.base, ease: easing.out },
+  },
+  exit: (direction: RouteDirection) => ({
+    opacity: 0,
+    x: direction * -20,
+    transition: { duration: duration.fast, ease: easing.out },
+  }),
+}
+
 /**
  * A line that rises from behind a mask. Pair with an `overflow-hidden` wrapper
  * so the text is clipped as it translates up — a terminal-native line reveal.

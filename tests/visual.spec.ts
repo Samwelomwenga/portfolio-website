@@ -204,6 +204,14 @@ test.describe("terminal portfolio", () => {
     await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
   })
 
+  test("archive navigation returns to the selected home section", async ({ page }) => {
+    await page.goto("/#/projects")
+    await page.getByRole("tab", { name: "~/contact" }).click()
+
+    await expect(page).toHaveURL(/#contact/)
+    await expect(page.getByRole("heading", { name: "Contact", exact: true })).toBeVisible()
+  })
+
   test("blog archive is reachable", async ({ page }) => {
     await page.goto("/#/blogs")
     await expect(page.getByRole("heading", { name: "Blog Library" })).toBeVisible()

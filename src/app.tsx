@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import type { RouteDirection } from "@/lib/motion"
 import type { BlogItem, ProjectItem, SectionId } from "@/portfolio-data"
 import {
   SiCss,
@@ -18,9 +19,9 @@ import {
   SiTypescript,
 } from "@icons-pack/react-simple-icons"
 import { ArrowUpRight } from "lucide-react"
-import { motion, useReducedMotion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { AssistantConsole } from "@/components/assistant-console"
 import { ContactForm } from "@/components/contact-form"
 import { ExperienceTimeline } from "@/components/experience-timeline"
@@ -35,7 +36,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
-import { cardReveal, consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
+import { cardReveal, consoleReveal, maskLine, routeTransition, spring, stagger, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
@@ -53,6 +54,10 @@ import {
 const archiveRoutes = ["experience", "projects", "blogs"] as const
 type ArchiveRoute = (typeof archiveRoutes)[number]
 type Route = "home" | ArchiveRoute
+type RouteState = {
+  route: Route
+  direction: RouteDirection
+}
 
 const sectionIds = navItems.map(item => item.id)
 const isSectionId = (value: string): value is SectionId => (sectionIds as readonly string[]).includes(value)
@@ -99,42 +104,87 @@ function getRouteFromHash(): Route {
   return "home"
 }
 
+function getRouteRank(route: Route): number {
+  return route === "home" ? 0 : archiveRoutes.indexOf(route) + 1
+}
+
+function getRouteDirection(from: Route, to: Route): RouteDirection {
+  if (from === to) {
+    return 0
+  }
+  return getRouteRank(to) > getRouteRank(from) ? 1 : -1
+}
+
 function App() {
   const { theme, mode, effectiveMode, setTheme, setMode } = useTerminalTheme()
-  const prefersReducedMotion = useReducedMotion()
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [route, setRoute] = useState<Route>(() => getRouteFromHash())
+  const [routeState, setRouteState] = useState<RouteState>(() => ({
+    route: getRouteFromHash(),
+    direction: 0,
+  }))
+  const { route, direction: routeDirection } = routeState
+  const routeRef = useRef<Route>(route)
+  const pendingHashScrollRef = useRef<ScrollBehavior | null>(null)
 
   const { activeId, jumpTo } = useActiveSection(scrollRef, sectionIds, route === "home")
   const displayedActive = route === "home" ? activeId : route
 
-  useEffect(() => {
-    function scrollToHashSection() {
-      const hash = window.location.hash.slice(1)
-      if (!isSectionId(hash)) {
-        return
-      }
-
-      const host = scrollRef.current
-      const target = host?.querySelector<HTMLElement>(`[data-section="${hash}"]`)
-      if (!host || !target) {
-        return
-      }
-
-      const top = host.scrollTop + target.getBoundingClientRect().top - host.getBoundingClientRect().top
-      host.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
+  const scrollToHashSection = useCallback((behavior: ScrollBehavior = "smooth"): boolean => {
+    const hash = window.location.hash.slice(1)
+    if (!isSectionId(hash)) {
+      return true
     }
 
+    const host = scrollRef.current
+    const target = host?.querySelector<HTMLElement>(`[data-section="${hash}"]`)
+    if (!host || !target) {
+      return false
+    }
+
+    const top = host.scrollTop + target.getBoundingClientRect().top - host.getBoundingClientRect().top
+    host.scrollTo({ top: Math.max(0, top), behavior })
+    return true
+  }, [])
+
+  const runPendingHashScroll = useCallback(() => {
+    const behavior = pendingHashScrollRef.current
+    if (!behavior || routeRef.current !== "home") {
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      if (scrollToHashSection(behavior)) {
+        pendingHashScrollRef.current = null
+      }
+    })
+  }, [scrollToHashSection])
+
+  useEffect(() => {
+    routeRef.current = route
+  }, [route])
+
+  useEffect(() => {
     function syncRouteFromHash() {
       const nextRoute = getRouteFromHash()
-      setRoute(nextRoute)
+      const currentRoute = routeRef.current
+      if (nextRoute !== currentRoute) {
+        routeRef.current = nextRoute
+        setRouteState({
+          route: nextRoute,
+          direction: getRouteDirection(currentRoute, nextRoute),
+        })
+      }
 
       if (nextRoute !== "home") {
+        pendingHashScrollRef.current = null
         scrollRef.current?.scrollTo({ top: 0, behavior: "auto" })
         return
       }
 
-      window.requestAnimationFrame(scrollToHashSection)
+      pendingHashScrollRef.current = "smooth"
+      if (currentRoute === "home") {
+        runPendingHashScroll()
+      }
     }
 
     window.addEventListener("hashchange", syncRouteFromHash)
@@ -144,7 +194,7 @@ function App() {
       window.removeEventListener("hashchange", syncRouteFromHash)
       window.cancelAnimationFrame(frame)
     }
-  }, [])
+  }, [runPendingHashScroll])
 
   function handleNavigate(id: SectionId) {
     // From an archive, switch the hash to the section; the hash sync returns
@@ -172,16 +222,30 @@ function App() {
       onModeChange={setMode}
       scrollRef={scrollRef}
     >
-      <motion.div
-        key={route}
-        initial={prefersReducedMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {route === "home"
-          ? <HomeScreens onNavigate={handleNavigate} onArchive={goToArchive} />
-          : <ArchiveScreen route={route} onNavigate={handleNavigate} />}
-      </motion.div>
+      <AnimatePresence mode="wait" custom={routeDirection}>
+        <motion.div
+          key={route}
+          custom={routeDirection}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          variants={routeTransition}
+          onAnimationStart={() => {
+            if (route === "home") {
+              runPendingHashScroll()
+            }
+          }}
+          onAnimationComplete={() => {
+            if (route === "home") {
+              runPendingHashScroll()
+            }
+          }}
+        >
+          {route === "home"
+            ? <HomeScreens onNavigate={handleNavigate} onArchive={goToArchive} />
+            : <ArchiveScreen route={route} onNavigate={handleNavigate} />}
+        </motion.div>
+      </AnimatePresence>
     </TerminalFrame>
   )
 }
