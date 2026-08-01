@@ -4,6 +4,7 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "mo
 
 import { useRef } from "react"
 import { Reveal } from "@/components/motion/reveal"
+import { RollingText } from "@/components/motion/rolling-text"
 import { cn, stateAccentClass } from "@/lib/utils"
 
 type ExperienceTimelineProps = {
@@ -108,7 +109,9 @@ function TimelineEntry({ item, index, total, progress }: TimelineEntryProps) {
 
       <div className="col-start-2 row-start-2 grid gap-1.5 wide:col-start-3 wide:row-start-1">
         <h3 className="text-[clamp(1.0625rem,2vw,1.25rem)] leading-snug">{item.role}</h3>
-        <p className="max-w-[74ch] text-sm leading-relaxed text-muted">{item.description}</p>
+        <p className="max-w-[74ch] text-sm leading-relaxed text-muted">
+          <RollingText text={item.description} split="words" />
+        </p>
       </div>
     </Reveal>
   )
