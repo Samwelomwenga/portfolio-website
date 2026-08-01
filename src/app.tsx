@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { BlogFilter, BlogItem, ProjectItem, SectionId } from "@/portfolio-data"
+import type { BlogItem, ProjectItem, SectionId } from "@/portfolio-data"
 import {
   SiCss,
   SiDotnet,
@@ -29,7 +29,6 @@ import { Stagger, StaggerItem } from "@/components/motion/stagger"
 import { TerminalText } from "@/components/motion/terminal-text"
 import { TiltCard } from "@/components/motion/tilt-card"
 import { ProjectCard } from "@/components/project-card"
-import { FilterBar } from "@/components/terminal/filter-bar"
 import { NoteCard } from "@/components/terminal/note-card"
 import { PromptLine } from "@/components/terminal/prompt-line"
 import { StatusPill } from "@/components/terminal/status-pill"
@@ -40,7 +39,6 @@ import { cardReveal, consoleReveal, maskLine, spring, stagger, staggerItem } fro
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
-  blogFilters,
   blogs,
   certifications,
   contactCommands,
@@ -242,9 +240,6 @@ type HomeScreensProps = {
 }
 
 function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
-  const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
-  const shownBlogs = blogFilter === "all" ? featuredBlogs : featuredBlogs.filter(b => b.filter === blogFilter)
-
   return (
     <>
       <Screen id="home">
@@ -368,12 +363,11 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="blogs">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <SectionHeading title="Blogs" headingId="screen-blogs-title">
-            A lean index for writing on process, interface craft, and implementation.
+            <RollingText text="A lean index of writing on process, interface craft, and implementation." split="words" />
           </SectionHeading>
           {blogs.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>}
         </div>
-        <FilterBar options={blogFilters} active={blogFilter} onChange={id => setBlogFilter(id as BlogFilter)} label="Blog filters" />
-        <BlogGrid items={shownBlogs} />
+        <BlogGrid items={featuredBlogs} />
       </Screen>
 
       <Screen id="contact">
@@ -429,10 +423,6 @@ type ArchiveMeta = {
 }
 
 function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
-  const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
-
-  const shownBlogs = blogFilter === "all" ? blogs : blogs.filter(b => b.filter === blogFilter)
-
   const titles: Record<ArchiveRoute, ArchiveMeta> = {
     experience: { title: "All Experience", blurb: "The fuller path behind the featured roles on the home page." },
     projects: { title: "Project Library", blurb: "A broader view of selected interface, web, and system work." },
@@ -456,12 +446,7 @@ function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
 
       {route === "projects" && <ProjectGrid items={projects} />}
 
-      {route === "blogs" && (
-        <>
-          <FilterBar options={blogFilters} active={blogFilter} onChange={id => setBlogFilter(id as BlogFilter)} label="Blog filters" />
-          <BlogGrid items={shownBlogs} />
-        </>
-      )}
+      {route === "blogs" && <BlogGrid items={blogs} />}
     </section>
   )
 }
@@ -491,18 +476,25 @@ type BlogGridProps = {
 }
 
 function BlogGrid({ items }: BlogGridProps) {
+  // Chip/card grid archetype (ticket 08), mirroring Projects/Skills: the cards
+  // lift in one at a time on scroll (cardReveal + relaxed gap) and each leans
+  // toward the pointer on hover via <TiltCard>. The blurb rolls in word by word.
   return (
-    <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+    <Stagger each={stagger.cards} className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
       {items.map(blog => (
-        <NoteCard key={blog.title} state={blog.state} kicker="draft">
-          <div className="grid gap-1.5">
-            <span className="text-xs text-muted">{blog.meta}</span>
-            <h3 className="text-lg leading-snug">{blog.title}</h3>
-            <p className="text-sm text-muted">{blog.blurb}</p>
-          </div>
-        </NoteCard>
+        <TiltCard key={blog.title} className="h-full">
+          <NoteCard state={blog.state} kicker="draft" className="h-full">
+            <div className="grid gap-1.5">
+              <span className="text-xs text-muted">{blog.meta}</span>
+              <h3 className="text-lg leading-snug">{blog.title}</h3>
+              <p className="text-sm text-muted">
+                <RollingText text={blog.blurb} split="words" />
+              </p>
+            </div>
+          </NoteCard>
+        </TiltCard>
       ))}
-    </div>
+    </Stagger>
   )
 }
 
