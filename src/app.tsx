@@ -361,7 +361,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="projects">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <SectionHeading title="Projects" headingId="screen-projects-title">
-            Filter the project cards without leaving the terminal frame.
+            <RollingText text="Filter the project cards without leaving the terminal frame." split="words" />
           </SectionHeading>
           {projects.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("projects")}>More projects</ArchiveLink>}
         </div>
@@ -482,10 +482,18 @@ type ProjectGridProps = {
 }
 
 function ProjectGrid({ items }: ProjectGridProps) {
+  // Chip/card grid archetype (ticket 07), mirroring Skills: the cards lift in
+  // one at a time on scroll (cardReveal + relaxed gap) and each leans toward the
+  // pointer on hover via <TiltCard>. A filter change swaps the mounted cards, so
+  // the survivors re-reveal through the same stagger.
   return (
-    <div className="grid gap-3.5 sm:grid-cols-2">
-      {items.map(project => <ProjectCard key={project.title} project={project} />)}
-    </div>
+    <Stagger each={stagger.cards} className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+      {items.map(project => (
+        <TiltCard key={project.title} className="h-full">
+          <ProjectCard project={project} />
+        </TiltCard>
+      ))}
+    </Stagger>
   )
 }
 
