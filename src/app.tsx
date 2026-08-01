@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from "react"
 import { AssistantConsole } from "@/components/assistant-console"
 import { ContactForm } from "@/components/contact-form"
 import { ExperienceTimeline } from "@/components/experience-timeline"
+import { Stagger, StaggerItem } from "@/components/motion/stagger"
 import { ProjectCard } from "@/components/project-card"
 import { FilterBar } from "@/components/terminal/filter-bar"
 import { NoteCard } from "@/components/terminal/note-card"
@@ -275,11 +276,13 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
 
       <Screen id="about">
         <SectionHeading title="About" headingId="screen-about-title" />
-        <div className="grid max-w-[72ch] gap-4">
+        {/* Reference implementation of the shared motion primitives (ticket 03):
+            paragraphs stagger in on scroll, once, respecting reduced motion. */}
+        <Stagger className="grid max-w-[72ch] gap-4">
           {aboutParagraphs.map(paragraph => (
-            <p key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">{paragraph}</p>
+            <StaggerItem as="p" key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">{paragraph}</StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </Screen>
 
       <Screen id="skills">
