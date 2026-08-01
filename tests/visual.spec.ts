@@ -178,21 +178,17 @@ test.describe("terminal portfolio", () => {
     await expect(page.getByText(/Samwel Omwenga is a software engineer at Africa Cloud Space/)).toBeVisible({ timeout: 15_000 })
   })
 
-  test("project filters narrow the featured cards", async ({ page }) => {
+  test("projects section lists the featured cards", async ({ page }) => {
     await page.getByRole("tab", { name: "~/projects" }).click()
-    await page.getByRole("button", { name: "web", exact: true }).click()
     await expect(page.getByRole("heading", { name: "Learning Portal Redesign" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeHidden()
+    await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
   })
 
-  test("archive route reveals non-featured work and filters it", async ({ page }) => {
+  test("archive route reveals non-featured work", async ({ page }) => {
     await page.goto("/#/projects")
     await expect(page.getByRole("heading", { name: "Project Library" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "Portfolio Terminal" })).toBeVisible()
-
-    await page.getByRole("button", { name: "systems", exact: true }).click()
     await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "Portfolio Terminal" })).toBeHidden()
   })
 
   test("blog archive is reachable", async ({ page }) => {

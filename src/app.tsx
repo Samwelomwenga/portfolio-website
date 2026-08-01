@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { BlogFilter, BlogItem, ProjectFilter, ProjectItem, SectionId } from "@/portfolio-data"
+import type { BlogFilter, BlogItem, ProjectItem, SectionId } from "@/portfolio-data"
 import {
   SiCss,
   SiDotnet,
@@ -48,7 +48,6 @@ import {
   hero,
   navItems,
   profile,
-  projectFilters,
   projects,
   skillGroups,
 } from "@/portfolio-data"
@@ -243,9 +242,7 @@ type HomeScreensProps = {
 }
 
 function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
-  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all")
   const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
-  const shownProjects = projectFilter === "all" ? featuredProjects : featuredProjects.filter(p => p.filter === projectFilter)
   const shownBlogs = blogFilter === "all" ? featuredBlogs : featuredBlogs.filter(b => b.filter === blogFilter)
 
   return (
@@ -361,12 +358,11 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="projects">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <SectionHeading title="Projects" headingId="screen-projects-title">
-            <RollingText text="Filter the project cards without leaving the terminal frame." split="words" />
+            <RollingText text="A selection of the web apps and backend systems I've shipped." split="words" />
           </SectionHeading>
           {projects.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("projects")}>More projects</ArchiveLink>}
         </div>
-        <FilterBar options={projectFilters} active={projectFilter} onChange={id => setProjectFilter(id as ProjectFilter)} label="Project filters" />
-        <ProjectGrid items={shownProjects} />
+        <ProjectGrid items={featuredProjects} />
       </Screen>
 
       <Screen id="blogs">
@@ -433,10 +429,8 @@ type ArchiveMeta = {
 }
 
 function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
-  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all")
   const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
 
-  const shownProjects = projectFilter === "all" ? projects : projects.filter(p => p.filter === projectFilter)
   const shownBlogs = blogFilter === "all" ? blogs : blogs.filter(b => b.filter === blogFilter)
 
   const titles: Record<ArchiveRoute, ArchiveMeta> = {
@@ -460,12 +454,7 @@ function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
 
       {route === "experience" && <ExperienceTimeline items={experience} />}
 
-      {route === "projects" && (
-        <>
-          <FilterBar options={projectFilters} active={projectFilter} onChange={id => setProjectFilter(id as ProjectFilter)} label="Project filters" />
-          <ProjectGrid items={shownProjects} />
-        </>
-      )}
+      {route === "projects" && <ProjectGrid items={projects} />}
 
       {route === "blogs" && (
         <>
