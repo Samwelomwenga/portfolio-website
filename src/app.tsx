@@ -27,6 +27,7 @@ import { ExperienceTimeline } from "@/components/experience-timeline"
 import { RollingText } from "@/components/motion/rolling-text"
 import { Stagger, StaggerItem } from "@/components/motion/stagger"
 import { TerminalText } from "@/components/motion/terminal-text"
+import { TiltCard } from "@/components/motion/tilt-card"
 import { ProjectCard } from "@/components/project-card"
 import { FilterBar } from "@/components/terminal/filter-bar"
 import { NoteCard } from "@/components/terminal/note-card"
@@ -35,7 +36,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
-import { cardReveal, consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
+import { consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
@@ -307,21 +308,15 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
 
       <Screen id="skills">
         <SectionHeading title="Skills" headingId="screen-skills-title">
-          Grouped like a terminal inventory — languages, frameworks, and tools.
+          The languages, frameworks, and tools I work with, grouped for a quick scan.
         </SectionHeading>
         {/* Chip/card grid archetype (ticket 05): the three groups lift in one at
             a time on scroll (cardReveal + relaxed gap so the entrance reads),
-            each card's chips cascade behind it with a tight gap, and cards lift
-            on hover. */}
+            each card's chips cascade behind it with a tight gap, and each card
+            leans toward the pointer on hover. */}
         <Stagger each={stagger.cards} className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
           {skillGroups.map(group => (
-            <StaggerItem
-              as="div"
-              key={group.title}
-              variants={cardReveal}
-              whileHover={{ y: -6, scale: 1.02 }}
-              transition={spring.snappy}
-            >
+            <TiltCard key={group.title}>
               <NoteCard state={group.state} title={group.title}>
                 <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
                   {group.tags.map(tag => (
@@ -329,7 +324,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
                   ))}
                 </Stagger>
               </NoteCard>
-            </StaggerItem>
+            </TiltCard>
           ))}
         </Stagger>
         <div className="grid gap-2">
