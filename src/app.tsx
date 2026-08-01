@@ -36,7 +36,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
-import { consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
+import { cardReveal, consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
@@ -297,11 +297,14 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
 
       <Screen id="about">
         <SectionHeading title="About" headingId="screen-about-title" />
-        {/* Reference implementation of the shared motion primitives (ticket 03):
-            paragraphs stagger in on scroll, once, respecting reduced motion. */}
-        <Stagger className="grid max-w-[72ch] gap-4">
+        {/* Paragraphs stagger in on scroll with the more pronounced cardReveal
+            (larger rise + scale), one clearly at a time; each rolls word-by-word
+            on hover only. */}
+        <Stagger each={stagger.cards} className="grid max-w-[72ch] gap-4">
           {aboutParagraphs.map(paragraph => (
-            <StaggerItem as="p" key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">{paragraph}</StaggerItem>
+            <StaggerItem as="p" variants={cardReveal} key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">
+              <RollingText text={paragraph} split="words" />
+            </StaggerItem>
           ))}
         </Stagger>
       </Screen>
