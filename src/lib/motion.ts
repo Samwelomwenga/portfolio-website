@@ -37,6 +37,8 @@ export const spring = {
 export const stagger = {
   base: 0.06,
   tight: 0.04,
+  /** Relaxed gap so a grid of cards reveals one clearly at a time. */
+  cards: 0.12,
 } as const
 
 /**
@@ -75,6 +77,22 @@ export const staggerContainer: Variants = makeStaggerContainer()
 export const staggerItem: Variants = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: entrance },
+}
+
+/**
+ * A card lifting into place: a larger rise plus a subtle scale over the slow
+ * duration, so a grid of cards reveals with a clearly visible entrance rather
+ * than a near-instant fade. Pair with `stagger.cards` on the container. Reduced
+ * motion drops the movement/scale (root <MotionConfig>) and it fades in.
+ */
+export const cardReveal: Variants = {
+  hidden: { opacity: 0, y: 28, scale: 0.97 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: duration.slow, ease: easing.out },
+  },
 }
 
 /**

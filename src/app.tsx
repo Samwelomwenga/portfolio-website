@@ -35,7 +35,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
-import { consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
+import { cardReveal, consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
@@ -309,11 +309,19 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
         <SectionHeading title="Skills" headingId="screen-skills-title">
           Grouped like a terminal inventory — languages, frameworks, and tools.
         </SectionHeading>
-        {/* Chip/card grid archetype (ticket 05): the three groups stagger in on
-            scroll, and each card's chips cascade behind it with a tight gap. */}
-        <Stagger className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+        {/* Chip/card grid archetype (ticket 05): the three groups lift in one at
+            a time on scroll (cardReveal + relaxed gap so the entrance reads),
+            each card's chips cascade behind it with a tight gap, and cards lift
+            on hover. */}
+        <Stagger each={stagger.cards} className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
           {skillGroups.map(group => (
-            <StaggerItem as="div" key={group.title}>
+            <StaggerItem
+              as="div"
+              key={group.title}
+              variants={cardReveal}
+              whileHover={{ y: -6, scale: 1.02 }}
+              transition={spring.snappy}
+            >
               <NoteCard state={group.state} title={group.title}>
                 <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
                   {group.tags.map(tag => (
@@ -328,7 +336,15 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
           <span className="text-[0.6875rem] font-extrabold tracking-[0.12em] text-muted uppercase">certifications</span>
           <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
             {certifications.map(certification => (
-              <StaggerItem as="li" key={certification} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{certification}</StaggerItem>
+              <StaggerItem
+                as="li"
+                key={certification}
+                whileHover={{ y: -3, scale: 1.04 }}
+                transition={spring.snappy}
+                className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg"
+              >
+                {certification}
+              </StaggerItem>
             ))}
           </Stagger>
         </div>
