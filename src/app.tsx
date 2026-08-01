@@ -308,7 +308,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
 
       <Screen id="skills">
         <SectionHeading title="Skills" headingId="screen-skills-title">
-          The languages, frameworks, and tools I work with, grouped for a quick scan.
+          <RollingText text="The languages, frameworks, and tools I work with, grouped for a quick scan." split="words" />
         </SectionHeading>
         {/* Chip/card grid archetype (ticket 05): the three groups lift in one at
             a time on scroll (cardReveal + relaxed gap so the entrance reads),
