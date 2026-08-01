@@ -24,7 +24,9 @@ import { useEffect, useRef, useState } from "react"
 import { AssistantConsole } from "@/components/assistant-console"
 import { ContactForm } from "@/components/contact-form"
 import { ExperienceTimeline } from "@/components/experience-timeline"
+import { RollingText } from "@/components/motion/rolling-text"
 import { Stagger, StaggerItem } from "@/components/motion/stagger"
+import { TerminalText } from "@/components/motion/terminal-text"
 import { ProjectCard } from "@/components/project-card"
 import { FilterBar } from "@/components/terminal/filter-bar"
 import { NoteCard } from "@/components/terminal/note-card"
@@ -33,6 +35,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
+import { consoleReveal, maskLine, spring } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
@@ -248,29 +251,46 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
     <>
       <Screen id="home">
         <div className="grid gap-3.5 wide:grid-cols-[minmax(0,1fr)_minmax(21.25rem,0.92fr)] wide:items-center wide:gap-x-[clamp(1.125rem,3vw,2.125rem)]">
-          <div className="grid content-start gap-4 wide:col-start-1 wide:row-start-1">
-            <h1 id="screen-home-title" className="text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] text-balance">
-              <span className="font-extrabold text-term-green">{hero.firstName}</span>
-              {" "}
-              <span className="font-extrabold text-term-yellow">{hero.lastName}</span>
+          {/* Above the fold: entrance plays on load, not on scroll. The heading
+              rises line by line from behind a mask, the role line types in, and
+              the blurb follows. Reduced motion drops the movement (root
+              <MotionConfig>) so each line simply fades to its final state. */}
+          <Stagger trigger="load" className="grid content-start gap-4 wide:col-start-1 wide:row-start-1">
+            <h1 id="screen-home-title" className="grid gap-1 text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] text-balance">
+              <span className="overflow-hidden pb-[0.08em]">
+                <StaggerItem as="span" variants={maskLine} whileHover={{ scale: 1.03 }} transition={spring.snappy} style={{ transformOrigin: "left" }} className="block w-max font-extrabold text-term-green">{hero.firstName}</StaggerItem>
+              </span>
+              <span className="overflow-hidden pb-[0.08em]">
+                <StaggerItem as="span" variants={maskLine} whileHover={{ scale: 1.03 }} transition={spring.snappy} style={{ transformOrigin: "left" }} className="block w-max font-extrabold text-term-yellow">{hero.lastName}</StaggerItem>
+              </span>
             </h1>
-            <p className="flex flex-wrap items-center gap-1.5 text-[clamp(1.125rem,2vw,1.75rem)] leading-snug tracking-[0.02em]">
+            <StaggerItem as="p" whileHover={{ scale: 1.03 }} transition={spring.snappy} style={{ transformOrigin: "left" }} className="flex w-max flex-wrap items-center gap-1.5 text-[clamp(1.125rem,2vw,1.75rem)] leading-snug tracking-[0.02em]">
               <span className="font-extrabold text-term-green">&lt;</span>
-              <span className="font-extrabold text-term-yellow">Software</span>
-              <span className="font-extrabold text-term-red">Engineer</span>
+              <TerminalText text="Software" caret={false} startDelay={720} className="font-extrabold text-term-yellow" />
+              <TerminalText text="Engineer" startDelay={950} className="font-extrabold text-term-red" />
               <span className="font-extrabold text-term-yellow">/&gt;</span>
+            </StaggerItem>
+            {/* Staggered rolling-text reveal (per word, for readable wrapping);
+                re-rolls on hover. Falls back to plain text under reduced motion. */}
+            <p className="max-w-[62ch] text-[clamp(0.875rem,1.25vw,1rem)] leading-relaxed text-muted text-pretty">
+              <RollingText text={hero.about} split="words" revealOnView />
             </p>
-            <p className="max-w-[62ch] text-[clamp(0.875rem,1.25vw,1rem)] leading-relaxed text-muted text-pretty">{hero.about}</p>
-          </div>
+          </Stagger>
 
-          <div className="wide:col-start-2 wide:row-span-2 wide:row-start-1">
+          <motion.div
+            className="wide:col-start-2 wide:row-span-2 wide:row-start-1"
+            initial="hidden"
+            animate="visible"
+            variants={consoleReveal}
+          >
             <AssistantConsole />
-          </div>
+          </motion.div>
 
-          <div className="flex flex-wrap items-center gap-2.5 wide:col-start-1 wide:row-start-2">
-            <ActionButton primary onClick={() => onNavigate("projects")}>view projects</ActionButton>
-            <ActionButton onClick={() => onNavigate("contact")}>contact</ActionButton>
-          </div>
+          {/* Small stagger tail after the text: buttons enter last, on load. */}
+          <Stagger trigger="load" delay={0.6} className="flex flex-wrap items-center gap-2.5 wide:col-start-1 wide:row-start-2">
+            <StaggerItem as="span" className="inline-flex"><ActionButton primary onClick={() => onNavigate("projects")}><RollingText text="view projects" driven /></ActionButton></StaggerItem>
+            <StaggerItem as="span" className="inline-flex"><ActionButton onClick={() => onNavigate("contact")}><RollingText text="contact" driven /></ActionButton></StaggerItem>
+          </Stagger>
         </div>
       </Screen>
 
@@ -480,15 +500,20 @@ type ActionButtonProps = {
 
 function ActionButton({ children, primary, onClick }: ActionButtonProps) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
+      initial="rest"
+      whileHover="rolled"
+      whileTap={{ scale: 0.96 }}
+      transition={spring.snappy}
+      variants={{ rest: { y: 0 }, rolled: { y: -2 } }}
       className={primary
         ? "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-3 text-xs font-extrabold tracking-[0.02em] text-[color:var(--bg)]"
         : "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-border bg-surface px-3 text-xs font-extrabold tracking-[0.02em] text-fg hover:border-line"}
     >
       {children}
-    </button>
+    </motion.button>
   )
 }
 

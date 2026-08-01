@@ -7,7 +7,11 @@ test.describe("terminal portfolio", () => {
 
   test("renders the terminal home screen", async ({ page }) => {
     await expect(page.getByRole("heading", { name: /Samwel Omwenga/i, level: 1 })).toBeVisible()
-    await expect(page.getByText("Software", { exact: true })).toBeVisible()
+    // "Software" renders via <TerminalText>, which keeps a visually-hidden full
+    // copy for screen readers plus an animated copy — two matches. Take the
+    // first (the screen-reader copy, always the full string) so the duplicate
+    // doesn't trip strict mode.
+    await expect(page.getByText("Software", { exact: true }).first()).toBeVisible()
     await expect(page.getByText("personal ai assistant")).toBeVisible()
 
     // Tab strip is the primary navigation on every viewport.
