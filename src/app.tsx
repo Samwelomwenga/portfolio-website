@@ -35,7 +35,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
-import { consoleReveal, maskLine, spring } from "@/lib/motion"
+import { consoleReveal, maskLine, spring, stagger, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
@@ -309,24 +309,28 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
         <SectionHeading title="Skills" headingId="screen-skills-title">
           Grouped like a terminal inventory — languages, frameworks, and tools.
         </SectionHeading>
-        <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+        {/* Chip/card grid archetype (ticket 05): the three groups stagger in on
+            scroll, and each card's chips cascade behind it with a tight gap. */}
+        <Stagger className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
           {skillGroups.map(group => (
-            <NoteCard key={group.title} state={group.state} title={group.title}>
-              <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-                {group.tags.map(tag => (
-                  <SkillChip key={tag} tag={tag} />
-                ))}
-              </ul>
-            </NoteCard>
+            <StaggerItem as="div" key={group.title}>
+              <NoteCard state={group.state} title={group.title}>
+                <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
+                  {group.tags.map(tag => (
+                    <SkillChip key={tag} tag={tag} />
+                  ))}
+                </Stagger>
+              </NoteCard>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
         <div className="grid gap-2">
           <span className="text-[0.6875rem] font-extrabold tracking-[0.12em] text-muted uppercase">certifications</span>
-          <div className="flex flex-wrap gap-2">
+          <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
             {certifications.map(certification => (
-              <span key={certification} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{certification}</span>
+              <StaggerItem as="li" key={certification} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{certification}</StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </Screen>
 
@@ -394,14 +398,14 @@ function SkillChip({ tag }: { tag: string }) {
   const icon = skillIcons[tag]
 
   return (
-    <li data-skill={tag} className="inline-flex min-h-8 items-center gap-1.5 rounded-sm border border-border bg-surface py-1 pr-2.5 pl-1 text-xs font-bold text-fg">
+    <motion.li variants={staggerItem} data-skill={tag} className="inline-flex min-h-8 items-center gap-1.5 rounded-sm border border-border bg-surface py-1 pr-2.5 pl-1 text-xs font-bold text-fg">
       {icon && (
         <span className="grid size-5 shrink-0 place-items-center rounded-sm bg-white/95">
           <icon.Icon aria-hidden="true" className={cn("size-3.5", icon.iconClass)} focusable="false" title="" />
         </span>
       )}
       <span>{tag}</span>
-    </li>
+    </motion.li>
   )
 }
 
