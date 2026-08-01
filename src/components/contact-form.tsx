@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 
-import { Button } from "@/components/ui/button"
+import { RollingText } from "@/components/motion/rolling-text"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,7 +15,7 @@ const formId = import.meta.env.VITE_FORMSPREE_FORM_ID as string
 const labelClass = "text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] text-muted"
 const fieldClass = "min-h-[2.875rem] rounded-sm border-border bg-panel px-3 text-fg shadow-none focus-visible:border-line focus-visible:ring-0"
 
-/** Small fade+rise swap for the submit-state message and button label. */
+/** Small fade+rise swap for the submit-state message. */
 const swap = {
   initial: { opacity: 0, y: 4 },
   animate: { opacity: 1, y: 0 },
@@ -72,6 +72,7 @@ export function ContactForm() {
         ? "submitting"
         : "idle"
   const feedback = status === "idle" ? null : statusFeedback[status]
+  const submitLabel = state.submitting ? "sending" : "send message"
 
   return (
     <form
@@ -96,17 +97,21 @@ export function ContactForm() {
         <ValidationError field="message" prefix="Message" errors={state.errors} className="text-xs font-bold text-danger" />
       </Field>
 
-      <Button
+      <motion.button
         type="submit"
         disabled={state.submitting}
-        className="min-h-[2.375rem] w-full rounded-sm border border-accent bg-accent px-3 text-xs font-black tracking-[0.02em] text-[color:var(--bg)] hover:bg-accent/90 sm:w-auto sm:justify-self-start"
+        initial="rest"
+        whileHover="rolled"
+        whileTap={{ scale: 0.96 }}
+        transition={spring.snappy}
+        variants={{ rest: { y: 0 }, rolled: { y: -2 } }}
+        className="inline-flex min-h-[2.375rem] w-full cursor-pointer items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-3 text-xs font-black tracking-[0.02em] text-[color:var(--bg)] hover:bg-accent/90 disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:justify-self-start"
       >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span key={state.submitting ? "sending" : "send"} {...swap}>
-            {state.submitting ? "sending" : "send message"}
-          </motion.span>
-        </AnimatePresence>
-      </Button>
+        <span className="sr-only">{submitLabel}</span>
+        <span aria-hidden="true" className="inline-flex">
+          <RollingText text={submitLabel} driven hideFromAccessibility />
+        </span>
+      </motion.button>
 
       <div className="min-h-[1.375rem] text-xs" role="status" aria-live="polite">
         <AnimatePresence mode="wait" initial={false}>

@@ -19,6 +19,8 @@ type RollingTextProps = {
   staggerEach?: number
   /** Class on the inline container; colour/size are inherited by the copies. */
   className?: string
+  /** Hide the duplicated visual text when an ancestor/sibling supplies the accessible label. */
+  hideFromAccessibility?: boolean
 }
 
 // A plain ease (no spring overshoot) so the roll never overshoots past the
@@ -54,16 +56,23 @@ export function RollingText({
   driven = false,
   staggerEach,
   className,
+  hideFromAccessibility = false,
 }: RollingTextProps) {
   const prefersReducedMotion = useReducedMotion()
 
   if (prefersReducedMotion) {
-    return <span className={className}>{text}</span>
+    return <span className={className} aria-hidden={hideFromAccessibility || undefined}>{text}</span>
   }
 
   const each = staggerEach ?? (split === "words" ? staggerTokens.base : 0.03)
   // Keep whitespace as its own unit so word wrapping still happens between words.
   const units = (split === "words" ? text.split(SPLIT_ON_WHITESPACE) : [...text]).filter(unit => unit !== "")
+  const occurrenceCounts = new Map<string, number>()
+  const keyedUnits = units.map((unit) => {
+    const occurrence = occurrenceCounts.get(unit) ?? 0
+    occurrenceCounts.set(unit, occurrence + 1)
+    return { unit, key: `${unit}:${occurrence}` }
+  })
 
   const containerVariants: Variants = {
     rest: { transition: { staggerChildren: each } },
@@ -79,15 +88,21 @@ export function RollingText({
       }
 
   return (
-    <motion.span className={className} variants={containerVariants} aria-label={text} {...selfProps}>
-      <span className="sr-only">{text}</span>
-      {units.map((unit, index) =>
+    <motion.span
+      className={className}
+      variants={containerVariants}
+      aria-hidden={hideFromAccessibility || undefined}
+      aria-label={hideFromAccessibility ? undefined : text}
+      {...selfProps}
+    >
+      {!hideFromAccessibility && <span className="sr-only">{text}</span>}
+      {keyedUnits.map(({ unit, key }) =>
         isWhitespace(unit)
           ? (
-              <span key={`${index}-space`} aria-hidden="true">{unit}</span>
+              <span key={`${key}:space`} aria-hidden="true">{unit}</span>
             )
           : (
-              <span key={`${index}-${unit}`} aria-hidden="true" className="relative inline-block overflow-hidden align-bottom">
+              <span key={key} aria-hidden="true" className="relative inline-block overflow-hidden align-bottom">
                 <motion.span variants={rollItem} className="block">
                   <span className="block">{unit}</span>
                   <span className="absolute left-0 top-full block">{unit}</span>

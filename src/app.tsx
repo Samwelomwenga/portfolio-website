@@ -371,30 +371,27 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       </Screen>
 
       <Screen id="contact">
-        {/* Form archetype (ticket 09): the info column and the form reveal one
-            after the other on scroll; the contact commands cascade within the
-            box on their own in-view trigger. Subtle — the form's own focus/submit
-            motion carries the rest. */}
+        {/* Contact reveals like the Projects grid (ticket 09 revisited): the
+            command card and the form lift in with `cardReveal`, the card leans
+            toward the pointer on hover via <TiltCard>, and the blurb rolls
+            word-by-word on hover like the project blurbs. */}
         <Stagger as="div" each={stagger.cards} className="grid gap-4.5 wide:grid-cols-[minmax(13.75rem,0.58fr)_minmax(22.5rem,1.42fr)] wide:items-start">
-          <StaggerItem as="div" className="grid max-w-[22.5rem] content-start gap-3">
-            <h2 id="screen-contact-title" className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight">Contact</h2>
-            <p className="text-sm text-muted">
-              Based in
-              {profile.location}
-              {" "}
-              — reach me on GitHub, LinkedIn, or X.
-            </p>
-            <Stagger as="div" each={stagger.tight} className="rounded-md border border-border bg-surface p-3">
+          <Stagger as="div" each={stagger.cards} className="grid max-w-[22.5rem] content-start gap-3">
+            <StaggerItem as="h2" id="screen-contact-title" className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight">Contact</StaggerItem>
+            <StaggerItem as="p" className="text-sm text-muted">
+              <RollingText text={`Based in ${profile.location} — reach me on GitHub, LinkedIn, or X.`} split="words" />
+            </StaggerItem>
+            <TiltCard className="rounded-md border border-border bg-surface p-3">
               {contactCommands.map(row => (
-                <StaggerItem as="div" key={row.command} className="grid min-h-[2.125rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 text-[0.8125rem]">
+                <div key={row.command} className="grid min-h-[2.125rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 text-[0.8125rem]">
                   <span className="font-extrabold text-success">$</span>
                   <code className="min-w-0 truncate text-fg">{row.command}</code>
                   <a href={row.href} target="_blank" rel="noreferrer"><StatusPill>{row.action}</StatusPill></a>
-                </StaggerItem>
+                </div>
               ))}
-            </Stagger>
-          </StaggerItem>
-          <StaggerItem as="div">
+            </TiltCard>
+          </Stagger>
+          <StaggerItem as="div" variants={cardReveal}>
             <ContactForm />
           </StaggerItem>
         </Stagger>

@@ -51,7 +51,7 @@ export function Stagger({ children, as = "div", trigger = "in-view", delay, each
   )
 }
 
-type StaggerItemTag = "div" | "li" | "article" | "p" | "span" | "h1"
+type StaggerItemTag = "div" | "li" | "article" | "p" | "span" | "h1" | "h2"
 
 type StaggerItemProps = {
   children: ReactNode
