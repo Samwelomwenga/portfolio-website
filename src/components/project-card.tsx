@@ -1,4 +1,5 @@
 import type { ProjectItem } from "@/portfolio-data"
+import { RollingText } from "@/components/motion/rolling-text"
 import { StatusPill } from "@/components/terminal/status-pill"
 import { cn, stateAccentClass } from "@/lib/utils"
 
@@ -6,13 +7,18 @@ type ProjectCardProps = {
   project: ProjectItem
 }
 
-/** Project pane: browser-framed screenshot well over a metadata body. */
+/**
+ * Project pane: browser-framed screenshot well over a metadata body. Wrapped by
+ * <TiltCard> in the grid, so it reveals via the shared `cardReveal` variant and
+ * leans toward the pointer on hover (chip/card grid archetype, ticket 07 —
+ * mirrors the Skills section). The blurb rolls in word by word.
+ */
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <article
       className={cn(
         stateAccentClass(project.state),
-        "grid grid-rows-[auto_1fr] overflow-hidden rounded-md border border-border bg-surface",
+        "grid h-full grid-rows-[auto_1fr] overflow-hidden rounded-md border border-border bg-surface",
       )}
     >
       <div className="project-preview-header border-t-4 border-t-[color:var(--card-accent)] border-b border-b-border p-3.5">
@@ -34,7 +40,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <StatusPill>{project.typeLabel}</StatusPill>
         </div>
         <h3 className="text-xl leading-tight">{project.title}</h3>
-        <p className="text-sm text-muted">{project.blurb}</p>
+        <p className="text-sm text-muted">
+          <RollingText text={project.blurb} split="words" />
+        </p>
       </div>
     </article>
   )

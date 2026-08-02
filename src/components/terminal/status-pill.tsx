@@ -1,6 +1,8 @@
-import type { ComponentProps } from "react"
+import type { HTMLMotionProps } from "motion/react"
 
 import type { StatusTone } from "@/portfolio-data"
+import { motion } from "motion/react"
+import { pillMicroInteraction } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 const toneClass: Record<StatusTone, string> = {
@@ -11,17 +13,18 @@ const toneClass: Record<StatusTone, string> = {
 
 type StatusPillProps = {
   tone?: StatusTone
-} & ComponentProps<"span">
+} & HTMLMotionProps<"span">
 
 /** Compact terminal chip used for project/blog states and inline actions. */
 export function StatusPill({ tone = "default", className, ...props }: StatusPillProps) {
   return (
-    <span
+    <motion.span
       className={cn(
         "inline-flex min-h-6 items-center justify-center rounded-sm border px-2 text-[0.6875rem] font-extrabold tracking-[0.02em]",
         toneClass[tone],
         className,
       )}
+      {...pillMicroInteraction}
       {...props}
     />
   )

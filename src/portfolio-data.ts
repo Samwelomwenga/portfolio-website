@@ -10,7 +10,7 @@ export const profile = {
   linkedinUrl: "https://www.linkedin.com/in/samwelomwenga",
   xUrl: "https://x.com/Samwel_codes",
   location: "Nairobi, Kenya",
-  workspaceMeta: "portfolio / main / software-developer",
+  workspaceMeta: "portfolio / main / software-engineer",
 } as const
 
 export const socialLinks = [
@@ -87,6 +87,8 @@ export type ExperienceItem = {
   period: string
   role: string
   description: string
+  /** Optional highlight bullets shown under the description. */
+  points?: readonly string[]
   state: StateColor
   featured: boolean
 }
@@ -98,6 +100,11 @@ export const experience: readonly ExperienceItem[] = [
     role: "Full-Stack Developer",
     description:
       "Led the redesign of the parent and student portal in Next.js with AI-powered revision tools, personalized learning pathways, performance analytics, and gamification, and integrated Kenya's eTIMS e-invoicing via .NET Core to improve tax-invoice accuracy and synchronization.",
+    points: [
+      "Redesigned the parent and student portal in Next.js with AI-powered revision tools and personalized learning pathways.",
+      "Built performance analytics and gamification that lifted student engagement.",
+      "Integrated Kenya's eTIMS e-invoicing via .NET Core for accurate, synchronized tax invoices.",
+    ],
     state: "blue",
     featured: true,
   },
@@ -106,7 +113,6 @@ export const experience: readonly ExperienceItem[] = [
 export type ProjectItem = {
   title: string
   blurb: string
-  filter: "web" | "system"
   statusLabel: string
   statusTone: StatusTone
   typeLabel: string
@@ -118,7 +124,6 @@ export const projects: readonly ProjectItem[] = [
   {
     title: "Learning Portal Redesign",
     blurb: "Rebuilt Africa Cloud Space's parent and student portal in Next.js with AI-powered revision tools, personalized learning pathways, analytics, and gamification.",
-    filter: "web",
     statusLabel: "live",
     statusTone: "done",
     typeLabel: "web app",
@@ -128,7 +133,6 @@ export const projects: readonly ProjectItem[] = [
   {
     title: "eTIMS Integration",
     blurb: "Integrated Kenya's eTIMS e-invoicing into internal software with .NET Core, improving tax-invoice data accuracy and synchronization for clients.",
-    filter: "system",
     statusLabel: "live",
     statusTone: "done",
     typeLabel: "backend",
@@ -138,7 +142,6 @@ export const projects: readonly ProjectItem[] = [
   {
     title: "Portfolio Terminal",
     blurb: "This site — a themeable, terminal-style portfolio built with React, TypeScript, and Tailwind CSS.",
-    filter: "web",
     statusLabel: "live",
     statusTone: "done",
     typeLabel: "web system",
@@ -147,19 +150,10 @@ export const projects: readonly ProjectItem[] = [
   },
 ]
 
-export const projectFilters = [
-  { id: "all", label: "all" },
-  { id: "web", label: "web" },
-  { id: "system", label: "systems" },
-] as const
-
-export type ProjectFilter = (typeof projectFilters)[number]["id"]
-
 export type BlogItem = {
   title: string
   blurb: string
   meta: string
-  filter: "process" | "interface" | "engineering"
   state: StateColor
   featured: boolean
 }
@@ -169,7 +163,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Building AI revision tools in Next.js",
     blurb: "Notes on wiring learning-science features — revision tools, pathways, and analytics — into a responsive Next.js portal.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "cyan",
     featured: true,
   },
@@ -177,7 +170,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Designing responsive learning dashboards",
     blurb: "How layout structure and clear states keep dense analytics dashboards readable across screen sizes.",
     meta: "draft / interface craft",
-    filter: "interface",
     state: "pink",
     featured: true,
   },
@@ -185,7 +177,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Integrating eTIMS with .NET Core",
     blurb: "A practical write-up on connecting internal software to Kenya's eTIMS e-invoicing with accurate, synchronized data.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "yellow",
     featured: true,
   },
@@ -193,7 +184,6 @@ export const blogs: readonly BlogItem[] = [
     title: "React Native navigation with Expo Router",
     blurb: "Structuring mobile navigation and shared layouts using Expo Router in a React Native app.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "blue",
     featured: false,
   },
@@ -201,7 +191,6 @@ export const blogs: readonly BlogItem[] = [
     title: "Postgres and Supabase for rapid product builds",
     blurb: "Using Postgres and Supabase to move from idea to a working, secure backend quickly.",
     meta: "draft / engineering",
-    filter: "engineering",
     state: "green",
     featured: false,
   },
@@ -209,20 +198,10 @@ export const blogs: readonly BlogItem[] = [
     title: "Shipping a themeable terminal portfolio",
     blurb: "Design and build notes on this site — tokens, theming, and a terminal-style layout in React and Tailwind.",
     meta: "draft / process",
-    filter: "process",
     state: "orange",
     featured: false,
   },
 ]
-
-export const blogFilters = [
-  { id: "all", label: "all" },
-  { id: "process", label: "process" },
-  { id: "interface", label: "interface" },
-  { id: "engineering", label: "engineering" },
-] as const
-
-export type BlogFilter = (typeof blogFilters)[number]["id"]
 
 export const contactCommands = [
   { command: "open github.com/samwelomwenga", action: "github", href: profile.githubUrl },

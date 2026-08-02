@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
-import type { BlogFilter, BlogItem, ProjectFilter, ProjectItem, SectionId } from "@/portfolio-data"
+import type { RouteDirection } from "@/lib/motion"
+import type { BlogItem, ProjectItem, SectionId } from "@/portfolio-data"
 import {
   SiCss,
   SiDotnet,
@@ -18,24 +19,27 @@ import {
   SiTypescript,
 } from "@icons-pack/react-simple-icons"
 import { ArrowUpRight } from "lucide-react"
-import { motion, useReducedMotion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { AssistantConsole } from "@/components/assistant-console"
 import { ContactForm } from "@/components/contact-form"
 import { ExperienceTimeline } from "@/components/experience-timeline"
+import { RollingText } from "@/components/motion/rolling-text"
+import { Stagger, StaggerItem } from "@/components/motion/stagger"
+import { TerminalText } from "@/components/motion/terminal-text"
+import { TiltCard } from "@/components/motion/tilt-card"
 import { ProjectCard } from "@/components/project-card"
-import { FilterBar } from "@/components/terminal/filter-bar"
 import { NoteCard } from "@/components/terminal/note-card"
 import { PromptLine } from "@/components/terminal/prompt-line"
 import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
+import { buttonMicroInteraction, cardReveal, consoleReveal, linkMicroInteraction, maskLine, pillMicroInteraction, routeTransition, spring, stagger, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
-  blogFilters,
   blogs,
   certifications,
   contactCommands,
@@ -43,7 +47,6 @@ import {
   hero,
   navItems,
   profile,
-  projectFilters,
   projects,
   skillGroups,
 } from "@/portfolio-data"
@@ -51,6 +54,10 @@ import {
 const archiveRoutes = ["experience", "projects", "blogs"] as const
 type ArchiveRoute = (typeof archiveRoutes)[number]
 type Route = "home" | ArchiveRoute
+type RouteState = {
+  route: Route
+  direction: RouteDirection
+}
 
 const sectionIds = navItems.map(item => item.id)
 const isSectionId = (value: string): value is SectionId => (sectionIds as readonly string[]).includes(value)
@@ -97,42 +104,87 @@ function getRouteFromHash(): Route {
   return "home"
 }
 
+function getRouteRank(route: Route): number {
+  return route === "home" ? 0 : archiveRoutes.indexOf(route) + 1
+}
+
+function getRouteDirection(from: Route, to: Route): RouteDirection {
+  if (from === to) {
+    return 0
+  }
+  return getRouteRank(to) > getRouteRank(from) ? 1 : -1
+}
+
 function App() {
   const { theme, mode, effectiveMode, setTheme, setMode } = useTerminalTheme()
-  const prefersReducedMotion = useReducedMotion()
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [route, setRoute] = useState<Route>(() => getRouteFromHash())
+  const [routeState, setRouteState] = useState<RouteState>(() => ({
+    route: getRouteFromHash(),
+    direction: 0,
+  }))
+  const { route, direction: routeDirection } = routeState
+  const routeRef = useRef<Route>(route)
+  const pendingHashScrollRef = useRef<ScrollBehavior | null>(null)
 
   const { activeId, jumpTo } = useActiveSection(scrollRef, sectionIds, route === "home")
   const displayedActive = route === "home" ? activeId : route
 
-  useEffect(() => {
-    function scrollToHashSection() {
-      const hash = window.location.hash.slice(1)
-      if (!isSectionId(hash)) {
-        return
-      }
-
-      const host = scrollRef.current
-      const target = host?.querySelector<HTMLElement>(`[data-section="${hash}"]`)
-      if (!host || !target) {
-        return
-      }
-
-      const top = host.scrollTop + target.getBoundingClientRect().top - host.getBoundingClientRect().top
-      host.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
+  const scrollToHashSection = useCallback((behavior: ScrollBehavior = "smooth"): boolean => {
+    const hash = window.location.hash.slice(1)
+    if (!isSectionId(hash)) {
+      return true
     }
 
+    const host = scrollRef.current
+    const target = host?.querySelector<HTMLElement>(`[data-section="${hash}"]`)
+    if (!host || !target) {
+      return false
+    }
+
+    const top = host.scrollTop + target.getBoundingClientRect().top - host.getBoundingClientRect().top
+    host.scrollTo({ top: Math.max(0, top), behavior })
+    return true
+  }, [])
+
+  const runPendingHashScroll = useCallback(() => {
+    const behavior = pendingHashScrollRef.current
+    if (!behavior || routeRef.current !== "home") {
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      if (scrollToHashSection(behavior)) {
+        pendingHashScrollRef.current = null
+      }
+    })
+  }, [scrollToHashSection])
+
+  useEffect(() => {
+    routeRef.current = route
+  }, [route])
+
+  useEffect(() => {
     function syncRouteFromHash() {
       const nextRoute = getRouteFromHash()
-      setRoute(nextRoute)
+      const currentRoute = routeRef.current
+      if (nextRoute !== currentRoute) {
+        routeRef.current = nextRoute
+        setRouteState({
+          route: nextRoute,
+          direction: getRouteDirection(currentRoute, nextRoute),
+        })
+      }
 
       if (nextRoute !== "home") {
+        pendingHashScrollRef.current = null
         scrollRef.current?.scrollTo({ top: 0, behavior: "auto" })
         return
       }
 
-      window.requestAnimationFrame(scrollToHashSection)
+      pendingHashScrollRef.current = "smooth"
+      if (currentRoute === "home") {
+        runPendingHashScroll()
+      }
     }
 
     window.addEventListener("hashchange", syncRouteFromHash)
@@ -142,7 +194,7 @@ function App() {
       window.removeEventListener("hashchange", syncRouteFromHash)
       window.cancelAnimationFrame(frame)
     }
-  }, [])
+  }, [runPendingHashScroll])
 
   function handleNavigate(id: SectionId) {
     // From an archive, switch the hash to the section; the hash sync returns
@@ -170,16 +222,30 @@ function App() {
       onModeChange={setMode}
       scrollRef={scrollRef}
     >
-      <motion.div
-        key={route}
-        initial={prefersReducedMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {route === "home"
-          ? <HomeScreens onNavigate={handleNavigate} onArchive={goToArchive} />
-          : <ArchiveScreen route={route} onNavigate={handleNavigate} />}
-      </motion.div>
+      <AnimatePresence mode="wait" custom={routeDirection}>
+        <motion.div
+          key={route}
+          custom={routeDirection}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          variants={routeTransition}
+          onAnimationStart={() => {
+            if (route === "home") {
+              runPendingHashScroll()
+            }
+          }}
+          onAnimationComplete={() => {
+            if (route === "home") {
+              runPendingHashScroll()
+            }
+          }}
+        >
+          {route === "home"
+            ? <HomeScreens onNavigate={handleNavigate} onArchive={goToArchive} />
+            : <ArchiveScreen route={route} onNavigate={handleNavigate} />}
+        </motion.div>
+      </AnimatePresence>
     </TerminalFrame>
   )
 }
@@ -225,10 +291,10 @@ type ArchiveLinkProps = {
 
 function ArchiveLink({ children, onClick }: ArchiveLinkProps) {
   return (
-    <button type="button" onClick={onClick} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold whitespace-nowrap text-state-orange">
+    <motion.button type="button" onClick={onClick} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold whitespace-nowrap text-state-orange" {...linkMicroInteraction}>
       {children}
       <ArrowUpRight className="size-3.5" aria-hidden="true" />
-    </button>
+    </motion.button>
   )
 }
 
@@ -238,79 +304,110 @@ type HomeScreensProps = {
 }
 
 function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
-  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all")
-  const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
-  const shownProjects = projectFilter === "all" ? featuredProjects : featuredProjects.filter(p => p.filter === projectFilter)
-  const shownBlogs = blogFilter === "all" ? featuredBlogs : featuredBlogs.filter(b => b.filter === blogFilter)
-
   return (
     <>
       <Screen id="home">
         <div className="grid gap-3.5 wide:grid-cols-[minmax(0,1fr)_minmax(21.25rem,0.92fr)] wide:items-center wide:gap-x-[clamp(1.125rem,3vw,2.125rem)]">
-          <div className="grid content-start gap-4 wide:col-start-1 wide:row-start-1">
-            <h1 id="screen-home-title" className="text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] text-balance">
-              <span className="font-extrabold text-term-green">{hero.firstName}</span>
-              {" "}
-              <span className="font-extrabold text-term-yellow">{hero.lastName}</span>
+          {/* Above the fold: entrance plays on load, not on scroll. The heading
+              rises line by line from behind a mask, the role line types in, and
+              the blurb follows. Reduced motion drops the movement (root
+              <MotionConfig>) so each line simply fades to its final state. */}
+          <Stagger trigger="load" className="grid content-start gap-4 wide:col-start-1 wide:row-start-1">
+            <h1 id="screen-home-title" className="grid gap-1 text-[clamp(2.875rem,7vw,5.75rem)] leading-[0.94] text-balance">
+              <span className="overflow-hidden pb-[0.08em]">
+                <StaggerItem as="span" variants={maskLine} whileHover={{ scale: 1.03 }} transition={spring.snappy} style={{ transformOrigin: "left" }} className="block w-max font-extrabold text-term-green">{hero.firstName}</StaggerItem>
+              </span>
+              <span className="overflow-hidden pb-[0.08em]">
+                <StaggerItem as="span" variants={maskLine} whileHover={{ scale: 1.03 }} transition={spring.snappy} style={{ transformOrigin: "left" }} className="block w-max font-extrabold text-term-yellow">{hero.lastName}</StaggerItem>
+              </span>
             </h1>
-            <p className="flex flex-wrap items-center gap-1.5 text-[clamp(1.125rem,2vw,1.75rem)] leading-snug tracking-[0.02em]">
+            <StaggerItem as="p" whileHover={{ scale: 1.03 }} transition={spring.snappy} style={{ transformOrigin: "left" }} className="flex w-max flex-wrap items-center gap-1.5 text-[clamp(1.125rem,2vw,1.75rem)] leading-snug tracking-[0.02em]">
               <span className="font-extrabold text-term-green">&lt;</span>
-              <span className="font-extrabold text-term-yellow">Software</span>
-              <span className="font-extrabold text-term-red">Engineer</span>
+              <TerminalText text="Software" caret={false} startDelay={720} className="font-extrabold text-term-yellow" />
+              <TerminalText text="Engineer" startDelay={950} className="font-extrabold text-term-red" />
               <span className="font-extrabold text-term-yellow">/&gt;</span>
+            </StaggerItem>
+            {/* Staggered rolling-text reveal (per word, for readable wrapping);
+                re-rolls on hover. Falls back to plain text under reduced motion. */}
+            <p className="max-w-[62ch] text-[clamp(0.875rem,1.25vw,1rem)] leading-relaxed text-muted text-pretty">
+              <RollingText text={hero.about} split="words" revealOnView />
             </p>
-            <p className="max-w-[62ch] text-[clamp(0.875rem,1.25vw,1rem)] leading-relaxed text-muted text-pretty">{hero.about}</p>
-          </div>
+          </Stagger>
 
-          <div className="wide:col-start-2 wide:row-span-2 wide:row-start-1">
+          <motion.div
+            className="wide:col-start-2 wide:row-span-2 wide:row-start-1"
+            initial="hidden"
+            animate="visible"
+            variants={consoleReveal}
+          >
             <AssistantConsole />
-          </div>
+          </motion.div>
 
-          <div className="flex flex-wrap items-center gap-2.5 wide:col-start-1 wide:row-start-2">
-            <ActionButton primary onClick={() => onNavigate("projects")}>view projects</ActionButton>
-            <ActionButton onClick={() => onNavigate("contact")}>contact</ActionButton>
-          </div>
+          {/* Small stagger tail after the text: buttons enter last, on load. */}
+          <Stagger trigger="load" delay={0.6} className="flex flex-wrap items-center gap-2.5 wide:col-start-1 wide:row-start-2">
+            <StaggerItem as="span" className="inline-flex"><ActionButton primary onClick={() => onNavigate("projects")}><RollingText text="view projects" driven /></ActionButton></StaggerItem>
+            <StaggerItem as="span" className="inline-flex"><ActionButton onClick={() => onNavigate("contact")}><RollingText text="contact" driven /></ActionButton></StaggerItem>
+          </Stagger>
         </div>
       </Screen>
 
       <Screen id="about">
         <SectionHeading title="About" headingId="screen-about-title" />
-        <div className="grid max-w-[72ch] gap-4">
+        {/* Paragraphs stagger in on scroll with the more pronounced cardReveal
+            (larger rise + scale), one clearly at a time; each rolls word-by-word
+            on hover only. */}
+        <Stagger each={stagger.cards} className="grid max-w-[72ch] gap-4">
           {aboutParagraphs.map(paragraph => (
-            <p key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">{paragraph}</p>
+            <StaggerItem as="p" variants={cardReveal} key={paragraph.slice(0, 24)} className="text-[0.9375rem] leading-relaxed text-muted">
+              <RollingText text={paragraph} split="words" />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </Screen>
 
       <Screen id="skills">
         <SectionHeading title="Skills" headingId="screen-skills-title">
-          Grouped like a terminal inventory — languages, frameworks, and tools.
+          <RollingText text="The languages, frameworks, and tools I work with, grouped for a quick scan." split="words" />
         </SectionHeading>
-        <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+        {/* Chip/card grid archetype (ticket 05): the three groups lift in one at
+            a time on scroll (cardReveal + relaxed gap so the entrance reads),
+            each card's chips cascade behind it with a tight gap, and each card
+            leans toward the pointer on hover. */}
+        <Stagger each={stagger.cards} className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
           {skillGroups.map(group => (
-            <NoteCard key={group.title} state={group.state} title={group.title}>
-              <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-                {group.tags.map(tag => (
-                  <SkillChip key={tag} tag={tag} />
-                ))}
-              </ul>
-            </NoteCard>
+            <TiltCard key={group.title}>
+              <NoteCard state={group.state} title={group.title}>
+                <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
+                  {group.tags.map(tag => (
+                    <SkillChip key={tag} tag={tag} />
+                  ))}
+                </Stagger>
+              </NoteCard>
+            </TiltCard>
           ))}
-        </div>
+        </Stagger>
         <div className="grid gap-2">
           <span className="text-[0.6875rem] font-extrabold tracking-[0.12em] text-muted uppercase">certifications</span>
-          <div className="flex flex-wrap gap-2">
+          <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
             {certifications.map(certification => (
-              <span key={certification} className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg">{certification}</span>
+              <StaggerItem
+                as="li"
+                key={certification}
+                whileHover={pillMicroInteraction.whileHover}
+                whileTap={pillMicroInteraction.whileTap}
+                transition={pillMicroInteraction.transition}
+                className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg"
+              >
+                {certification}
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </Screen>
 
       <Screen id="experience">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <div className="grid gap-2">
-            <p className="text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">experience</p>
             <h2 id="screen-experience-title" className="max-w-[38.75rem] text-[clamp(1.5rem,4vw,2.375rem)] leading-tight text-balance">Featured Experience</h2>
           </div>
           {experience.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("experience")}>More experience</ArchiveLink>}
@@ -321,36 +418,35 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
       <Screen id="projects">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <SectionHeading title="Projects" headingId="screen-projects-title">
-            Filter the project cards without leaving the terminal frame.
+            <RollingText text="A selection of the web apps and backend systems I've shipped." split="words" />
           </SectionHeading>
           {projects.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("projects")}>More projects</ArchiveLink>}
         </div>
-        <FilterBar options={projectFilters} active={projectFilter} onChange={id => setProjectFilter(id as ProjectFilter)} label="Project filters" />
-        <ProjectGrid items={shownProjects} />
+        <ProjectGrid items={featuredProjects} />
       </Screen>
 
       <Screen id="blogs">
         <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
           <SectionHeading title="Blogs" headingId="screen-blogs-title">
-            A lean index for writing on process, interface craft, and implementation.
+            <RollingText text="A lean index of writing on process, interface craft, and implementation." split="words" />
           </SectionHeading>
           {blogs.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>}
         </div>
-        <FilterBar options={blogFilters} active={blogFilter} onChange={id => setBlogFilter(id as BlogFilter)} label="Blog filters" />
-        <BlogGrid items={shownBlogs} />
+        <BlogGrid items={featuredBlogs} />
       </Screen>
 
       <Screen id="contact">
-        <div className="grid gap-4.5 wide:grid-cols-[minmax(13.75rem,0.58fr)_minmax(22.5rem,1.42fr)] wide:items-start">
-          <div className="grid max-w-[22.5rem] content-start gap-3">
-            <h2 id="screen-contact-title" className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight">Contact</h2>
-            <p className="text-sm text-muted">
-              Based in
-              {profile.location}
-              {" "}
-              — reach me on GitHub, LinkedIn, or X.
-            </p>
-            <div className="rounded-md border border-border bg-surface p-3">
+        {/* Contact reveals like the Projects grid (ticket 09 revisited): the
+            command card and the form lift in with `cardReveal`, the card leans
+            toward the pointer on hover via <TiltCard>, and the blurb rolls
+            word-by-word on hover like the project blurbs. */}
+        <Stagger as="div" each={stagger.cards} className="grid gap-4.5 wide:grid-cols-[minmax(13.75rem,0.58fr)_minmax(22.5rem,1.42fr)] wide:items-start">
+          <Stagger as="div" each={stagger.cards} className="grid max-w-[22.5rem] content-start gap-3">
+            <StaggerItem as="h2" id="screen-contact-title" className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight">Contact</StaggerItem>
+            <StaggerItem as="p" className="text-sm text-muted">
+              <RollingText text={`Based in ${profile.location} — reach me on GitHub, LinkedIn, or X.`} split="words" />
+            </StaggerItem>
+            <TiltCard className="rounded-md border border-border bg-surface p-3">
               {contactCommands.map(row => (
                 <div key={row.command} className="grid min-h-[2.125rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 text-[0.8125rem]">
                   <span className="font-extrabold text-success">$</span>
@@ -358,10 +454,12 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
                   <a href={row.href} target="_blank" rel="noreferrer"><StatusPill>{row.action}</StatusPill></a>
                 </div>
               ))}
-            </div>
-          </div>
-          <ContactForm />
-        </div>
+            </TiltCard>
+          </Stagger>
+          <StaggerItem as="div" variants={cardReveal}>
+            <ContactForm />
+          </StaggerItem>
+        </Stagger>
       </Screen>
     </>
   )
@@ -371,14 +469,14 @@ function SkillChip({ tag }: { tag: string }) {
   const icon = skillIcons[tag]
 
   return (
-    <li data-skill={tag} className="inline-flex min-h-8 items-center gap-1.5 rounded-sm border border-border bg-surface py-1 pr-2.5 pl-1 text-xs font-bold text-fg">
+    <motion.li variants={staggerItem} data-skill={tag} className="inline-flex min-h-8 items-center gap-1.5 rounded-sm border border-border bg-surface py-1 pr-2.5 pl-1 text-xs font-bold text-fg">
       {icon && (
         <span className="grid size-5 shrink-0 place-items-center rounded-sm bg-white/95">
           <icon.Icon aria-hidden="true" className={cn("size-3.5", icon.iconClass)} focusable="false" title="" />
         </span>
       )}
       <span>{tag}</span>
-    </li>
+    </motion.li>
   )
 }
 
@@ -393,12 +491,6 @@ type ArchiveMeta = {
 }
 
 function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
-  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all")
-  const [blogFilter, setBlogFilter] = useState<BlogFilter>("all")
-
-  const shownProjects = projectFilter === "all" ? projects : projects.filter(p => p.filter === projectFilter)
-  const shownBlogs = blogFilter === "all" ? blogs : blogs.filter(b => b.filter === blogFilter)
-
   const titles: Record<ArchiveRoute, ArchiveMeta> = {
     experience: { title: "All Experience", blurb: "The fuller path behind the featured roles on the home page." },
     projects: { title: "Project Library", blurb: "A broader view of selected interface, web, and system work." },
@@ -412,27 +504,17 @@ function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
       aria-labelledby={`screen-${route}-title`}
       className="relative grid content-start gap-5 p-[clamp(1.25rem,4vw,2.75rem)]"
     >
-      <button type="button" onClick={() => onNavigate("home")} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold text-state-orange">
+      <motion.button type="button" onClick={() => onNavigate("home")} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold text-state-orange" {...linkMicroInteraction}>
         <ArrowUpRight className="size-3.5 rotate-180" aria-hidden="true" />
         Back to terminal
-      </button>
+      </motion.button>
       <SectionHeading title={titles[route].title} headingId={`screen-${route}-title`}>{titles[route].blurb}</SectionHeading>
 
       {route === "experience" && <ExperienceTimeline items={experience} />}
 
-      {route === "projects" && (
-        <>
-          <FilterBar options={projectFilters} active={projectFilter} onChange={id => setProjectFilter(id as ProjectFilter)} label="Project filters" />
-          <ProjectGrid items={shownProjects} />
-        </>
-      )}
+      {route === "projects" && <ProjectGrid items={projects} />}
 
-      {route === "blogs" && (
-        <>
-          <FilterBar options={blogFilters} active={blogFilter} onChange={id => setBlogFilter(id as BlogFilter)} label="Blog filters" />
-          <BlogGrid items={shownBlogs} />
-        </>
-      )}
+      {route === "blogs" && <BlogGrid items={blogs} />}
     </section>
   )
 }
@@ -442,10 +524,18 @@ type ProjectGridProps = {
 }
 
 function ProjectGrid({ items }: ProjectGridProps) {
+  // Chip/card grid archetype (ticket 07), mirroring Skills: the cards lift in
+  // one at a time on scroll (cardReveal + relaxed gap) and each leans toward the
+  // pointer on hover via <TiltCard>. A filter change swaps the mounted cards, so
+  // the survivors re-reveal through the same stagger.
   return (
-    <div className="grid gap-3.5 sm:grid-cols-2">
-      {items.map(project => <ProjectCard key={project.title} project={project} />)}
-    </div>
+    <Stagger each={stagger.cards} className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+      {items.map(project => (
+        <TiltCard key={project.title} className="h-full">
+          <ProjectCard project={project} />
+        </TiltCard>
+      ))}
+    </Stagger>
   )
 }
 
@@ -454,18 +544,25 @@ type BlogGridProps = {
 }
 
 function BlogGrid({ items }: BlogGridProps) {
+  // Chip/card grid archetype (ticket 08), mirroring Projects/Skills: the cards
+  // lift in one at a time on scroll (cardReveal + relaxed gap) and each leans
+  // toward the pointer on hover via <TiltCard>. The blurb rolls in word by word.
   return (
-    <div className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
+    <Stagger each={stagger.cards} className="grid gap-3.5 sm:grid-cols-2 wide:grid-cols-3">
       {items.map(blog => (
-        <NoteCard key={blog.title} state={blog.state} kicker="draft">
-          <div className="grid gap-1.5">
-            <span className="text-xs text-muted">{blog.meta}</span>
-            <h3 className="text-lg leading-snug">{blog.title}</h3>
-            <p className="text-sm text-muted">{blog.blurb}</p>
-          </div>
-        </NoteCard>
+        <TiltCard key={blog.title} className="h-full">
+          <NoteCard state={blog.state} kicker="draft" className="h-full">
+            <div className="grid gap-1.5">
+              <span className="text-xs text-muted">{blog.meta}</span>
+              <h3 className="text-lg leading-snug">{blog.title}</h3>
+              <p className="text-sm text-muted">
+                <RollingText text={blog.blurb} split="words" />
+              </p>
+            </div>
+          </NoteCard>
+        </TiltCard>
       ))}
-    </div>
+    </Stagger>
   )
 }
 
@@ -477,15 +574,16 @@ type ActionButtonProps = {
 
 function ActionButton({ children, primary, onClick }: ActionButtonProps) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
       className={primary
         ? "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-3 text-xs font-extrabold tracking-[0.02em] text-[color:var(--bg)]"
         : "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-border bg-surface px-3 text-xs font-extrabold tracking-[0.02em] text-fg hover:border-line"}
+      {...buttonMicroInteraction}
     >
       {children}
-    </button>
+    </motion.button>
   )
 }
 
