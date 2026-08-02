@@ -36,7 +36,7 @@ import { StatusPill } from "@/components/terminal/status-pill"
 import { TerminalFrame } from "@/components/terminal/terminal-frame"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { useTerminalTheme } from "@/hooks/use-terminal-theme"
-import { cardReveal, consoleReveal, maskLine, routeTransition, spring, stagger, staggerItem } from "@/lib/motion"
+import { buttonMicroInteraction, cardReveal, consoleReveal, linkMicroInteraction, maskLine, pillMicroInteraction, routeTransition, spring, stagger, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import {
   aboutParagraphs,
@@ -291,10 +291,10 @@ type ArchiveLinkProps = {
 
 function ArchiveLink({ children, onClick }: ArchiveLinkProps) {
   return (
-    <button type="button" onClick={onClick} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold whitespace-nowrap text-state-orange">
+    <motion.button type="button" onClick={onClick} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold whitespace-nowrap text-state-orange" {...linkMicroInteraction}>
       {children}
       <ArrowUpRight className="size-3.5" aria-hidden="true" />
-    </button>
+    </motion.button>
   )
 }
 
@@ -393,8 +393,9 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
               <StaggerItem
                 as="li"
                 key={certification}
-                whileHover={{ y: -3, scale: 1.04 }}
-                transition={spring.snappy}
+                whileHover={pillMicroInteraction.whileHover}
+                whileTap={pillMicroInteraction.whileTap}
+                transition={pillMicroInteraction.transition}
                 className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg"
               >
                 {certification}
@@ -503,10 +504,10 @@ function ArchiveScreen({ route, onNavigate }: ArchiveScreenProps) {
       aria-labelledby={`screen-${route}-title`}
       className="relative grid content-start gap-5 p-[clamp(1.25rem,4vw,2.75rem)]"
     >
-      <button type="button" onClick={() => onNavigate("home")} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold text-state-orange">
+      <motion.button type="button" onClick={() => onNavigate("home")} className="inline-flex w-max items-center gap-1 text-[0.8125rem] font-extrabold text-state-orange" {...linkMicroInteraction}>
         <ArrowUpRight className="size-3.5 rotate-180" aria-hidden="true" />
         Back to terminal
-      </button>
+      </motion.button>
       <SectionHeading title={titles[route].title} headingId={`screen-${route}-title`}>{titles[route].blurb}</SectionHeading>
 
       {route === "experience" && <ExperienceTimeline items={experience} />}
@@ -576,14 +577,10 @@ function ActionButton({ children, primary, onClick }: ActionButtonProps) {
     <motion.button
       type="button"
       onClick={onClick}
-      initial="rest"
-      whileHover="rolled"
-      whileTap={{ scale: 0.96 }}
-      transition={spring.snappy}
-      variants={{ rest: { y: 0 }, rolled: { y: -2 } }}
       className={primary
         ? "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-3 text-xs font-extrabold tracking-[0.02em] text-[color:var(--bg)]"
         : "inline-flex min-h-[2.375rem] items-center justify-center gap-2 rounded-sm border border-border bg-surface px-3 text-xs font-extrabold tracking-[0.02em] text-fg hover:border-line"}
+      {...buttonMicroInteraction}
     >
       {children}
     </motion.button>

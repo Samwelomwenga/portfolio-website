@@ -33,6 +33,46 @@ export const spring = {
   snappy: { type: "spring", bounce: 0.24, visualDuration: 0.26 },
 } satisfies Record<string, Transition>
 
+/** Shared active-pill layout transition for chrome controls. */
+export const activeIndicatorTransition = spring.soft
+
+/**
+ * Universal chrome micro-interactions. Buttons that drive <RollingText> use the
+ * named `rest`/`rolled` variants; compact links, chips, and icon buttons use
+ * direct transform targets. All are transform-only and use `spring.snappy`.
+ */
+export const buttonMicroInteraction = {
+  initial: "rest",
+  whileHover: "rolled",
+  whileTap: { scale: 0.96 },
+  transition: spring.snappy,
+  variants: {
+    rest: { y: 0, scale: 1 },
+    rolled: { y: -2, scale: 1.01 },
+  },
+} as const
+
+export const linkMicroInteraction = {
+  initial: false,
+  whileHover: { x: 2, y: -1, scale: 1.01 },
+  whileTap: { scale: 0.97 },
+  transition: spring.snappy,
+} as const
+
+export const pillMicroInteraction = {
+  initial: false,
+  whileHover: { y: -1, scale: 1.02 },
+  whileTap: { scale: 0.97 },
+  transition: spring.snappy,
+} as const
+
+export const iconButtonMicroInteraction = {
+  initial: false,
+  whileHover: { y: -1, scale: 1.04 },
+  whileTap: { scale: 0.94 },
+  transition: spring.snappy,
+} as const
+
 /** Delay between staggered children, in seconds. */
 export const stagger = {
   base: 0.06,

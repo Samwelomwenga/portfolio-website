@@ -8,7 +8,7 @@ import { RollingText } from "@/components/motion/rolling-text"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { duration, easing, spring } from "@/lib/motion"
+import { buttonMicroInteraction, duration, easing, spring } from "@/lib/motion"
 
 const formId = import.meta.env.VITE_FORMSPREE_FORM_ID as string
 
@@ -100,12 +100,8 @@ export function ContactForm() {
       <motion.button
         type="submit"
         disabled={state.submitting}
-        initial="rest"
-        whileHover="rolled"
-        whileTap={{ scale: 0.96 }}
-        transition={spring.snappy}
-        variants={{ rest: { y: 0 }, rolled: { y: -2 } }}
         className="inline-flex min-h-[2.375rem] w-full cursor-pointer items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-3 text-xs font-black tracking-[0.02em] text-[color:var(--bg)] hover:bg-accent/90 disabled:pointer-events-none disabled:opacity-50 sm:w-auto sm:justify-self-start"
+        {...buttonMicroInteraction}
       >
         <span className="sr-only">{submitLabel}</span>
         <span aria-hidden="true" className="inline-flex">
