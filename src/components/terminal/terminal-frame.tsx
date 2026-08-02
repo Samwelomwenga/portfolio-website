@@ -84,7 +84,17 @@ function Sidebar({ activeId, onNavigate }: SidebarProps) {
       <div className="border-b border-border p-3.5">
         <p className="mb-2 text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">workspace</p>
         <div className="grid gap-2">
-          <strong className="text-[clamp(1.375rem,4vw,1.75rem)] leading-tight">{profile.name}</strong>
+          <motion.a
+            href="#home"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate("home")
+            }}
+            className="inline-flex w-max max-w-full text-[clamp(1.375rem,4vw,1.75rem)] leading-tight font-extrabold text-fg"
+            {...linkMicroInteraction}
+          >
+            {profile.name}
+          </motion.a>
           <span className="text-xs break-words text-muted">{profile.workspaceMeta}</span>
         </div>
       </div>

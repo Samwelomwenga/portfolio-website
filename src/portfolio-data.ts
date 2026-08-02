@@ -10,7 +10,7 @@ export const profile = {
   linkedinUrl: "https://www.linkedin.com/in/samwelomwenga",
   xUrl: "https://x.com/Samwel_codes",
   location: "Nairobi, Kenya",
-  workspaceMeta: "portfolio / main / software-developer",
+  workspaceMeta: "portfolio / main / software-engineer",
 } as const
 
 export const socialLinks = [
