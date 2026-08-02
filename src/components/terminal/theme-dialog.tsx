@@ -1,21 +1,41 @@
-import type { ColorMode, EffectiveMode, ThemeName } from "@/hooks/use-terminal-theme"
+import type { Variants } from "motion/react"
+import type { EffectiveMode, ThemeName, ThemeOption } from "@/hooks/use-terminal-theme"
 
 import { X } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { getThemeOption, themeOptions } from "@/hooks/use-terminal-theme"
-import { activeIndicatorTransition, buttonMicroInteraction, duration, easing, iconButtonMicroInteraction, pillMicroInteraction } from "@/lib/motion"
+import { activeIndicatorTransition, buttonMicroInteraction, duration, easing, iconButtonMicroInteraction, pillMicroInteraction, stagger } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 type ThemeDialogProps = {
   theme: ThemeName
   effectiveMode: EffectiveMode
-  onThemeChange: (theme: ThemeName) => void
-  onModeChange: (mode: ColorMode) => void
+  transitioning: boolean
+  onThemeOptionChange: (option: ThemeOption) => void
+}
+
+const themeListVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      delayChildren: 0.14,
+      staggerChildren: stagger.tight,
+    },
+  },
+}
+
+const themeOptionVariants: Variants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: duration.fast, ease: easing.out },
+  },
 }
 
 /** Bottom-right settings launcher plus its modal theme picker. */
-export function ThemeDialog({ theme, effectiveMode, onThemeChange, onModeChange }: ThemeDialogProps) {
+export function ThemeDialog({ theme, effectiveMode, transitioning, onThemeOptionChange }: ThemeDialogProps) {
   const [open, setOpen] = useState(false)
   const launcherRef = useRef<HTMLButtonElement>(null)
   const activeButtonRef = useRef<HTMLButtonElement>(null)
@@ -110,8 +130,13 @@ export function ThemeDialog({ theme, effectiveMode, onThemeChange, onModeChange 
                 </motion.button>
               </div>
 
-              <div data-theme-list className="min-h-0 overflow-y-auto overscroll-contain p-3.5 term-scrollbar">
-                <div className="grid gap-2">
+              <div data-theme-list className="min-h-0 overflow-y-auto overscroll-contain p-3.5 term-scrollbar" aria-busy={transitioning}>
+                <motion.div
+                  className="grid gap-2"
+                  variants={themeListVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
                   <div className="text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">theme</div>
                   <LayoutGroup id="theme-options">
                     <div className="grid gap-2">
@@ -121,43 +146,42 @@ export function ThemeDialog({ theme, effectiveMode, onThemeChange, onModeChange 
                           {themeOptions.filter(item => item.mode === group).map((item) => {
                             const isActive = item.id === activeOption.id
                             return (
-                              <motion.button
-                                key={item.id}
-                                ref={isActive ? activeButtonRef : undefined}
-                                type="button"
-                                aria-pressed={isActive}
-                                onClick={() => {
-                                  onThemeChange(item.theme)
-                                  onModeChange(item.mode)
-                                }}
-                                className={cn(
-                                  "relative grid min-h-[2.375rem] grid-cols-[auto_minmax(0,1fr)] items-center gap-2 overflow-hidden rounded-sm border border-border bg-surface px-2.5 text-left text-[0.8125rem] transition-colors hover:border-line hover:text-fg",
-                                  isActive && "border-line text-fg",
-                                )}
-                                {...pillMicroInteraction}
-                              >
-                                {isActive && (
-                                  <motion.span
-                                    layoutId="theme-active"
-                                    className="absolute inset-0 rounded-sm bg-accent-soft"
-                                    transition={activeIndicatorTransition}
-                                    aria-hidden="true"
-                                  />
-                                )}
-                                <span className="relative z-10 flex gap-1" aria-hidden="true">
-                                  {item.swatches.map(color => (
-                                    <span key={color} className="size-2 rounded-full border border-border" style={{ backgroundColor: color }} />
-                                  ))}
-                                </span>
-                                <span className="relative z-10 truncate">{item.label}</span>
-                              </motion.button>
+                              <motion.div key={item.id} variants={themeOptionVariants}>
+                                <motion.button
+                                  ref={isActive ? activeButtonRef : undefined}
+                                  type="button"
+                                  aria-pressed={isActive}
+                                  disabled={transitioning}
+                                  onClick={() => onThemeOptionChange(item)}
+                                  className={cn(
+                                    "relative grid min-h-[2.375rem] w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-2 overflow-hidden rounded-sm border border-border bg-surface px-2.5 text-left text-[0.8125rem] transition-colors hover:border-line hover:text-fg disabled:cursor-wait disabled:opacity-65",
+                                    isActive && "border-line text-fg",
+                                  )}
+                                  {...pillMicroInteraction}
+                                >
+                                  {isActive && (
+                                    <motion.span
+                                      layoutId="theme-active"
+                                      className="absolute inset-0 rounded-sm bg-accent-soft"
+                                      transition={activeIndicatorTransition}
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                  <span className="relative z-10 flex gap-1" aria-hidden="true">
+                                    {item.swatches.map(color => (
+                                      <span key={color} className="size-2 rounded-full border border-border" style={{ backgroundColor: color }} />
+                                    ))}
+                                  </span>
+                                  <span className="relative z-10 truncate">{item.label}</span>
+                                </motion.button>
+                              </motion.div>
                             )
                           })}
                         </div>
                       ))}
                     </div>
                   </LayoutGroup>
-                </div>
+                </motion.div>
               </div>
 
               <div className="flex items-center justify-between gap-3 border-t border-border px-3.5 py-3 text-xs text-muted">

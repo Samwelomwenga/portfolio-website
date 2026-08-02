@@ -1,13 +1,15 @@
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode, RefObject } from "react"
-import type { ColorMode, EffectiveMode, ThemeName } from "@/hooks/use-terminal-theme"
+import type { ColorMode, EffectiveMode, ThemeName, ThemeOption } from "@/hooks/use-terminal-theme"
 
 import type { SectionId, StateColor } from "@/portfolio-data"
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons"
 import { Linkedin, Monitor, Moon, Sun } from "lucide-react"
-import { LayoutGroup, motion } from "motion/react"
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
+import { ThemeCurtain } from "@/components/terminal/theme-curtain"
 import { ThemeDialog } from "@/components/terminal/theme-dialog"
+import { getThemeOption } from "@/hooks/use-terminal-theme"
 import { activeIndicatorTransition, iconButtonMicroInteraction, linkMicroInteraction, pillMicroInteraction } from "@/lib/motion"
 import { cn, stateAccentClass } from "@/lib/utils"
 import { navItems, profile, socialLinks } from "@/portfolio-data"
@@ -19,6 +21,17 @@ const modeOptions: { id: ColorMode, icon: LucideIcon, label: string }[] = [
   { id: "light", icon: Sun, label: "light" },
   { id: "auto", icon: Monitor, label: "auto" },
 ]
+
+type ThemeTransitionRequest = {
+  theme?: ThemeName
+  mode?: ColorMode
+  swatches: ThemeOption["swatches"]
+}
+
+type ThemeCurtainState = ThemeTransitionRequest & {
+  id: number
+  phase: "cover" | "reveal"
+}
 
 type TerminalFrameProps = {
   theme: ThemeName
@@ -43,6 +56,82 @@ export function TerminalFrame({
   scrollRef,
   children,
 }: TerminalFrameProps) {
+  const reduceMotion = useReducedMotion()
+  const curtainIdRef = useRef(0)
+  const [themeCurtain, setThemeCurtain] = useState<ThemeCurtainState | null>(null)
+  const themeTransitioning = themeCurtain !== null
+  const displayedMode = themeCurtain?.mode ?? mode
+
+  function getModePreviewOption(nextMode: ColorMode): ThemeOption {
+    const nextEffectiveMode = nextMode === "auto" ? getSystemEffectiveMode() : nextMode
+    return getThemeOption(theme, nextEffectiveMode)
+  }
+
+  function requestThemeTransition(request: ThemeTransitionRequest) {
+    if (themeTransitioning) {
+      return
+    }
+
+    const nextTheme = request.theme ?? theme
+    const nextMode = request.mode ?? mode
+    if (nextTheme === theme && nextMode === mode) {
+      return
+    }
+
+    if (reduceMotion) {
+      if (request.theme) {
+        onThemeChange(request.theme)
+      }
+      if (request.mode) {
+        onModeChange(request.mode)
+      }
+      return
+    }
+
+    setThemeCurtain({
+      ...request,
+      id: curtainIdRef.current += 1,
+      phase: "cover",
+    })
+  }
+
+  function handleThemeOptionChange(option: ThemeOption) {
+    requestThemeTransition({
+      theme: option.theme,
+      mode: option.mode,
+      swatches: option.swatches,
+    })
+  }
+
+  function handleModeChange(nextMode: ColorMode) {
+    requestThemeTransition({
+      mode: nextMode,
+      swatches: getModePreviewOption(nextMode).swatches,
+    })
+  }
+
+  function handleCurtainCovered() {
+    if (!themeCurtain || themeCurtain.phase !== "cover") {
+      return
+    }
+
+    const curtainId = themeCurtain.id
+    if (themeCurtain.theme) {
+      onThemeChange(themeCurtain.theme)
+    }
+    if (themeCurtain.mode) {
+      onModeChange(themeCurtain.mode)
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setThemeCurtain(current =>
+          current?.id === curtainId ? { ...current, phase: "reveal" } : current,
+        )
+      })
+    })
+  }
+
   return (
     <>
       <a
@@ -61,16 +150,47 @@ export function TerminalFrame({
           className="grid min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-panel outline-none"
           aria-label="Portfolio terminal"
         >
-          <TabBar activeId={activeId} mode={mode} onNavigate={onNavigate} onModeChange={onModeChange} />
+          <TabBar
+            activeId={activeId}
+            mode={displayedMode}
+            onNavigate={onNavigate}
+            onModeChange={handleModeChange}
+            themeTransitioning={themeTransitioning}
+          />
           <div id="terminal-scroll" ref={scrollRef} className="min-h-0 overflow-auto scroll-pt-6 term-scrollbar">
             {children}
           </div>
         </main>
       </div>
 
-      <ThemeDialog theme={theme} effectiveMode={effectiveMode} onThemeChange={onThemeChange} onModeChange={onModeChange} />
+      <ThemeDialog
+        theme={theme}
+        effectiveMode={effectiveMode}
+        transitioning={themeTransitioning}
+        onThemeOptionChange={handleThemeOptionChange}
+      />
+
+      <AnimatePresence>
+        {themeCurtain && (
+          <ThemeCurtain
+            key={themeCurtain.id}
+            phase={themeCurtain.phase}
+            swatches={themeCurtain.swatches}
+            onCovered={handleCurtainCovered}
+            onRevealed={() => setThemeCurtain(null)}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
+}
+
+function getSystemEffectiveMode(): EffectiveMode {
+  if (typeof window.matchMedia !== "function") {
+    return "dark"
+  }
+
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
 }
 
 type SidebarProps = {
@@ -209,9 +329,10 @@ type TabBarProps = {
   mode: ColorMode
   onNavigate: (id: SectionId) => void
   onModeChange: (mode: ColorMode) => void
+  themeTransitioning: boolean
 }
 
-function TabBar({ activeId, mode, onNavigate, onModeChange }: TabBarProps) {
+function TabBar({ activeId, mode, onNavigate, onModeChange, themeTransitioning }: TabBarProps) {
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] border-b border-border bg-surface">
       <div className="flex min-w-0 overflow-x-auto hide-scrollbar" role="tablist" aria-label="Open sections">
@@ -246,19 +367,20 @@ function TabBar({ activeId, mode, onNavigate, onModeChange }: TabBarProps) {
         </LayoutGroup>
       </div>
 
-      <ModeSwitch mode={mode} onModeChange={onModeChange} />
+      <ModeSwitch mode={mode} transitioning={themeTransitioning} onModeChange={onModeChange} />
     </div>
   )
 }
 
 type ModeSwitchProps = {
   mode: ColorMode
+  transitioning: boolean
   onModeChange: (mode: ColorMode) => void
 }
 
 // On narrow viewports the switch collapses to just the active mode; tapping it
 // reveals the rest, and picking one (or tapping outside) collapses it again.
-function ModeSwitch({ mode, onModeChange }: ModeSwitchProps) {
+function ModeSwitch({ mode, transitioning, onModeChange }: ModeSwitchProps) {
   const [compact, setCompact] = useState(() => window.matchMedia("(max-width: 40rem)").matches)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -284,6 +406,13 @@ function ModeSwitch({ mode, onModeChange }: ModeSwitchProps) {
   }, [compact])
 
   function handleClick(id: ColorMode) {
+    if (transitioning) {
+      if (compact && !open && id === mode) {
+        setOpen(true)
+      }
+      return
+    }
+
     if (compact && !open) {
       setOpen(true)
       return
@@ -297,6 +426,7 @@ function ModeSwitch({ mode, onModeChange }: ModeSwitchProps) {
       <LayoutGroup id="mode-switch">
         {modeOptions.map(({ id, icon: Icon, label }) => {
           const isActive = id === mode
+          const isCompactLauncher = compact && !open && isActive
           return (
             <motion.button
               key={id}
@@ -305,9 +435,10 @@ function ModeSwitch({ mode, onModeChange }: ModeSwitchProps) {
               aria-pressed={isActive}
               aria-label={`Use ${label} mode`}
               hidden={compact && !open && id !== mode}
+              disabled={transitioning && !isCompactLauncher}
               onClick={() => handleClick(id)}
               className={cn(
-                "relative grid min-h-[2.375rem] w-[2.625rem] place-items-center overflow-hidden border-l border-border text-muted transition-colors first:border-l-0 data-[active=true]:text-fg",
+                "relative grid min-h-[2.375rem] w-[2.625rem] place-items-center overflow-hidden border-l border-border text-muted transition-colors first:border-l-0 data-[active=true]:text-fg disabled:cursor-wait disabled:opacity-65",
                 compact && !open && "border-l-0",
               )}
               {...iconButtonMicroInteraction}
