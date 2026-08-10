@@ -7,6 +7,7 @@ import { SiGithub, SiX } from "@icons-pack/react-simple-icons"
 import { Linkedin, Monitor, Moon, Sun } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
+import { MobileNav } from "@/components/terminal/mobile-nav"
 import { ThemeCurtain } from "@/components/terminal/theme-curtain"
 import { ThemeDialog } from "@/components/terminal/theme-dialog"
 import { getThemeOption } from "@/hooks/use-terminal-theme"
@@ -337,8 +338,9 @@ type TabBarProps = {
 
 function TabBar({ activeId, mode, onNavigate, onModeChange, themeTransitioning }: TabBarProps) {
   return (
-    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] border-b border-border bg-surface">
-      <div className="flex min-w-0 overflow-x-auto hide-scrollbar" role="tablist" aria-label="Open sections">
+    <div className="flex min-w-0 items-stretch justify-between border-b border-border bg-surface">
+      <MobileNav activeId={activeId} onNavigate={onNavigate} />
+      <div className="hidden min-w-0 flex-1 overflow-x-auto hide-scrollbar wide:flex" role="tablist" aria-label="Open sections">
         <LayoutGroup id="terminal-tabs">
           {navItems.filter(item => item.ready).map((item) => {
             const isActive = item.id === activeId
