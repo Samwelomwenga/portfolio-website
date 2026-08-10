@@ -475,7 +475,27 @@ function SkillChip({ tag }: { tag: string }) {
   )
 }
 
-const certPillClass = "inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg"
+const certPillClass = "group/cert inline-flex min-h-12 max-w-full items-center gap-2 rounded-sm border border-border bg-surface py-1.5 pr-2.5 pl-1.5 text-xs font-bold text-fg"
+
+function CertificationBadge({ certification }: { certification: Certification }) {
+  if (!certification.imageSrc) {
+    return null
+  }
+
+  return (
+    <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-white p-1">
+      <img
+        src={certification.imageSrc}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+        aria-hidden="true"
+        className="size-full object-contain"
+      />
+    </span>
+  )
+}
 
 function CertificationPill({ certification }: { certification: Certification }) {
   // Linked certificates become new-tab anchors; unlinked ones keep the existing
@@ -489,7 +509,8 @@ function CertificationPill({ certification }: { certification: Certification }) 
         transition={pillMicroInteraction.transition}
         className={certPillClass}
       >
-        {certification.name}
+        <CertificationBadge certification={certification} />
+        <span className="min-w-0 leading-snug">{certification.name}</span>
       </motion.li>
     )
   }
@@ -503,10 +524,11 @@ function CertificationPill({ certification }: { certification: Certification }) 
         whileHover={pillMicroInteraction.whileHover}
         whileTap={pillMicroInteraction.whileTap}
         transition={pillMicroInteraction.transition}
-        className={cn(certPillClass, "gap-1 transition-colors hover:border-fg")}
+        className={cn(certPillClass, "transition-colors hover:border-fg")}
       >
-        {certification.name}
-        <ArrowUpRight className="size-3" aria-hidden="true" />
+        <CertificationBadge certification={certification} />
+        <span className="min-w-0 leading-snug">{certification.name}</span>
+        <ArrowUpRight className="size-3.5 shrink-0 text-muted transition-colors group-hover/cert:text-fg" aria-hidden="true" />
       </motion.a>
     </motion.li>
   )

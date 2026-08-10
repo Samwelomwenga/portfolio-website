@@ -88,11 +88,20 @@ export type Certification = {
    * becomes a link that opens in a new tab; without it the pill stays plain.
    */
   href?: string
+  imageSrc?: string
 }
 
 export const certifications: readonly Certification[] = [
-  { name: "AWS Certified Cloud Practitioner" },
-  { name: "Kubernetes & Cloud Native Associate" },
+  {
+    name: "AWS Certified Cloud Practitioner",
+    href: "https://www.credly.com/badges/c77b467a-8caf-4353-9a0c-16a5f4813053/public_url",
+    imageSrc: "https://images.credly.com/images/00634f82-b07f-4bbd-a6bb-53de397fc3a6/image.png",
+  },
+  {
+    name: "Kubernetes & Cloud Native Associate",
+    href: "https://www.credly.com/badges/3bb41b76-1db3-4d24-9f7c-1db6caca8311/public_url",
+    imageSrc: "https://images.credly.com/images/f28f1d88-428a-47f6-95b5-7da1dd6c1000/KCNA_badge.png",
+  },
 ]
 
 export type ExperienceItem = {
