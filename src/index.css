@@ -1222,6 +1222,15 @@
     text-decoration: none;
   }
 
+  :where(a[href], button, select, summary, [role="button"], [role="tab"], [role="link"], [aria-pressed]) {
+    cursor: pointer;
+  }
+
+  :where(button, select):disabled,
+  :where([aria-disabled="true"]) {
+    cursor: not-allowed;
+  }
+
   button,
   input,
   textarea {

@@ -1,32 +1,76 @@
+import type { Page } from "@playwright/test"
 import { expect, test } from "@playwright/test"
+
+type HomeSection = "home" | "skills" | "experience" | "projects" | "contact"
+
+function mobileSectionName(section: HomeSection) {
+  return new RegExp(`^${section}\\b`, "i")
+}
+
+async function openMobileNav(page: Page) {
+  await page.getByRole("button", { name: "Open navigation menu" }).click()
+  const dialog = page.getByRole("dialog", { name: "Samwel Omwenga" })
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+async function navigateToSection(page: Page, section: HomeSection, isMobile: boolean) {
+  if (isMobile) {
+    const dialog = await openMobileNav(page)
+    await dialog.getByRole("button", { name: mobileSectionName(section) }).click()
+    await expect(dialog).toBeHidden()
+    return
+  }
+
+  const tab = page.getByRole("tab", { name: `~/${section}` })
+  await tab.click()
+  await expect(tab).toHaveAttribute("aria-selected", "true")
+}
 
 test.describe("terminal portfolio", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/")
   })
 
-  test("renders the terminal home screen", async ({ page }) => {
+  test("renders the terminal home screen", async ({ page, isMobile }) => {
     await expect(page.getByRole("heading", { name: /Samwel Omwenga/i, level: 1 })).toBeVisible()
-    await expect(page.getByText("Software", { exact: true })).toBeVisible()
+    // "Software" renders via <TerminalText>, which keeps a visually-hidden full
+    // copy for screen readers plus an animated copy — two matches. Take the
+    // first (the screen-reader copy, always the full string) so the duplicate
+    // doesn't trip strict mode.
+    await expect(page.getByText("Software", { exact: true }).first()).toBeVisible()
     await expect(page.getByText("personal ai assistant")).toBeVisible()
 
-    // Tab strip is the primary navigation on every viewport.
-    await expect(page.getByRole("tab", { name: "~/home" })).toHaveAttribute("aria-selected", "true")
+    if (isMobile) {
+      const dialog = await openMobileNav(page)
+      await expect(dialog.getByRole("button", { name: mobileSectionName("home") })).toHaveAttribute("aria-current", "page")
+      await page.keyboard.press("Escape")
+      await expect(dialog).toBeHidden()
+    }
+    else {
+      await expect(page.getByRole("tab", { name: "~/home" })).toHaveAttribute("aria-selected", "true")
+    }
   })
 
-  test("tab navigation activates and scrolls to a section", async ({ page }) => {
-    const projectsTab = page.getByRole("tab", { name: "~/projects" })
-    await projectsTab.click()
-    await expect(projectsTab).toHaveAttribute("aria-selected", "true")
+  test("tab navigation activates and scrolls to a section", async ({ page, isMobile }) => {
+    await navigateToSection(page, "projects", isMobile)
     await expect(page.getByRole("heading", { name: "Projects", exact: true })).toBeVisible()
   })
 
-  test("skills show brand icons", async ({ page }) => {
-    await page.getByRole("tab", { name: "~/skills" }).click()
+  test("skills show brand icons", async ({ page, isMobile }) => {
+    await navigateToSection(page, "skills", isMobile)
 
     for (const skill of ["HTML5", "React", "Git"]) {
       await expect(page.locator(`[data-skill="${skill}"] svg`)).toBeVisible()
     }
+  })
+
+  test("experience timeline reveals the featured role", async ({ page, isMobile }) => {
+    await navigateToSection(page, "experience", isMobile)
+
+    await expect(page.getByRole("heading", { name: "Featured Experience" })).toBeVisible()
+    await expect(page.getByText("Africa Cloud Space", { exact: true })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Full-Stack Developer" })).toBeVisible()
   })
 
   test("theme dialog switches palette and persists", async ({ page }) => {
@@ -166,21 +210,54 @@ test.describe("terminal portfolio", () => {
     await expect(page.getByText(/Samwel Omwenga is a software engineer at Africa Cloud Space/)).toBeVisible({ timeout: 15_000 })
   })
 
-  test("project filters narrow the featured cards", async ({ page }) => {
-    await page.getByRole("tab", { name: "~/projects" }).click()
-    await page.getByRole("button", { name: "web", exact: true }).click()
+  test("projects section lists the featured cards", async ({ page, isMobile }) => {
+    await navigateToSection(page, "projects", isMobile)
     await expect(page.getByRole("heading", { name: "Learning Portal Redesign" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeHidden()
+    await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
   })
 
-  test("archive route reveals non-featured work and filters it", async ({ page }) => {
+  test("project cards expose stack badges and configured actions", async ({ page, isMobile }) => {
+    await navigateToSection(page, "projects", isMobile)
+
+    const learningCard = page.getByRole("article", { name: "Learning Portal Redesign" })
+    const learningStack = learningCard.getByRole("list", { name: "Learning Portal Redesign tech stack" })
+
+    await expect(learningStack.getByText("Next.js", { exact: true })).toBeVisible()
+    await expect(learningStack.locator("[data-project-skill=\"Next.js\"] svg")).toBeVisible()
+    await expect(learningCard.getByRole("link")).toHaveCount(0)
+
+    await page.goto("/#/projects")
+
+    const portfolioCard = page.getByRole("article", { name: "Portfolio Terminal" })
+    await expect(portfolioCard.getByRole("link", { name: "code" })).toHaveAttribute("href", "https://github.com/Samwelomwenga/portfolio-website")
+  })
+
+  test("contact form exposes labeled fields and a live status region", async ({ page, isMobile }) => {
+    await navigateToSection(page, "contact", isMobile)
+
+    await expect(page.getByRole("heading", { name: "Contact", exact: true })).toBeVisible()
+    await expect(page.getByLabel("name")).toBeVisible()
+    await expect(page.getByLabel("email")).toBeVisible()
+    await expect(page.getByLabel("message")).toBeVisible()
+    await expect(page.getByRole("button", { name: "send message" })).toBeVisible()
+    // The submit-state feedback lives in a persistent aria-live region so the
+    // idle → submitting → success/error swap is announced, not just animated.
+    await expect(page.getByRole("status")).toBeVisible()
+  })
+
+  test("archive route reveals non-featured work", async ({ page }) => {
     await page.goto("/#/projects")
     await expect(page.getByRole("heading", { name: "Project Library" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "Portfolio Terminal" })).toBeVisible()
-
-    await page.getByRole("button", { name: "systems", exact: true }).click()
     await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "Portfolio Terminal" })).toBeHidden()
+  })
+
+  test("archive navigation returns to the selected home section", async ({ page, isMobile }) => {
+    await page.goto("/#/projects")
+    await navigateToSection(page, "contact", isMobile)
+
+    await expect(page).toHaveURL(/#contact/)
+    await expect(page.getByRole("heading", { name: "Contact", exact: true })).toBeVisible()
   })
 
   test("blog archive is reachable", async ({ page }) => {

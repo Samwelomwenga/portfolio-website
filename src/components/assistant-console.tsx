@@ -1,7 +1,8 @@
-import { useReducedMotion } from "motion/react"
+import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import { StatusPill } from "@/components/terminal/status-pill"
+import { buttonMicroInteraction, pillMicroInteraction } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { assistantPrompts, assistantResponses, assistantSeedPrompt } from "@/portfolio-data"
 
@@ -111,14 +112,15 @@ export function AssistantConsole() {
 
       <div className="flex flex-wrap gap-2 border-t border-border bg-surface/40 px-3.5 pb-3">
         {assistantPrompts.map(chip => (
-          <button
+          <motion.button
             key={chip.label}
             type="button"
             onClick={() => runAssistant(chip.prompt)}
             className="mt-3 min-h-8 rounded-sm border border-border bg-surface px-2.5 text-[0.6875rem] font-extrabold tracking-[0.02em] text-muted transition-colors hover:border-line hover:text-fg"
+            {...pillMicroInteraction}
           >
             {chip.label}
-          </button>
+          </motion.button>
         ))}
       </div>
 
@@ -139,12 +141,13 @@ export function AssistantConsole() {
           aria-label="Ask the portfolio assistant"
           className="min-h-[2.375rem] w-full rounded-sm border border-border bg-surface px-2.5 text-xs text-fg outline-none focus:border-line focus:shadow-[0_0_0_0.125rem_color-mix(in_oklch,var(--accent)_24%,transparent)]"
         />
-        <button
+        <motion.button
           type="submit"
           className="min-h-[2.375rem] rounded-sm border border-accent bg-accent px-3 text-xs font-black tracking-[0.02em] text-[color:var(--bg)]"
+          {...buttonMicroInteraction}
         >
           run
-        </button>
+        </motion.button>
       </form>
     </section>
   )
