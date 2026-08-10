@@ -223,7 +223,7 @@ function Sidebar({ activeId, onNavigate }: SidebarProps) {
         <div className="mb-3">
           <div className="px-2 py-1.5 text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">pages</div>
           <LayoutGroup id="sidebar-pages">
-            {navItems.map(item => (
+            {navItems.filter(item => item.ready).map(item => (
               <TreeLink
                 key={item.id}
                 state={item.state}
@@ -337,7 +337,7 @@ function TabBar({ activeId, mode, onNavigate, onModeChange, themeTransitioning }
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] border-b border-border bg-surface">
       <div className="flex min-w-0 overflow-x-auto hide-scrollbar" role="tablist" aria-label="Open sections">
         <LayoutGroup id="terminal-tabs">
-          {navItems.map((item) => {
+          {navItems.filter(item => item.ready).map((item) => {
             const isActive = item.id === activeId
             return (
               <motion.button

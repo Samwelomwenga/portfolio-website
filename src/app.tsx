@@ -59,9 +59,10 @@ type RouteState = {
   direction: RouteDirection
 }
 
-const sectionIds = navItems.map(item => item.id)
+const sectionIds = navItems.filter(item => item.ready).map(item => item.id)
 const isSectionId = (value: string): value is SectionId => (sectionIds as readonly string[]).includes(value)
 const commandFor = (id: SectionId) => navItems.find(item => item.id === id)?.command ?? "$"
+const isSectionReady = (id: string) => navItems.some(item => item.id === id && item.ready)
 const featuredExperience = experience.filter(item => item.featured)
 const featuredProjects = projects.filter(project => project.featured)
 const featuredBlogs = blogs.filter(blog => blog.featured)
@@ -425,15 +426,17 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
         <ProjectGrid items={featuredProjects} />
       </Screen>
 
-      <Screen id="blogs">
-        <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
-          <SectionHeading title="Blogs" headingId="screen-blogs-title">
-            <RollingText text="A lean index of writing on process, interface craft, and implementation." split="words" />
-          </SectionHeading>
-          {blogs.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>}
-        </div>
-        <BlogGrid items={featuredBlogs} />
-      </Screen>
+      {isSectionReady("blogs") && (
+        <Screen id="blogs">
+          <div className="flex flex-col items-start justify-between gap-4 wide:flex-row wide:items-end">
+            <SectionHeading title="Blogs" headingId="screen-blogs-title">
+              <RollingText text="A lean index of writing on process, interface craft, and implementation." split="words" />
+            </SectionHeading>
+            {blogs.length > ARCHIVE_THRESHOLD && <ArchiveLink onClick={() => onArchive("blogs")}>More blogs</ArchiveLink>}
+          </div>
+          <BlogGrid items={featuredBlogs} />
+        </Screen>
+      )}
 
       <Screen id="contact">
         {/* Contact reveals like the Projects grid (ticket 09 revisited): the
