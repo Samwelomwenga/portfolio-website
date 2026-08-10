@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import type { RouteDirection } from "@/lib/motion"
-import type { BlogItem, ProjectItem, SectionId } from "@/portfolio-data"
+import type { BlogItem, Certification, ProjectItem, SectionId } from "@/portfolio-data"
 import {
   SiCss,
   SiDotnet,
@@ -392,16 +392,7 @@ function HomeScreens({ onNavigate, onArchive }: HomeScreensProps) {
           <span className="text-[0.6875rem] font-extrabold tracking-[0.12em] text-muted uppercase">certifications</span>
           <Stagger as="ul" each={stagger.tight} className="m-0 flex list-none flex-wrap gap-2 p-0">
             {certifications.map(certification => (
-              <StaggerItem
-                as="li"
-                key={certification}
-                whileHover={pillMicroInteraction.whileHover}
-                whileTap={pillMicroInteraction.whileTap}
-                transition={pillMicroInteraction.transition}
-                className="inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg"
-              >
-                {certification}
-              </StaggerItem>
+              <CertificationPill key={certification.name} certification={certification} />
             ))}
           </Stagger>
         </div>
@@ -480,6 +471,43 @@ function SkillChip({ tag }: { tag: string }) {
         </span>
       )}
       <span>{tag}</span>
+    </motion.li>
+  )
+}
+
+const certPillClass = "inline-flex min-h-7 items-center rounded-sm border border-border bg-surface px-2.5 text-xs font-bold text-fg"
+
+function CertificationPill({ certification }: { certification: Certification }) {
+  // Linked certificates become new-tab anchors; unlinked ones keep the existing
+  // plain pill rendering.
+  if (!certification.href) {
+    return (
+      <motion.li
+        variants={staggerItem}
+        whileHover={pillMicroInteraction.whileHover}
+        whileTap={pillMicroInteraction.whileTap}
+        transition={pillMicroInteraction.transition}
+        className={certPillClass}
+      >
+        {certification.name}
+      </motion.li>
+    )
+  }
+
+  return (
+    <motion.li variants={staggerItem}>
+      <motion.a
+        href={certification.href}
+        target="_blank"
+        rel="noreferrer"
+        whileHover={pillMicroInteraction.whileHover}
+        whileTap={pillMicroInteraction.whileTap}
+        transition={pillMicroInteraction.transition}
+        className={cn(certPillClass, "gap-1 transition-colors hover:border-fg")}
+      >
+        {certification.name}
+        <ArrowUpRight className="size-3" aria-hidden="true" />
+      </motion.a>
     </motion.li>
   )
 }

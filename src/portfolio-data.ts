@@ -81,7 +81,19 @@ export const skillGroups = [
   },
 ] as const
 
-export const certifications = ["AWS Certified Cloud Practitioner", "Kubernetes & Cloud Native Associate"] as const
+export type Certification = {
+  name: string
+  /**
+   * Optional verification URL (e.g. a Credly badge). When present, the pill
+   * becomes a link that opens in a new tab; without it the pill stays plain.
+   */
+  href?: string
+}
+
+export const certifications: readonly Certification[] = [
+  { name: "AWS Certified Cloud Practitioner" },
+  { name: "Kubernetes & Cloud Native Associate" },
+]
 
 export type ExperienceItem = {
   company: string
