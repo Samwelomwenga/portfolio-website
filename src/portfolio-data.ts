@@ -136,41 +136,73 @@ export const experience: readonly ExperienceItem[] = [
   },
 ]
 
+export type ProjectKind = "backend" | "web" | "mobile"
+export type ProjectStatus = "live" | "testing"
+
+/**
+ * Action links for a project — every key is independently optional and the card
+ * renders only the ones present. For `testing` projects, `playStore` / `appStore`
+ * relabel as the join-testing CTA (Play internal testing / TestFlight).
+ */
+export type ProjectLinks = {
+  github?: string
+  swagger?: string
+  web?: string
+  playStore?: string
+  appStore?: string
+}
+
 export type ProjectItem = {
   title: string
   blurb: string
-  statusLabel: string
-  statusTone: StatusTone
+  /** Primary classifier; does not gate which links are shown. */
+  kind: ProjectKind
+  /** Free display text, shown alongside the status pill. */
   typeLabel: string
+  status: ProjectStatus
+  links?: ProjectLinks
+  stack: readonly string[]
   state: StateColor
   featured: boolean
+}
+
+/** Derives the status pill's label and tone from a project's `status`. */
+export const projectStatusMeta: Record<ProjectStatus, { label: string, tone: StatusTone }> = {
+  live: { label: "live", tone: "done" },
+  testing: { label: "testing", tone: "warn" },
 }
 
 export const projects: readonly ProjectItem[] = [
   {
     title: "Learning Portal Redesign",
     blurb: "Rebuilt Africa Cloud Space's parent and student portal in Next.js with AI-powered revision tools, personalized learning pathways, analytics, and gamification.",
-    statusLabel: "live",
-    statusTone: "done",
+    kind: "web",
     typeLabel: "web app",
+    status: "live",
+    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
     state: "blue",
     featured: true,
   },
   {
     title: "eTIMS Integration",
     blurb: "Integrated Kenya's eTIMS e-invoicing into internal software with .NET Core, improving tax-invoice data accuracy and synchronization for clients.",
-    statusLabel: "live",
-    statusTone: "done",
+    kind: "backend",
     typeLabel: "backend",
+    status: "live",
+    stack: [".NET Core", "EF Core", "Postgres"],
     state: "green",
     featured: true,
   },
   {
     title: "Portfolio Terminal",
     blurb: "This site — a themeable, terminal-style portfolio built with React, TypeScript, and Tailwind CSS.",
-    statusLabel: "live",
-    statusTone: "done",
+    kind: "web",
     typeLabel: "web system",
+    status: "live",
+    links: {
+      github: "https://github.com/Samwelomwenga/portfolio-website",
+    },
+    stack: ["React", "TypeScript", "Tailwind CSS"],
     state: "cyan",
     featured: false,
   },
