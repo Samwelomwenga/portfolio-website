@@ -6,6 +6,8 @@ import { duration, easing } from "@/lib/motion"
 type ThemeCurtainProps = {
   phase: "cover" | "reveal"
   swatches: ThemeOption["swatches"]
+  /** When present, strips wipe with a gradient reading current (`swatches`) → target. */
+  toSwatches?: ThemeOption["swatches"]
   onCovered: () => void
   onRevealed: () => void
 }
@@ -16,7 +18,11 @@ const STRIP_DELAY = 0.04
 const stripIndexes = Array.from({ length: STRIP_COUNT }, (_, index) => index)
 
 /** Full-viewport staggered strip wipe used when terminal themes change. */
-export function ThemeCurtain({ phase, swatches, onCovered, onRevealed }: ThemeCurtainProps) {
+export function ThemeCurtain({ phase, swatches, toSwatches, onCovered, onRevealed }: ThemeCurtainProps) {
+  const gradientStops = toSwatches
+    ? `${swatches[0]} 0%, ${swatches[1]} 20%, ${swatches[2]} 40%, ${toSwatches[0]} 60%, ${toSwatches[1]} 80%, ${toSwatches[2]} 100%`
+    : `${swatches[0]} 0%, ${swatches[1]} 56%, ${swatches[2]} 100%`
+  const background = `linear-gradient(135deg, ${gradientStops})`
   return (
     <div
       aria-hidden="true"
@@ -30,7 +36,7 @@ export function ThemeCurtain({ phase, swatches, onCovered, onRevealed }: ThemeCu
             key={index}
             className="origin-top"
             style={{
-              background: `linear-gradient(135deg, ${swatches[0]} 0%, ${swatches[1]} 56%, ${swatches[2]} 100%)`,
+              background,
               backgroundPosition: `${(index / (STRIP_COUNT - 1)) * 100}% 0%`,
               backgroundSize: `${STRIP_COUNT * 100}% 100%`,
               transformOrigin: phase === "cover" ? "top" : "bottom",

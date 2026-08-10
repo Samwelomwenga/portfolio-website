@@ -7,6 +7,7 @@ import { SiGithub, SiX } from "@icons-pack/react-simple-icons"
 import { Linkedin, Monitor, Moon, Sun } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
+import { MobileNav } from "@/components/terminal/mobile-nav"
 import { ThemeCurtain } from "@/components/terminal/theme-curtain"
 import { ThemeDialog } from "@/components/terminal/theme-dialog"
 import { getThemeOption } from "@/hooks/use-terminal-theme"
@@ -26,6 +27,7 @@ type ThemeTransitionRequest = {
   theme?: ThemeName
   mode?: ColorMode
   swatches: ThemeOption["swatches"]
+  toSwatches?: ThemeOption["swatches"]
 }
 
 type ThemeCurtainState = ThemeTransitionRequest & {
@@ -106,7 +108,8 @@ export function TerminalFrame({
   function handleModeChange(nextMode: ColorMode) {
     requestThemeTransition({
       mode: nextMode,
-      swatches: getModePreviewOption(nextMode).swatches,
+      swatches: getThemeOption(theme, effectiveMode).swatches,
+      toSwatches: getModePreviewOption(nextMode).swatches,
     })
   }
 
@@ -176,6 +179,7 @@ export function TerminalFrame({
             key={themeCurtain.id}
             phase={themeCurtain.phase}
             swatches={themeCurtain.swatches}
+            toSwatches={themeCurtain.toSwatches}
             onCovered={handleCurtainCovered}
             onRevealed={() => setThemeCurtain(null)}
           />
@@ -223,7 +227,7 @@ function Sidebar({ activeId, onNavigate }: SidebarProps) {
         <div className="mb-3">
           <div className="px-2 py-1.5 text-[0.6875rem] font-extrabold tracking-[0.08em] text-muted uppercase">pages</div>
           <LayoutGroup id="sidebar-pages">
-            {navItems.map(item => (
+            {navItems.filter(item => item.ready).map(item => (
               <TreeLink
                 key={item.id}
                 state={item.state}
@@ -334,10 +338,11 @@ type TabBarProps = {
 
 function TabBar({ activeId, mode, onNavigate, onModeChange, themeTransitioning }: TabBarProps) {
   return (
-    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] border-b border-border bg-surface">
-      <div className="flex min-w-0 overflow-x-auto hide-scrollbar" role="tablist" aria-label="Open sections">
+    <div className="flex min-w-0 items-stretch justify-between border-b border-border bg-surface">
+      <MobileNav activeId={activeId} onNavigate={onNavigate} />
+      <div className="hidden min-w-0 flex-1 overflow-x-auto hide-scrollbar wide:flex" role="tablist" aria-label="Open sections">
         <LayoutGroup id="terminal-tabs">
-          {navItems.map((item) => {
+          {navItems.filter(item => item.ready).map((item) => {
             const isActive = item.id === activeId
             return (
               <motion.button
