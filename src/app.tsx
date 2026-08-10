@@ -18,7 +18,7 @@ import {
   SiTailwindcss,
   SiTypescript,
 } from "@icons-pack/react-simple-icons"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, Database } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -71,7 +71,7 @@ const featuredBlogs = blogs.filter(blog => blog.featured)
 const ARCHIVE_THRESHOLD = 6
 
 type SkillIconEntry = {
-  Icon: typeof SiReact
+  Icon: typeof SiReact | typeof Database
   iconClass: string
 }
 
@@ -82,6 +82,7 @@ const skillIcons: Record<string, SkillIconEntry> = {
   "TypeScript": { Icon: SiTypescript, iconClass: "text-[#3178C6]" },
   "C#": { Icon: SiDotnet, iconClass: "text-[#512BD4]" },
   "Postgres": { Icon: SiPostgresql, iconClass: "text-[#4169E1]" },
+  "Microsoft SQL": { Icon: Database, iconClass: "text-[#CC2927]" },
   "React": { Icon: SiReact, iconClass: "text-[#61DAFB]" },
   "Next.js": { Icon: SiNextdotjs, iconClass: "text-[#000000]" },
   "React Native": { Icon: SiReact, iconClass: "text-[#61DAFB]" },

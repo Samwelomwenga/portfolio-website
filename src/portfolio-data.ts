@@ -67,7 +67,7 @@ export const skillGroups = [
   {
     title: "languages",
     state: "blue",
-    tags: ["HTML5", "CSS3", "JavaScript", "TypeScript", "C#", "Postgres"],
+    tags: ["HTML5", "CSS3", "JavaScript", "TypeScript", "C#", "Postgres", "Microsoft SQL"],
   },
   {
     title: "frameworks",
