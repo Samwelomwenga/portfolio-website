@@ -26,6 +26,7 @@ type ThemeTransitionRequest = {
   theme?: ThemeName
   mode?: ColorMode
   swatches: ThemeOption["swatches"]
+  toSwatches?: ThemeOption["swatches"]
 }
 
 type ThemeCurtainState = ThemeTransitionRequest & {
@@ -106,7 +107,8 @@ export function TerminalFrame({
   function handleModeChange(nextMode: ColorMode) {
     requestThemeTransition({
       mode: nextMode,
-      swatches: getModePreviewOption(nextMode).swatches,
+      swatches: getThemeOption(theme, effectiveMode).swatches,
+      toSwatches: getModePreviewOption(nextMode).swatches,
     })
   }
 
@@ -176,6 +178,7 @@ export function TerminalFrame({
             key={themeCurtain.id}
             phase={themeCurtain.phase}
             swatches={themeCurtain.swatches}
+            toSwatches={themeCurtain.toSwatches}
             onCovered={handleCurtainCovered}
             onRevealed={() => setThemeCurtain(null)}
           />
