@@ -35,7 +35,7 @@ export const hero = {
   firstName: "Samwel",
   lastName: "Omwenga",
   about:
-    "I'm a full-stack engineer who builds tools people rely on every day. I work across the stack — React and Next.js on the front end, .NET Core and Postgres on the back — mostly on an academic platform used by teachers, students, and parents.",
+    "I'm a software engineer passionate about creating intuitive, user-focused solutions. I design and build engaging interfaces for web and mobile alongside highly available, scalable backend systems, and I work closely with cross-functional teams to turn complex business needs into reliable software.",
 } as const
 
 export const assistantPrompts = [
@@ -58,9 +58,9 @@ export const assistantResponses = {
 } as const
 
 export const aboutParagraphs = [
-  "I'm a full-stack engineer based in Nairobi. I work on an academic platform used by teachers, students, and parents. Most of my work turns slow, manual tasks into simple, automated ones. The people using it aren't engineers, so I keep the screens clear and the data correct.",
-  "I build the front end with React, Next.js, React Native, and TypeScript. For data, forms, and URL state I use TanStack Query, React Hook Form, and nuqs. On the back end I work with .NET Core and Postgres. I care most about the front end, where the work is actually used, but I handle the full stack.",
-  "I'm practical about how I build. I weigh user experience, maintainability, and deadlines, and I ship. I've also trained interns into developers who shipped real features, and helped raise the team's front-end standards through code reviews and shared patterns. Next, I want more full-stack ownership and deeper work on architecture.",
+  "Hello, I am Samwel Omwenga, a software engineer passionate about creating intuitive, user-focused solutions. I have a proven ability to design and implement engaging interfaces for both web and mobile platforms using React and React Native, and to build highly available, scalable backend systems with .NET Core, Microsoft SQL, and PostgreSQL. I excel at collaborating with cross-functional teams, leveraging strong communication and problem-solving skills to translate complex business needs into effective, reliable software solutions.",
+  "I have a proven record of building a multi-curriculum edtech ERP system that reduces the manual workload for teachers, such as creating lesson plans and assessments, and provides insightful analysis, reports, and suggestions to support informed decision-making. I implemented an online learning interface where students can access revision materials, take assessments, and receive timely feedback, which increases student academic results by providing personalized learning resources and timely feedback. Additionally, I developed dashboards and reports within the system that use AI-generated learning science insights, analysis, and reports to help students, teachers, and parents monitor progress and identify areas that need additional support.",
+  "Score disputes should not weigh down pool table games during play or confuse the math at the end of money match games; that is why, besides my core work, I am building Chalk App. This React Native and ASP.NET Core application handles real-time game tracking and complex post-money-match-game calculations for 8-ball and points games. By automating the ledger, it ensures players can focus entirely on the table — less talk, more chalk during the games while Chalk App handles the math.",
 ] as const
 
 export const skillGroups = [
@@ -100,14 +100,15 @@ export const experience: readonly ExperienceItem[] = [
     period: "Present",
     role: "Full-Stack Developer",
     description:
-      "I work across a live academic platform — the Next.js portals teachers, students, and parents use, and the .NET Core services and internal tools behind them. Most of my work turns a manual task into something simple and automatic.",
+      "I work on the  academic platform, building intuitive portals for teachers, students, and parents while also developing the internal services that support them. I specialize in turning time-consuming, manual tasks into seamless, automated workflows that make the platform more efficient for everyone.",
     points: [
-      "Built AI features that give people a starting point instead of a blank page — draft lesson steps for teachers, and clear explanations for students on why they missed a question.",
-      "Helped move the academic module from a legacy stack to Next.js and .NET Core. The platform got faster and broke less often, which cut down support calls.",
-      "Made lesson planning less repetitive: the next lesson number now fills in from the previous plan, and Scheme of Work creation went from two steps to one.",
-      "Replaced monthly manual reminder calls and hand-done account closures with automatic reminders and access control, so subscriptions run on a set workflow.",
-      "Built dashboards for admins, teachers, students, and parents that turn platform activity into clear signals — who's active, who's behind, and where a teacher should step in.",
-      "Trained interns into developers who shipped real features on the student and parent portals, and helped raise the team's front-end standards through code reviews and shared patterns.",
+      "Developed AI-powered features to assist with lesson planning and student revision, reducing teacher workload and improving learning outcomes.",
+      "Collaborated on the migration of the academic module to a modern technology stack, enhancing platform stability and customer satisfaction.",
+      "Mentored interns and new developers, accelerating onboarding and maintaining high standards for code quality and architecture.",
+      "Designed and implemented an internal subscription management system, automating renewals and access control to reduce operational overhead and improve revenue reliability.",
+      "Built and maintained dashboards to provide actionable insights for teachers, students, parents, and administrators, supporting data-driven decision-making.",
+      "Participated in code reviews, architecture discussions, and cross-functional team collaboration to ensure high-quality, maintainable solutions.",
+      "Trained teachers on new product features, increasing adoption and reducing support calls through hands-on enablement and regular feedback sessions",
     ],
     state: "blue",
     featured: true,
