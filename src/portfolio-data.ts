@@ -35,7 +35,7 @@ export const hero = {
   firstName: "Samwel",
   lastName: "Omwenga",
   about:
-    "Software engineer building scalable web and mobile products with modern frontend and backend technologies. I focus on responsive interfaces, secure APIs, third-party integrations, and reliable end-to-end solutions.",
+    "I'm a full-stack engineer who builds tools people rely on every day. I work across the stack — React and Next.js on the front end, .NET Core and Postgres on the back — mostly on an academic platform used by teachers, students, and parents.",
 } as const
 
 export const assistantPrompts = [
@@ -58,8 +58,9 @@ export const assistantResponses = {
 } as const
 
 export const aboutParagraphs = [
-  "Full-stack developer experienced in building scalable applications using modern frontend and backend technologies. Skilled in developing responsive user interfaces, designing secure APIs, integrating third-party services, and delivering reliable end-to-end solutions.",
-  "I enjoy collaborating with cross-functional teams to create intuitive digital experiences and continuously improve application performance, usability, and maintainability.",
+  "I'm a full-stack engineer based in Nairobi. I work on an academic platform used by teachers, students, and parents. Most of my work turns slow, manual tasks into simple, automated ones. The people using it aren't engineers, so I keep the screens clear and the data correct.",
+  "I build the front end with React, Next.js, React Native, and TypeScript. For data, forms, and URL state I use TanStack Query, React Hook Form, and nuqs. On the back end I work with .NET Core and Postgres. I care most about the front end, where the work is actually used, but I handle the full stack.",
+  "I'm practical about how I build. I weigh user experience, maintainability, and deadlines, and I ship. I've also trained interns into developers who shipped real features, and helped raise the team's front-end standards through code reviews and shared patterns. Next, I want more full-stack ownership and deeper work on architecture.",
 ] as const
 
 export const skillGroups = [
@@ -99,11 +100,14 @@ export const experience: readonly ExperienceItem[] = [
     period: "Present",
     role: "Full-Stack Developer",
     description:
-      "Led the redesign of the parent and student portal in Next.js with AI-powered revision tools, personalized learning pathways, performance analytics, and gamification, and integrated Kenya's eTIMS e-invoicing via .NET Core to improve tax-invoice accuracy and synchronization.",
+      "I work across a live academic platform — the Next.js portals teachers, students, and parents use, and the .NET Core services and internal tools behind them. Most of my work turns a manual task into something simple and automatic.",
     points: [
-      "Redesigned the parent and student portal in Next.js with AI-powered revision tools and personalized learning pathways.",
-      "Built performance analytics and gamification that lifted student engagement.",
-      "Integrated Kenya's eTIMS e-invoicing via .NET Core for accurate, synchronized tax invoices.",
+      "Built AI features that give people a starting point instead of a blank page — draft lesson steps for teachers, and clear explanations for students on why they missed a question.",
+      "Helped move the academic module from a legacy stack to Next.js and .NET Core. The platform got faster and broke less often, which cut down support calls.",
+      "Made lesson planning less repetitive: the next lesson number now fills in from the previous plan, and Scheme of Work creation went from two steps to one.",
+      "Replaced monthly manual reminder calls and hand-done account closures with automatic reminders and access control, so subscriptions run on a set workflow.",
+      "Built dashboards for admins, teachers, students, and parents that turn platform activity into clear signals — who's active, who's behind, and where a teacher should step in.",
+      "Trained interns into developers who shipped real features on the student and parent portals, and helped raise the team's front-end standards through code reviews and shared patterns.",
     ],
     state: "blue",
     featured: true,
