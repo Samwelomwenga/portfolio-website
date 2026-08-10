@@ -5,7 +5,6 @@ export const profile = {
   name: "Samwel Omwenga",
   shortName: "Samwel",
   title: "Software Engineer",
-  email: "banjan10@gmail.com",
   githubUrl: "https://github.com/samwelomwenga",
   linkedinUrl: "https://www.linkedin.com/in/samwelomwenga",
   xUrl: "https://x.com/Samwel_codes",
