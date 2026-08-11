@@ -14,8 +14,10 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.39",
     "@formspree/react": "^3.0.0",
     "@icons-pack/react-simple-icons": "^13.13.0",
+    "ai": "^7.0.58",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
