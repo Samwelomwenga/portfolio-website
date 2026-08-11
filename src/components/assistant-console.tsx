@@ -198,9 +198,9 @@ export function AssistantConsole() {
         {messages.map((message) => {
           if (message.role === "user") {
             return (
-              <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
-                <span className="font-black text-accent">›</span>
-                <p className="min-w-0">{messageText(message)}</p>
+              <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-[#E4BF7A]">
+                <span className="font-black">›</span>
+                <p className="min-w-0 font-bold">{messageText(message)}</p>
               </div>
             )
           }
@@ -219,7 +219,7 @@ export function AssistantConsole() {
               <span className="mt-2 size-2 rounded-full bg-state-orange shadow-[0_0_0_0.25rem_color-mix(in_oklch,var(--state-orange)_18%,transparent)]" aria-hidden="true" />
               <p className="min-w-0">
                 <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Samwel AI assistant</strong>
-                <span className={cn("text-muted", streaming && !prefersReducedMotion && "typed-caret")}>{linkedText(text)}</span>
+                <span className={cn("text-fg", streaming && !prefersReducedMotion && "typed-caret")}>{linkedText(text)}</span>
                 {showContactLink && (
                   <a href="#contact" className="mt-1 block font-extrabold text-accent hover:underline" aria-label="Go to contact section to ask Samwel directly">Go to contact section →</a>
                 )}
