@@ -1,4 +1,4 @@
-import type { ThemeOption } from "@/hooks/use-terminal-theme"
+import type { ThemeOption } from "@/lib/theme"
 
 import { motion } from "motion/react"
 import { duration, easing } from "@/lib/motion"

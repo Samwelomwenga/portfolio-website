@@ -40,7 +40,7 @@ export const hero = {
 export const assistantPrompts = [
   { label: "recruiter summary", prompt: "Summarize my best projects for a recruiter" },
   { label: "stack overview", prompt: "Explain my software engineering experience" },
-  { label: "client intro", prompt: "Write a short intro for a client conversation" },
+  { label: "contact info", prompt: "Share Samwel's listed contact options with their URLs and point me to the contact section" },
 ] as const
 
 export const assistantSeedPrompt = "Summarize my strongest project work"
@@ -88,6 +88,13 @@ export type Certification = {
    */
   href?: string
   imageSrc?: string
+  /**
+   * Stable Source ID acronym for the assistant's portfolio context — the
+   * builder emits `cert-<sourceId>`. Deliberately a short acronym
+   * (`aws-ccp`, `kcna`), not a title slug, so the eval-referenced IDs stay
+   * authoritative and new certs assign their own id explicitly.
+   */
+  sourceId?: string
 }
 
 export const certifications: readonly Certification[] = [
@@ -95,13 +102,31 @@ export const certifications: readonly Certification[] = [
     name: "AWS Certified Cloud Practitioner",
     href: "https://www.credly.com/badges/c77b467a-8caf-4353-9a0c-16a5f4813053/public_url",
     imageSrc: "https://images.credly.com/images/00634f82-b07f-4bbd-a6bb-53de397fc3a6/image.png",
+    sourceId: "aws-ccp",
   },
   {
     name: "Kubernetes & Cloud Native Associate",
     href: "https://www.credly.com/badges/3bb41b76-1db3-4d24-9f7c-1db6caca8311/public_url",
     imageSrc: "https://images.credly.com/images/f28f1d88-428a-47f6-95b5-7da1dd6c1000/KCNA_badge.png",
+    sourceId: "kcna",
   },
 ]
+
+/**
+ * Optional evidence backing impact claims, added per the portfolio
+ * source-of-truth decision so measurable proof can be filled in over time.
+ * The assistant may cite only populated values verbatim — an empty field is
+ * treated as "no such number exists", never a gap to fill by guessing. Left
+ * unpopulated until a genuine, verifiable value is known.
+ */
+export type EvidenceFields = {
+  /** Quantified outcomes, e.g. "Reduced onboarding time from 3 days to 1". */
+  metrics?: readonly string[]
+  /** Qualitative evidence backing an impact claim. */
+  impactEvidence?: readonly string[]
+  /** Concrete proof points — links, artifacts, or verifiable outcomes. */
+  proofPoints?: readonly string[]
+}
 
 export type ExperienceItem = {
   company: string
@@ -112,7 +137,7 @@ export type ExperienceItem = {
   points?: readonly string[]
   state: StateColor
   featured: boolean
-}
+} & EvidenceFields
 
 export const experience: readonly ExperienceItem[] = [
   {
@@ -163,7 +188,7 @@ export type ProjectItem = {
   stack: readonly string[]
   state: StateColor
   featured: boolean
-}
+} & EvidenceFields
 
 /** Derives the status pill's label and tone from a project's `status`. */
 export const projectStatusMeta: Record<ProjectStatus, { label: string, tone: StatusTone }> = {

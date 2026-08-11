@@ -1,75 +1,165 @@
+"use client"
+
+import type { UIMessage } from "ai"
+import type { ReactNode } from "react"
+
+import type { AssistantMeta } from "@/lib/assistant/meta"
+import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport } from "ai"
 import { motion, useReducedMotion } from "motion/react"
+
 import { useEffect, useRef, useState } from "react"
 
 import { StatusPill } from "@/components/terminal/status-pill"
 import { buttonMicroInteraction, pillMicroInteraction } from "@/lib/motion"
 import { cn } from "@/lib/utils"
-import { assistantPrompts, assistantResponses, assistantSeedPrompt } from "@/portfolio-data"
+import { assistantPrompts } from "@/portfolio-data"
 
-const TYPE_INTERVAL_MS = 24
+/** The client-side message type, carrying the route's `disposition`/`sourceIds` metadata. */
+type AssistantUIMessage = UIMessage<AssistantMeta>
 
-function responseFor(prompt: string): string {
-  const lower = prompt.toLowerCase()
-  if (lower.includes("recruiter")) {
-    return assistantResponses.recruiter
+/** Transport state driving the header pill and the failure notice — distinct from a content disposition. */
+type TransportState = "online" | "thinking" | "degraded" | "offline"
+
+const pillTone: Record<TransportState, "default" | "done" | "warn"> = {
+  online: "done",
+  thinking: "default",
+  degraded: "warn",
+  offline: "warn",
+}
+
+/** Flatten a UI message's text parts into the plain prose we render and send upstream. */
+function messageText(message: AssistantUIMessage): string {
+  return message.parts
+    .filter(part => part.type === "text")
+    .map(part => (part as { text: string }).text)
+    .join("")
+}
+
+const LINK_TOKEN = /#contact\b|https?:\/\/[^\s<>"']+/gi
+const TRAILING_PUNCTUATION = /[),.;:!?]+$/
+
+function trimTrailingPunctuation(value: string): { href: string, trailing: string } {
+  const match = TRAILING_PUNCTUATION.exec(value)
+  if (!match)
+    return { href: value, trailing: "" }
+
+  return {
+    href: value.slice(0, match.index),
+    trailing: match[0],
   }
-  if (lower.includes("react") || lower.includes("stack")) {
-    return assistantResponses.stack
+}
+
+/** Renders model prose as text, promoting safe URLs and the contact anchor to clickable links. */
+function linkedText(text: string): ReactNode[] {
+  const nodes: ReactNode[] = []
+  let cursor = 0
+
+  for (const match of text.matchAll(LINK_TOKEN)) {
+    const raw = match[0]
+    const index = match.index ?? 0
+    if (index > cursor)
+      nodes.push(text.slice(cursor, index))
+
+    const { href, trailing } = raw.startsWith("#")
+      ? { href: raw, trailing: "" }
+      : trimTrailingPunctuation(raw)
+    const external = href.toLowerCase().startsWith("http")
+
+    nodes.push(
+      <a
+        key={`${href}-${index}`}
+        href={href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noopener noreferrer" : undefined}
+        className="font-extrabold text-accent underline-offset-2 hover:underline"
+      >
+        {href}
+      </a>,
+    )
+    if (trailing)
+      nodes.push(trailing)
+
+    cursor = index + raw.length
   }
-  if (lower.includes("client")) {
-    return assistantResponses.client
-  }
-  return assistantResponses.fallback
+
+  if (cursor < text.length)
+    nodes.push(text.slice(cursor))
+
+  return nodes
 }
 
 /**
- * A simulated personal-assistant console. Prompt chips and the compose box feed
- * canned, keyword-matched replies that "type" out — no backend involved.
+ * Fetch wrapper that turns the route's non-2xx transport states into typed
+ * errors so the UI can tell a rate-limit (`degraded`) apart from any other
+ * failure (`offline`). A 200 with a stream-level error is masked to `"offline"`
+ * by the route, so its error message already reads as such.
+ */
+async function assistantFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const response = await fetch(input, init)
+  if (!response.ok)
+    throw new Error(response.status === 429 ? "rate_limited" : "unavailable")
+  return response
+}
+
+/**
+ * The real portfolio assistant: a terminal console wired to `POST /api/assistant`.
+ * Answers stream token-by-token from Gemini; the assistant only speaks from
+ * Samwel's portfolio and never fabricates a fallback when the backend is down.
  */
 export function AssistantConsole() {
   const prefersReducedMotion = useReducedMotion()
-  const [input, setInput] = useState(assistantSeedPrompt.toLowerCase())
-  const [echo, setEcho] = useState(assistantSeedPrompt.toLowerCase())
-  const [target, setTarget] = useState(() => responseFor(assistantSeedPrompt))
-  const [typed, setTyped] = useState("")
-  const timerRef = useRef<number | null>(null)
+  const [input, setInput] = useState("")
 
-  function runAssistant(rawPrompt: string) {
-    const clean = rawPrompt.trim() || assistantSeedPrompt
-    setInput(clean)
-    setEcho(clean)
-    setTarget(responseFor(clean))
+  // A stable anonymous session id lets the server rate-limit per visitor
+  // without any account or persisted identity.
+  const [sessionId] = useState(() => crypto.randomUUID())
+
+  // The React Compiler (enabled in next.config) memoizes this on `sessionId`,
+  // so the transport is created once per session without a manual `useMemo`.
+  const transport = new DefaultChatTransport<AssistantUIMessage>({
+    api: "/api/assistant",
+    fetch: assistantFetch,
+    headers: { "x-assistant-session": sessionId },
+    // The route expects a plain `{ role, content }[]`, not UI messages with
+    // parts. Drop any empty (errored) assistant turns so a prior failure
+    // never poisons the next request.
+    prepareSendMessagesRequest: ({ messages }) => ({
+      body: {
+        messages: messages
+          .map(message => ({ role: message.role, content: messageText(message) }))
+          .filter(turn => turn.content.trim() !== ""),
+      },
+    }),
+  })
+
+  const { messages, sendMessage, status, error } = useChat<AssistantUIMessage>({ transport })
+
+  const busy = status === "submitted" || status === "streaming"
+  const transportState: TransportState
+    = status === "error"
+      ? (error?.message === "rate_limited" ? "degraded" : "offline")
+      : busy
+        ? "thinking"
+        : "online"
+
+  const transcriptRef = useRef<HTMLDivElement | null>(null)
+  // Keep the newest turn in view as answers stream in.
+  useEffect(() => {
+    const node = transcriptRef.current
+    if (node)
+      node.scrollTop = node.scrollHeight
+  }, [messages, status])
+
+  function ask(prompt: string) {
+    const clean = prompt.trim()
+    if (!clean || busy)
+      return
+    setInput("")
+    void sendMessage({ text: clean })
   }
 
-  // Type the current target response character by character. When reduced
-  // motion is preferred the full text is shown at once (derived below).
-  useEffect(() => {
-    if (!target || prefersReducedMotion) {
-      return
-    }
-
-    // The first tick resets the text to empty, so no synchronous setState is
-    // needed in the effect body.
-    let index = 0
-    timerRef.current = window.setInterval(() => {
-      setTyped(target.slice(0, index))
-      index += 1
-      if (index > target.length && timerRef.current) {
-        window.clearInterval(timerRef.current)
-        timerRef.current = null
-      }
-    }, TYPE_INTERVAL_MS)
-
-    return () => {
-      if (timerRef.current) {
-        window.clearInterval(timerRef.current)
-        timerRef.current = null
-      }
-    }
-  }, [target, prefersReducedMotion])
-
-  const shownTyped = prefersReducedMotion ? target : typed
-  const shownReady = target !== "" && shownTyped === target
+  const lastMessageId = messages.at(-1)?.id
 
   return (
     <section
@@ -77,37 +167,93 @@ export function AssistantConsole() {
       className="grid max-h-[38.75rem] grid-rows-[auto_minmax(0,1fr)_auto_auto] overflow-hidden rounded-md border border-line bg-panel shadow-[0_1.5rem_5rem_color-mix(in_oklch,black_32%,transparent)] wide:max-h-[38.75rem]"
     >
       <div className="flex flex-wrap items-center gap-3 border-b border-border bg-surface/50 px-3.5 py-3">
-        <div className="pixel-mark grid size-9 shrink-0 place-items-center rounded-sm border border-state-orange/60" aria-hidden="true">
-          AI
+        <div
+          className="grid size-9 shrink-0 place-items-center rounded-full border border-success/50 bg-surface text-[0.75rem] font-black tracking-[0.02em] text-fg"
+          aria-hidden="true"
+        >
+          SO
         </div>
         <div className="grid min-w-0 flex-1 gap-0.5">
-          <strong id="assistant-console-title" className="truncate text-[0.8125rem] tracking-[0.01em]">personal ai assistant</strong>
-          <span className="truncate text-[0.6875rem] text-muted">portfolio helper · custom prompts</span>
+          <strong id="assistant-console-title" className="truncate text-[0.8125rem] tracking-[0.01em]">Samwel AI assistant</strong>
+          <span className="truncate text-[0.6875rem] text-muted">Personal portfolio assistant for Samwel Omwenga</span>
         </div>
-        <StatusPill tone="done">online</StatusPill>
+        <StatusPill tone={pillTone[transportState]}>{transportState}</StatusPill>
       </div>
 
-      <div className="grid min-h-[17.5rem] content-start gap-3 overflow-auto p-3.5 text-[0.8125rem] leading-relaxed term-scrollbar" aria-live="polite">
-        <div className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
-          <span className="font-black text-accent">›</span>
-          <p className="min-w-0">{echo}</p>
-        </div>
-        <div className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
-          <span className="mt-2 size-2 rounded-full bg-state-orange shadow-[0_0_0_0.25rem_color-mix(in_oklch,var(--state-orange)_18%,transparent)]" aria-hidden="true" />
-          <p className="min-w-0">
-            <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Assistant</strong>
-            <span className="typed-caret text-muted">{shownTyped}</span>
-          </p>
-        </div>
-        <div
-          className={cn(
-            "status-pulse flex items-center gap-2 pt-0.5 text-xs",
-            shownReady ? "text-success" : "text-warn",
-          )}
-          data-ready={shownReady}
-        >
-          {shownReady ? "Ready for next prompt" : "Working"}
-        </div>
+      <div
+        ref={transcriptRef}
+        className="grid min-h-[17.5rem] content-start gap-3 overflow-auto p-3.5 text-[0.8125rem] leading-relaxed term-scrollbar"
+        aria-live="polite"
+      >
+        {messages.length === 0 && status !== "error" && (
+          <div className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
+            <span className="mt-2 size-2 rounded-full bg-state-orange shadow-[0_0_0_0.25rem_color-mix(in_oklch,var(--state-orange)_18%,transparent)]" aria-hidden="true" />
+            <p className="min-w-0">
+              <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Samwel AI assistant</strong>
+              <span className="text-muted">Ask about Samwel&apos;s projects, stack, experience, or how to reach him.</span>
+            </p>
+          </div>
+        )}
+
+        {messages.map((message) => {
+          if (message.role === "user") {
+            return (
+              <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-[#E4BF7A]">
+                <span className="font-black">›</span>
+                <p className="min-w-0 font-bold">{messageText(message)}</p>
+              </div>
+            )
+          }
+
+          const text = messageText(message)
+          if (text === "")
+            return null
+
+          const streaming = status === "streaming" && message.id === lastMessageId
+          const needsContact = message.metadata?.disposition === "needs_contact"
+          const citesContact = message.metadata?.sourceIds?.includes("contact") ?? false
+          const showContactLink = !streaming && (needsContact || citesContact)
+
+          return (
+            <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
+              <span className="mt-2 size-2 rounded-full bg-state-orange shadow-[0_0_0_0.25rem_color-mix(in_oklch,var(--state-orange)_18%,transparent)]" aria-hidden="true" />
+              <p className="min-w-0">
+                <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Samwel AI assistant</strong>
+                <span className={cn("text-fg", streaming && !prefersReducedMotion && "typed-caret")}>{linkedText(text)}</span>
+                {showContactLink && (
+                  <a href="#contact" className="mt-1 block font-extrabold text-accent hover:underline" aria-label="Go to contact section to ask Samwel directly">Go to contact section →</a>
+                )}
+              </p>
+            </div>
+          )
+        })}
+
+        {status === "error" && (
+          <div className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-warn">
+            <span className="mt-2 size-2 rounded-full bg-warn" aria-hidden="true" />
+            <p className="min-w-0">
+              <strong className="mb-0.5 block text-xs tracking-[0.08em] uppercase">Samwel AI assistant</strong>
+              <span>
+                {transportState === "degraded"
+                  ? "Samwel AI assistant is taking a short break. Please try again in a moment."
+                  : "Samwel AI assistant is offline for now. You can still reach Samwel directly."}
+              </span>
+              <a href="#contact" className="mt-1 block font-extrabold text-accent hover:underline" aria-label="Go to contact section to ask Samwel directly">Go to contact section →</a>
+            </p>
+          </div>
+        )}
+
+        {messages.length > 0 && (
+          <div
+            className={cn(
+              "status-pulse flex items-center gap-2 pt-0.5 text-xs",
+              busy ? "text-warn" : "text-success",
+            )}
+            data-ready={!busy}
+          >
+            {busy ? "Working" : "Ready for next prompt"}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 border-t border-border bg-surface/40 px-3.5 pb-3">
@@ -115,8 +261,9 @@ export function AssistantConsole() {
           <motion.button
             key={chip.label}
             type="button"
-            onClick={() => runAssistant(chip.prompt)}
-            className="mt-3 min-h-8 rounded-sm border border-border bg-surface px-2.5 text-[0.6875rem] font-extrabold tracking-[0.02em] text-muted transition-colors hover:border-line hover:text-fg"
+            disabled={busy}
+            onClick={() => ask(chip.prompt)}
+            className="mt-3 min-h-8 rounded-sm border border-border bg-surface px-2.5 text-[0.6875rem] font-extrabold tracking-[0.02em] text-muted transition-colors hover:border-line hover:text-fg disabled:cursor-not-allowed disabled:opacity-50"
             {...pillMicroInteraction}
           >
             {chip.label}
@@ -128,7 +275,7 @@ export function AssistantConsole() {
         className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-t border-border bg-panel px-3.5 py-3"
         onSubmit={(event) => {
           event.preventDefault()
-          runAssistant(input)
+          ask(input)
         }}
       >
         <span className="font-black text-accent">›</span>
@@ -137,13 +284,14 @@ export function AssistantConsole() {
           onChange={event => setInput(event.target.value)}
           type="text"
           autoComplete="off"
-          placeholder="Ask the portfolio assistant..."
-          aria-label="Ask the portfolio assistant"
+          placeholder="Ask Samwel AI assistant about projects, stack, or experience..."
+          aria-label="Ask Samwel AI assistant"
           className="min-h-[2.375rem] w-full rounded-sm border border-border bg-surface px-2.5 text-xs text-fg outline-none focus:border-line focus:shadow-[0_0_0_0.125rem_color-mix(in_oklch,var(--accent)_24%,transparent)]"
         />
         <motion.button
           type="submit"
-          className="min-h-[2.375rem] rounded-sm border border-accent bg-accent px-3 text-xs font-black tracking-[0.02em] text-[color:var(--bg)]"
+          disabled={busy || input.trim() === ""}
+          className="min-h-[2.375rem] rounded-sm border border-accent bg-accent px-3 text-xs font-black tracking-[0.02em] text-[color:var(--bg)] disabled:cursor-not-allowed disabled:opacity-50"
           {...buttonMicroInteraction}
         >
           run

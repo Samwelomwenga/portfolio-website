@@ -1,6 +1,7 @@
 import type { Certification } from "@/portfolio-data"
 import { ArrowUpRight } from "lucide-react"
 import { motion } from "motion/react"
+import Image from "next/image"
 import { pillMicroInteraction, staggerItem } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
@@ -13,12 +14,11 @@ function CertificationBadge({ certification }: { certification: Certification })
 
   return (
     <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-white p-1">
-      <img
+      <Image
         src={certification.imageSrc}
         alt=""
-        loading="lazy"
-        decoding="async"
-        referrerPolicy="no-referrer"
+        width={28}
+        height={28}
         aria-hidden="true"
         className="size-full object-contain"
       />

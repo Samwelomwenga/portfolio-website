@@ -27,9 +27,46 @@ async function navigateToSection(page: Page, section: HomeSection, isMobile: boo
   await expect(tab).toHaveAttribute("aria-selected", "true")
 }
 
+test("extension-injected html attributes do not trip hydration", async ({ page }) => {
+  const hydrationErrors: string[] = []
+
+  page.on("console", (message) => {
+    const text = message.text()
+    if (message.type() === "error" && text.includes("A tree hydrated but some attributes")) {
+      hydrationErrors.push(text)
+    }
+  })
+
+  await page.addInitScript(() => {
+    const markHtml = () => {
+      document.documentElement?.setAttribute("data-scribe-recorder-ready", "true")
+    }
+
+    markHtml()
+
+    if (!document.documentElement) {
+      const observer = new MutationObserver(() => {
+        markHtml()
+
+        if (document.documentElement) {
+          observer.disconnect()
+        }
+      })
+
+      observer.observe(document, { childList: true })
+    }
+  })
+  await page.goto("/")
+  await expect(page.locator("html")).toHaveAttribute("data-scribe-recorder-ready", "true")
+  await expect(page.getByRole("main", { name: "Portfolio terminal" })).toBeVisible()
+
+  expect(hydrationErrors).toEqual([])
+})
+
 test.describe("terminal portfolio", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/")
+    await expect(page.getByRole("main", { name: "Portfolio terminal" })).toBeVisible()
   })
 
   test("renders the terminal home screen", async ({ page, isMobile }) => {
@@ -39,7 +76,7 @@ test.describe("terminal portfolio", () => {
     // first (the screen-reader copy, always the full string) so the duplicate
     // doesn't trip strict mode.
     await expect(page.getByText("Software", { exact: true }).first()).toBeVisible()
-    await expect(page.getByText("personal ai assistant")).toBeVisible()
+    await expect(page.locator("#assistant-console-title")).toHaveText("Samwel AI assistant")
 
     if (isMobile) {
       const dialog = await openMobileNav(page)
@@ -204,10 +241,45 @@ test.describe("terminal portfolio", () => {
     await expect(page.locator("html")).toHaveAttribute("data-effective-mode", "dark")
   })
 
-  test("assistant prompt chip echoes and types a response", async ({ page }) => {
+  test("assistant chip streams a grounded answer from the backend", async ({ page }) => {
+    // Mock the route with the UI-message-stream SSE the client expects, so the
+    // test is deterministic and never calls the real model.
+    await page.route("**/api/assistant", async (route) => {
+      const chunks = [
+        { type: "start" },
+        { type: "text-start", id: "0" },
+        { type: "text-delta", id: "0", delta: "Samwel builds web and mobile products with Next.js and .NET." },
+        { type: "text-end", id: "0" },
+        { type: "finish" },
+      ]
+      const body = `${chunks.map(chunk => `data: ${JSON.stringify(chunk)}\n\n`).join("")}data: [DONE]\n\n`
+      await route.fulfill({
+        status: 200,
+        headers: { "content-type": "text/event-stream", "x-vercel-ai-ui-message-stream": "v1" },
+        body,
+      })
+    })
+
     await page.getByRole("button", { name: "recruiter summary" }).click()
     await expect(page.getByText("Summarize my best projects for a recruiter")).toBeVisible()
-    await expect(page.getByText(/Samwel Omwenga is a software engineer at Africa Cloud Space/)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(/Samwel builds web and mobile products/)).toBeVisible({ timeout: 15_000 })
+  })
+
+  test("assistant shows an offline notice without a fabricated answer when the backend is down", async ({ page }) => {
+    // A missing key surfaces as the 503 offline transport state — the assistant
+    // must say so and never invent a fallback answer.
+    await page.route("**/api/assistant", route =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "offline", reason: "missing_config" }),
+      }))
+
+    await page.getByRole("button", { name: "recruiter summary" }).click()
+    await expect(page.getByText("Summarize my best projects for a recruiter")).toBeVisible()
+    await expect(page.getByText(/Samwel AI assistant is offline for now/)).toBeVisible({ timeout: 15_000 })
+    // The header status pill flips to the exact "offline" transport state.
+    await expect(page.getByText("offline", { exact: true })).toBeVisible()
   })
 
   test("projects section lists the featured cards", async ({ page, isMobile }) => {

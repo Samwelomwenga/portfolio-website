@@ -1,3 +1,5 @@
+"use client"
+
 import type { ArchiveRoute } from "@/lib/routes"
 import type { SectionId } from "@/portfolio-data"
 import { AnimatePresence, motion } from "motion/react"
@@ -12,7 +14,7 @@ import { routeTransition } from "@/lib/motion"
 import { getRouteFromHash } from "@/lib/routes"
 import { isSectionId, sectionIds } from "@/lib/sections"
 
-function App() {
+export function AppRoot() {
   const { theme, mode, effectiveMode, setTheme, setMode } = useTerminalTheme()
   const scrollRef = useRef<HTMLDivElement>(null)
   const { route, routeDirection, runPendingHashScroll } = useHashRoute({ scrollRef, isSectionId })
@@ -71,5 +73,3 @@ function App() {
     </TerminalFrame>
   )
 }
-
-export default App
