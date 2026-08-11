@@ -12,7 +12,7 @@ import {
 import { EVAL_CASES } from "@/lib/assistant/eval/cases"
 import { runAssistantCase } from "@/lib/assistant/eval/harness"
 import { createFailingModel, createScriptedModel } from "@/lib/assistant/eval/mock-model"
-import { getServerConfig } from "@/lib/env"
+import { getServerConfig, isAssistantEvalLiveEnabled } from "@/lib/env"
 
 function expectNoHardFail(resultText: string, reason: string | null | undefined): void {
   expect(reason ?? null, resultText).toBeNull()
@@ -76,7 +76,7 @@ describe("assistant fail-condition detectors", () => {
   })
 })
 
-const liveEnabled = process.env.ASSISTANT_EVAL_LIVE === "1" || process.env.ASSISTANT_EVAL_LIVE === "true"
+const liveEnabled = isAssistantEvalLiveEnabled()
 const liveDescribe = liveEnabled ? describe : describe.skip
 
 liveDescribe("assistant live Gemini evaluation", () => {

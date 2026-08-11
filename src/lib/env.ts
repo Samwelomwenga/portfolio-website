@@ -12,7 +12,7 @@
  *   bundle (it resolves to `undefined` on the client). This module is imported
  *   by client components for `publicEnv`, so it cannot carry an
  *   `import "server-only"` guard — call `getServerConfig()` from server code
- *   only (the `/api/assistant` route handler).
+ *   only (the `/api/assistant` route handler) or server-side tooling/tests.
  */
 
 export const publicEnv = {
@@ -49,4 +49,14 @@ export function getServerConfig(): ServerConfig {
 
   const model = process.env.ASSISTANT_MODEL?.trim() || DEFAULT_MODEL
   return { ok: true, apiKey, model }
+}
+
+/**
+ * Reads the optional eval flag used by the assistant test suite. Kept here so
+ * test files do not read `process.env` directly; all env access stays auditable
+ * in this module.
+ */
+export function isAssistantEvalLiveEnabled(): boolean {
+  const value = process.env.ASSISTANT_EVAL_LIVE?.trim().toLowerCase()
+  return value === "1" || value === "true"
 }

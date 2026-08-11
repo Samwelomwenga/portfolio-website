@@ -42,15 +42,6 @@ export default antfu({
     }],
   },
 }, {
-  files: ["src/lib/assistant/eval/**/*.test.ts"],
-  rules: {
-    "node/no-process-env": ["error", {
-      allowedVariables: [
-        "ASSISTANT_EVAL_LIVE",
-      ],
-    }],
-  },
-}, {
   files: ["src/lib/env.ts"],
   rules: {
     "node/no-process-env": ["error", {
@@ -59,6 +50,7 @@ export default antfu({
         "NEXT_PUBLIC_FORMSPREE_FORM_ID",
         "GOOGLE_GENERATIVE_AI_API_KEY",
         "ASSISTANT_MODEL",
+        "ASSISTANT_EVAL_LIVE",
       ],
     }],
   },
