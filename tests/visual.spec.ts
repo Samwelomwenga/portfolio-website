@@ -27,9 +27,46 @@ async function navigateToSection(page: Page, section: HomeSection, isMobile: boo
   await expect(tab).toHaveAttribute("aria-selected", "true")
 }
 
+test("extension-injected html attributes do not trip hydration", async ({ page }) => {
+  const hydrationErrors: string[] = []
+
+  page.on("console", (message) => {
+    const text = message.text()
+    if (message.type() === "error" && text.includes("A tree hydrated but some attributes")) {
+      hydrationErrors.push(text)
+    }
+  })
+
+  await page.addInitScript(() => {
+    const markHtml = () => {
+      document.documentElement?.setAttribute("data-scribe-recorder-ready", "true")
+    }
+
+    markHtml()
+
+    if (!document.documentElement) {
+      const observer = new MutationObserver(() => {
+        markHtml()
+
+        if (document.documentElement) {
+          observer.disconnect()
+        }
+      })
+
+      observer.observe(document, { childList: true })
+    }
+  })
+  await page.goto("/")
+  await expect(page.locator("html")).toHaveAttribute("data-scribe-recorder-ready", "true")
+  await expect(page.getByRole("main", { name: "Portfolio terminal" })).toBeVisible()
+
+  expect(hydrationErrors).toEqual([])
+})
+
 test.describe("terminal portfolio", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/")
+    await expect(page.getByRole("main", { name: "Portfolio terminal" })).toBeVisible()
   })
 
   test("renders the terminal home screen", async ({ page, isMobile }) => {
