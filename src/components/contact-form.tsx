@@ -8,8 +8,8 @@ import { RollingText } from "@/components/motion/rolling-text"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { publicEnv } from "@/lib/env"
 import { buttonMicroInteraction, duration, easing, spring } from "@/lib/motion"
-import { publicEnv } from "@/lib/public-env"
 
 const formId = publicEnv.formspreeFormId as string
 

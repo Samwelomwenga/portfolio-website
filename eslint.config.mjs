@@ -42,12 +42,14 @@ export default antfu({
     }],
   },
 }, {
-  files: ["src/lib/public-env.ts"],
+  files: ["src/lib/env.ts"],
   rules: {
     "node/no-process-env": ["error", {
       allowedVariables: [
         "NEXT_PUBLIC_RECAPTCHA_SITE_KEY",
         "NEXT_PUBLIC_FORMSPREE_FORM_ID",
+        "GOOGLE_GENERATIVE_AI_API_KEY",
+        "ASSISTANT_MODEL",
       ],
     }],
   },
