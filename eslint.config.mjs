@@ -42,6 +42,15 @@ export default antfu({
     }],
   },
 }, {
+  files: ["src/lib/assistant/eval/**/*.test.ts"],
+  rules: {
+    "node/no-process-env": ["error", {
+      allowedVariables: [
+        "ASSISTANT_EVAL_LIVE",
+      ],
+    }],
+  },
+}, {
   files: ["src/lib/env.ts"],
   rules: {
     "node/no-process-env": ["error", {
