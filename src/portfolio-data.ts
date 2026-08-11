@@ -40,7 +40,7 @@ export const hero = {
 export const assistantPrompts = [
   { label: "recruiter summary", prompt: "Summarize my best projects for a recruiter" },
   { label: "stack overview", prompt: "Explain my software engineering experience" },
-  { label: "client intro", prompt: "Write a short intro for a client conversation" },
+  { label: "contact info", prompt: "Share Samwel's listed contact options with their URLs and point me to the contact section" },
 ] as const
 
 export const assistantSeedPrompt = "Summarize my strongest project work"

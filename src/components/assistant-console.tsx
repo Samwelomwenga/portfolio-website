@@ -1,11 +1,13 @@
 "use client"
 
 import type { UIMessage } from "ai"
+import type { ReactNode } from "react"
 
 import type { AssistantMeta } from "@/lib/assistant/meta"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { motion, useReducedMotion } from "motion/react"
+
 import { useEffect, useRef, useState } from "react"
 
 import { StatusPill } from "@/components/terminal/status-pill"
@@ -32,6 +34,59 @@ function messageText(message: AssistantUIMessage): string {
     .filter(part => part.type === "text")
     .map(part => (part as { text: string }).text)
     .join("")
+}
+
+const LINK_TOKEN = /#contact\b|https?:\/\/[^\s<>"']+/gi
+const TRAILING_PUNCTUATION = /[),.;:!?]+$/
+
+function trimTrailingPunctuation(value: string): { href: string, trailing: string } {
+  const match = TRAILING_PUNCTUATION.exec(value)
+  if (!match)
+    return { href: value, trailing: "" }
+
+  return {
+    href: value.slice(0, match.index),
+    trailing: match[0],
+  }
+}
+
+/** Renders model prose as text, promoting safe URLs and the contact anchor to clickable links. */
+function linkedText(text: string): ReactNode[] {
+  const nodes: ReactNode[] = []
+  let cursor = 0
+
+  for (const match of text.matchAll(LINK_TOKEN)) {
+    const raw = match[0]
+    const index = match.index ?? 0
+    if (index > cursor)
+      nodes.push(text.slice(cursor, index))
+
+    const { href, trailing } = raw.startsWith("#")
+      ? { href: raw, trailing: "" }
+      : trimTrailingPunctuation(raw)
+    const external = href.toLowerCase().startsWith("http")
+
+    nodes.push(
+      <a
+        key={`${href}-${index}`}
+        href={href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noopener noreferrer" : undefined}
+        className="font-extrabold text-accent underline-offset-2 hover:underline"
+      >
+        {href}
+      </a>,
+    )
+    if (trailing)
+      nodes.push(trailing)
+
+    cursor = index + raw.length
+  }
+
+  if (cursor < text.length)
+    nodes.push(text.slice(cursor))
+
+  return nodes
 }
 
 /**
@@ -156,15 +211,17 @@ export function AssistantConsole() {
 
           const streaming = status === "streaming" && message.id === lastMessageId
           const needsContact = message.metadata?.disposition === "needs_contact"
+          const citesContact = message.metadata?.sourceIds?.includes("contact") ?? false
+          const showContactLink = !streaming && (needsContact || citesContact)
 
           return (
             <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
               <span className="mt-2 size-2 rounded-full bg-state-orange shadow-[0_0_0_0.25rem_color-mix(in_oklch,var(--state-orange)_18%,transparent)]" aria-hidden="true" />
               <p className="min-w-0">
                 <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Samwel AI assistant</strong>
-                <span className={cn("text-muted", streaming && !prefersReducedMotion && "typed-caret")}>{text}</span>
-                {needsContact && !streaming && (
-                  <a href="#contact" className="mt-1 inline-block font-extrabold text-accent hover:underline">Ask Samwel →</a>
+                <span className={cn("text-muted", streaming && !prefersReducedMotion && "typed-caret")}>{linkedText(text)}</span>
+                {showContactLink && (
+                  <a href="#contact" className="mt-1 block font-extrabold text-accent hover:underline" aria-label="Go to contact section to ask Samwel directly">Go to contact section →</a>
                 )}
               </p>
             </div>
@@ -181,7 +238,7 @@ export function AssistantConsole() {
                   ? "Samwel AI assistant is taking a short break. Please try again in a moment."
                   : "Samwel AI assistant is offline for now. You can still reach Samwel directly."}
               </span>
-              <a href="#contact" className="mt-1 inline-block font-extrabold text-accent hover:underline">Ask Samwel →</a>
+              <a href="#contact" className="mt-1 block font-extrabold text-accent hover:underline" aria-label="Go to contact section to ask Samwel directly">Go to contact section →</a>
             </p>
           </div>
         )}
