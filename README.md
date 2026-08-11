@@ -47,7 +47,7 @@ Add a current desktop or mobile screenshot at `./screenshot.png` before publishi
 - Accessible tabs, dialogs, live regions, and form labels
 - React 19
 - TypeScript
-- Vite
+- Next.js App Router
 - Tailwind CSS v4 custom utilities
 - Motion for interface animation
 - Radix UI primitives
@@ -84,19 +84,19 @@ pnpm build
 Preview the production build:
 
 ```bash
-pnpm preview
+pnpm start
 ```
 
 ### Environment variables
 
-Create a local `.env` file when contact form submissions are needed:
+Create a local `.env.local` file when contact form submissions are needed:
 
 ```bash
-VITE_FORMSPREE_FORM_ID=your_formspree_form_id
-VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
+NEXT_PUBLIC_FORMSPREE_FORM_ID=your_formspree_form_id
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
 ```
 
-`VITE_RECAPTCHA_SITE_KEY` is optional for local UI work. `VITE_FORMSPREE_FORM_ID` is required for live contact form submissions.
+`NEXT_PUBLIC_RECAPTCHA_SITE_KEY` is optional for local UI work. `NEXT_PUBLIC_FORMSPREE_FORM_ID` is required for live contact form submissions.
 
 ### Available scripts
 
