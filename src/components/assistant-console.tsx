@@ -119,8 +119,8 @@ export function AssistantConsole() {
           SO
         </div>
         <div className="grid min-w-0 flex-1 gap-0.5">
-          <strong id="assistant-console-title" className="truncate text-[0.8125rem] tracking-[0.01em]">personal ai assistant</strong>
-          <span className="truncate text-[0.6875rem] text-muted">portfolio helper · grounded answers</span>
+          <strong id="assistant-console-title" className="truncate text-[0.8125rem] tracking-[0.01em]">Samwel AI assistant</strong>
+          <span className="truncate text-[0.6875rem] text-muted">Personal portfolio assistant for Samwel Omwenga</span>
         </div>
         <StatusPill tone={pillTone[transportState]}>{transportState}</StatusPill>
       </div>
@@ -134,7 +134,7 @@ export function AssistantConsole() {
           <div className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
             <span className="mt-2 size-2 rounded-full bg-state-orange shadow-[0_0_0_0.25rem_color-mix(in_oklch,var(--state-orange)_18%,transparent)]" aria-hidden="true" />
             <p className="min-w-0">
-              <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Assistant</strong>
+              <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Samwel AI assistant</strong>
               <span className="text-muted">Ask about Samwel&apos;s projects, stack, experience, or how to reach him.</span>
             </p>
           </div>
@@ -161,7 +161,7 @@ export function AssistantConsole() {
             <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-muted">
               <span className="mt-2 size-2 rounded-full bg-state-orange shadow-[0_0_0_0.25rem_color-mix(in_oklch,var(--state-orange)_18%,transparent)]" aria-hidden="true" />
               <p className="min-w-0">
-                <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Assistant</strong>
+                <strong className="mb-0.5 block text-xs tracking-[0.08em] text-fg uppercase">Samwel AI assistant</strong>
                 <span className={cn("text-muted", streaming && !prefersReducedMotion && "typed-caret")}>{text}</span>
                 {needsContact && !streaming && (
                   <a href="#contact" className="mt-1 inline-block font-extrabold text-accent hover:underline">Ask Samwel →</a>
@@ -175,11 +175,11 @@ export function AssistantConsole() {
           <div className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-warn">
             <span className="mt-2 size-2 rounded-full bg-warn" aria-hidden="true" />
             <p className="min-w-0">
-              <strong className="mb-0.5 block text-xs tracking-[0.08em] uppercase">Assistant</strong>
+              <strong className="mb-0.5 block text-xs tracking-[0.08em] uppercase">Samwel AI assistant</strong>
               <span>
                 {transportState === "degraded"
-                  ? "Assistant is catching its breath — please try again in a moment."
-                  : "Assistant is offline right now — I won't guess an answer."}
+                  ? "Samwel AI assistant is taking a short break. Please try again in a moment."
+                  : "Samwel AI assistant is offline for now. You can still reach Samwel directly."}
               </span>
               <a href="#contact" className="mt-1 inline-block font-extrabold text-accent hover:underline">Ask Samwel →</a>
             </p>
@@ -227,8 +227,8 @@ export function AssistantConsole() {
           onChange={event => setInput(event.target.value)}
           type="text"
           autoComplete="off"
-          placeholder="Ask the portfolio assistant..."
-          aria-label="Ask the portfolio assistant"
+          placeholder="Ask Samwel AI assistant about projects, stack, or experience..."
+          aria-label="Ask Samwel AI assistant"
           className="min-h-[2.375rem] w-full rounded-sm border border-border bg-surface px-2.5 text-xs text-fg outline-none focus:border-line focus:shadow-[0_0_0_0.125rem_color-mix(in_oklch,var(--accent)_24%,transparent)]"
         />
         <motion.button

@@ -76,7 +76,7 @@ test.describe("terminal portfolio", () => {
     // first (the screen-reader copy, always the full string) so the duplicate
     // doesn't trip strict mode.
     await expect(page.getByText("Software", { exact: true }).first()).toBeVisible()
-    await expect(page.getByText("personal ai assistant")).toBeVisible()
+    await expect(page.locator("#assistant-console-title")).toHaveText("Samwel AI assistant")
 
     if (isMobile) {
       const dialog = await openMobileNav(page)
@@ -277,7 +277,7 @@ test.describe("terminal portfolio", () => {
 
     await page.getByRole("button", { name: "recruiter summary" }).click()
     await expect(page.getByText("Summarize my best projects for a recruiter")).toBeVisible()
-    await expect(page.getByText(/Assistant is offline right now/)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(/Samwel AI assistant is offline for now/)).toBeVisible({ timeout: 15_000 })
     // The header status pill flips to the exact "offline" transport state.
     await expect(page.getByText("offline", { exact: true })).toBeVisible()
   })
