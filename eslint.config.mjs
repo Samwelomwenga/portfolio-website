@@ -9,8 +9,15 @@ export default antfu({
     ".codex/**",
     ".opencode/**",
     ".scratch/**",
+    ".mcp.json",
+    ".next/**",
+    "build/**",
     "dist/**",
+    "next-env.d.ts",
+    "opencode.json",
+    "out/**",
   ],
+  nextjs: true,
   react: true,
   formatters: true,
   stylistic: {
@@ -31,6 +38,16 @@ export default antfu({
       case: "kebabCase",
       ignore: [
         /^README.*\.md$/,
+      ],
+    }],
+  },
+}, {
+  files: ["src/lib/public-env.ts"],
+  rules: {
+    "node/no-process-env": ["error", {
+      allowedVariables: [
+        "NEXT_PUBLIC_RECAPTCHA_SITE_KEY",
+        "NEXT_PUBLIC_FORMSPREE_FORM_ID",
       ],
     }],
   },

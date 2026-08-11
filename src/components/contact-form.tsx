@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { buttonMicroInteraction, duration, easing, spring } from "@/lib/motion"
+import { publicEnv } from "@/lib/public-env"
 
-const formId = import.meta.env.VITE_FORMSPREE_FORM_ID as string
+const formId = publicEnv.formspreeFormId as string
 
 const labelClass = "text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] text-muted"
 const fieldClass = "min-h-[2.875rem] rounded-sm border-border bg-panel px-3 text-fg shadow-none focus-visible:border-line focus-visible:ring-0"

@@ -1,11 +1,11 @@
 import type { Variants } from "motion/react"
-import type { EffectiveMode, ThemeName, ThemeOption } from "@/hooks/use-terminal-theme"
+import type { EffectiveMode, ThemeName, ThemeOption } from "@/lib/theme"
 
 import { X } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { getThemeOption, themeOptions } from "@/hooks/use-terminal-theme"
 import { activeIndicatorTransition, buttonMicroInteraction, duration, easing, iconButtonMicroInteraction, pillMicroInteraction, stagger } from "@/lib/motion"
+import { getThemeOption, themeOptions } from "@/lib/theme"
 import { cn } from "@/lib/utils"
 
 type ThemeDialogProps = {

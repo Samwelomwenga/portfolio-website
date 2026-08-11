@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode, RefObject } from "react"
-import type { ColorMode, EffectiveMode, ThemeName, ThemeOption } from "@/hooks/use-terminal-theme"
+import type { ColorMode, EffectiveMode, ThemeName, ThemeOption } from "@/lib/theme"
 
 import type { SectionId, StateColor } from "@/portfolio-data"
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons"
@@ -10,8 +10,8 @@ import { useEffect, useRef, useState } from "react"
 import { MobileNav } from "@/components/terminal/mobile-nav"
 import { ThemeCurtain } from "@/components/terminal/theme-curtain"
 import { ThemeDialog } from "@/components/terminal/theme-dialog"
-import { getThemeOption } from "@/hooks/use-terminal-theme"
 import { activeIndicatorTransition, iconButtonMicroInteraction, linkMicroInteraction, pillMicroInteraction } from "@/lib/motion"
+import { getThemeOption } from "@/lib/theme"
 import { cn, stateAccentClass } from "@/lib/utils"
 import { navItems, profile, socialLinks } from "@/portfolio-data"
 
@@ -195,6 +195,14 @@ function getSystemEffectiveMode(): EffectiveMode {
   }
 
   return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
+}
+
+function getCompactMode(): boolean {
+  if (typeof window.matchMedia === "function") {
+    return window.matchMedia("(max-width: 40rem)").matches
+  }
+
+  return window.innerWidth <= 640
 }
 
 type SidebarProps = {
@@ -386,11 +394,17 @@ type ModeSwitchProps = {
 // On narrow viewports the switch collapses to just the active mode; tapping it
 // reveals the rest, and picking one (or tapping outside) collapses it again.
 function ModeSwitch({ mode, transitioning, onModeChange }: ModeSwitchProps) {
-  const [compact, setCompact] = useState(() => window.matchMedia("(max-width: 40rem)").matches)
+  const [compact, setCompact] = useState(getCompactMode)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (typeof window.matchMedia !== "function") {
+      const sync = () => setCompact(getCompactMode())
+      window.addEventListener("resize", sync)
+      return () => window.removeEventListener("resize", sync)
+    }
+
     const query = window.matchMedia("(max-width: 40rem)")
     const sync = () => setCompact(query.matches)
     query.addEventListener("change", sync)
