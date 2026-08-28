@@ -1,10 +1,11 @@
-import type { ProjectItem, ProjectLinks } from "@/portfolio-data"
-import { SiAppstore, SiGithub, SiGoogleplay, SiSwagger } from "@icons-pack/react-simple-icons"
-import { Globe } from "lucide-react"
+import type { ProjectAction } from "@/lib/project-actions"
+import type { ProjectItem } from "@/portfolio-data"
 import { motion } from "motion/react"
+import Image from "next/image"
 import { RollingText } from "@/components/motion/rolling-text"
 import { StatusPill } from "@/components/terminal/status-pill"
 import { buttonMicroInteraction } from "@/lib/motion"
+import { getProjectActions } from "@/lib/project-actions"
 import { skillIcons } from "@/lib/skill-icons"
 import { cn, stateAccentClass } from "@/lib/utils"
 import { projectStatusMeta } from "@/portfolio-data"
@@ -14,54 +15,6 @@ type ProjectCardProps = {
 }
 
 const stackBadgeLimit = 6
-
-type ProjectActionKey = keyof ProjectLinks
-
-const projectActionOrder = ["github", "swagger", "web", "playStore", "appStore"] satisfies readonly ProjectActionKey[]
-
-const liveActionMeta = {
-  github: { label: "code", Icon: SiGithub, iconClass: "text-[#181717]" },
-  swagger: { label: "API docs", Icon: SiSwagger, iconClass: "text-[#85EA2D]" },
-  web: { label: "live site", Icon: Globe, iconClass: "text-accent" },
-  playStore: { label: "Play Store", Icon: SiGoogleplay, iconClass: "text-[#414141]" },
-  appStore: { label: "App Store", Icon: SiAppstore, iconClass: "text-[#0D96F6]" },
-} satisfies Record<ProjectActionKey, {
-  label: string
-  Icon: typeof SiGithub | typeof Globe
-  iconClass: string
-}>
-
-const testingActionMeta = {
-  playStore: { label: "Join Android testing", Icon: SiGoogleplay, iconClass: "text-[#414141]" },
-  appStore: { label: "Join TestFlight", Icon: SiAppstore, iconClass: "text-[#0D96F6]" },
-} satisfies Pick<typeof liveActionMeta, "playStore" | "appStore">
-
-type ProjectAction = {
-  key: ProjectActionKey
-  href: string
-  label: string
-  Icon: typeof SiGithub | typeof Globe
-  iconClass: string
-  testingCta: boolean
-}
-
-function getProjectActions(project: ProjectItem): ProjectAction[] {
-  if (!project.links) {
-    return []
-  }
-
-  return projectActionOrder.flatMap((key) => {
-    const href = project.links?.[key]
-    if (!href) {
-      return []
-    }
-
-    const testingCta = project.status === "testing" && (key === "playStore" || key === "appStore")
-    const meta = testingCta ? testingActionMeta[key] : liveActionMeta[key]
-
-    return [{ key, href, ...meta, testingCta }]
-  })
-}
 
 /**
  * Project pane: browser-framed screenshot well over a metadata body. Wrapped by
@@ -87,9 +40,23 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <span className="size-[0.4375rem] rounded-full bg-state-pink" />
             <span className="size-[0.4375rem] rounded-full bg-state-green" />
           </div>
-          <div className="project-preview-placeholder grid min-h-[10.125rem] place-items-center border border-dashed text-[0.75rem] font-extrabold tracking-[0.08em] text-muted uppercase">
-            project screenshot
-          </div>
+          {project.imageSrc
+            ? (
+                <div className="relative min-h-[10.125rem]">
+                  <Image
+                    src={project.imageSrc}
+                    alt={`${project.title} screenshot`}
+                    fill
+                    sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
+                    className="object-cover object-top"
+                  />
+                </div>
+              )
+            : (
+                <div className="project-preview-placeholder grid min-h-[10.125rem] place-items-center border border-dashed text-[0.75rem] font-extrabold tracking-[0.08em] text-muted uppercase">
+                  project screenshot
+                </div>
+              )}
         </div>
       </div>
 
@@ -159,6 +126,12 @@ function ProjectActionList({ project, actions }: { project: ProjectItem, actions
 
   return (
     <div aria-label={`${project.title} links`} className="grid gap-2">
+      {testingActions.length > 1 && (
+        <p className="text-xs text-muted">
+          Join the tester group first, then open the store listing to install.
+        </p>
+      )}
+
       {testingActions.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {testingActions.map(action => (
@@ -178,8 +151,27 @@ function ProjectActionList({ project, actions }: { project: ProjectItem, actions
   )
 }
 
+const actionVariantClass = {
+  "standard": "border-border bg-shell text-fg hover:border-fg",
+  "testing-primary": "border-[color:var(--card-accent)] bg-[color:var(--card-accent)] text-[color:var(--bg)]",
+  "testing-secondary": "border-[color:var(--card-accent)] bg-transparent text-[color:var(--card-accent)]",
+} as const
+
+const actionVariantIconClass = {
+  "testing-primary": "text-[color:var(--bg)]",
+  "testing-secondary": "text-[color:var(--card-accent)]",
+} as const
+
+function actionVariant(action: ProjectAction): keyof typeof actionVariantClass {
+  if (!action.testingCta) {
+    return "standard"
+  }
+  return action.primary ? "testing-primary" : "testing-secondary"
+}
+
 function ProjectActionLink({ action }: { action: ProjectAction }) {
   const Icon = action.Icon
+  const variant = actionVariant(action)
 
   return (
     <motion.a
@@ -189,15 +181,16 @@ function ProjectActionLink({ action }: { action: ProjectAction }) {
       aria-label={action.label}
       className={cn(
         "inline-flex min-h-8 max-w-full items-center justify-center gap-1.5 rounded-sm border px-2.5 text-xs font-extrabold transition-colors",
-        action.testingCta
-          ? "border-[color:var(--card-accent)] bg-[color:var(--card-accent)] text-[color:var(--bg)]"
-          : "border-border bg-shell text-fg hover:border-fg",
+        actionVariantClass[variant],
       )}
       {...buttonMicroInteraction}
     >
       <Icon
         aria-hidden="true"
-        className={cn("size-3.5 shrink-0", action.testingCta ? "text-[color:var(--bg)]" : action.iconClass)}
+        className={cn(
+          "size-3.5 shrink-0",
+          variant === "standard" ? action.iconClass : actionVariantIconClass[variant],
+        )}
         focusable="false"
         title=""
       />
