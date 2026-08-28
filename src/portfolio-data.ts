@@ -34,7 +34,7 @@ export const hero = {
   firstName: "Samwel",
   lastName: "Omwenga",
   about:
-    "I'm a software engineer passionate about creating intuitive, user-focused solutions. I design and build engaging interfaces for web and mobile alongside highly available, scalable backend systems, and I work closely with cross-functional teams to turn complex business needs into reliable software.",
+    "I'm a software engineer passionate about creating intuitive, user-focused solutions. I design and build engaging interfaces for web and mobile alongside highly available, scalable backend systems. I work closely with cross-functional teams to turn complex business needs into reliable software.",
 } as const
 
 export const assistantPrompts = [
@@ -47,7 +47,7 @@ export const assistantSeedPrompt = "Summarize my strongest project work"
 
 export const assistantResponses = {
   recruiter:
-    "Samwel Omwenga is a software engineer at Africa Cloud Space, building scalable web and mobile products with Next.js, React Native, and .NET Core — from responsive UIs to secure APIs and third-party integrations.",
+    "Samwel Omwenga is a software engineer at Africa Cloud Space, building scalable web and mobile products with Next.js, React Native, and .NET Core, from responsive UIs to secure APIs and third-party integrations. His work reaches 150+ schools, ~7,000 teachers, and 100,000 students, and includes AI lesson planning that cuts about 15 minutes of manual typing per plan to a roughly one-minute review.",
   stack:
     "Frontend: React, Next.js, React Native, TypeScript, and Tailwind CSS. Backend: .NET Core, EF Core, and Postgres. Tooling: Supabase, Firebase, Git, and Figma. AWS Certified Cloud Practitioner and KCNA.",
   client:
@@ -59,7 +59,7 @@ export const assistantResponses = {
 export const aboutParagraphs = [
   "Hello, I am Samwel Omwenga, a software engineer passionate about creating intuitive, user-focused solutions. I have a proven ability to design and implement engaging interfaces for both web and mobile platforms using React and React Native, and to build highly available, scalable backend systems with .NET Core, Microsoft SQL, and PostgreSQL. I excel at collaborating with cross-functional teams, leveraging strong communication and problem-solving skills to translate complex business needs into effective, reliable software solutions.",
   "I have a proven record of building a multi-curriculum edtech ERP system that reduces the manual workload for teachers, such as creating lesson plans and assessments, and provides insightful analysis, reports, and suggestions to support informed decision-making. I implemented an online learning interface where students can access revision materials, take assessments, and receive timely feedback, which increases student academic results by providing personalized learning resources and timely feedback. Additionally, I developed dashboards and reports within the system that use AI-generated learning science insights, analysis, and reports to help students, teachers, and parents monitor progress and identify areas that need additional support.",
-  "Score disputes should not weigh down pool table games during play or confuse the math at the end of money match games; that is why, besides my core work, I am building Chalk App. This React Native and ASP.NET Core application handles real-time game tracking and complex post-money-match-game calculations for 8-ball and points games. By automating the ledger, it ensures players can focus entirely on the table — less talk, more chalk during the games while Chalk App handles the math.",
+  "Score disputes should not weigh down pool table games during play or confuse the math at the end of money match games; that is why, besides my core work, I am building Chalk App. This React Native and ASP.NET Core application handles real-time game tracking and complex post-money-match-game calculations for 8-ball and points games. By automating the ledger, it ensures players can focus entirely on the table with less talk, more chalk during the games while Chalk App handles the math.",
 ] as const
 
 export const skillGroups = [
@@ -82,18 +82,8 @@ export const skillGroups = [
 
 export type Certification = {
   name: string
-  /**
-   * Optional verification URL (e.g. a Credly badge). When present, the pill
-   * becomes a link that opens in a new tab; without it the pill stays plain.
-   */
   href?: string
   imageSrc?: string
-  /**
-   * Stable Source ID acronym for the assistant's portfolio context — the
-   * builder emits `cert-<sourceId>`. Deliberately a short acronym
-   * (`aws-ccp`, `kcna`), not a title slug, so the eval-referenced IDs stay
-   * authoritative and new certs assign their own id explicitly.
-   */
   sourceId?: string
 }
 
@@ -112,19 +102,9 @@ export const certifications: readonly Certification[] = [
   },
 ]
 
-/**
- * Optional evidence backing impact claims, added per the portfolio
- * source-of-truth decision so measurable proof can be filled in over time.
- * The assistant may cite only populated values verbatim — an empty field is
- * treated as "no such number exists", never a gap to fill by guessing. Left
- * unpopulated until a genuine, verifiable value is known.
- */
 export type EvidenceFields = {
-  /** Quantified outcomes, e.g. "Reduced onboarding time from 3 days to 1". */
   metrics?: readonly string[]
-  /** Qualitative evidence backing an impact claim. */
   impactEvidence?: readonly string[]
-  /** Concrete proof points — links, artifacts, or verifiable outcomes. */
   proofPoints?: readonly string[]
 }
 
@@ -133,7 +113,6 @@ export type ExperienceItem = {
   period: string
   role: string
   description: string
-  /** Optional highlight bullets shown under the description. */
   points?: readonly string[]
   state: StateColor
   featured: boolean
@@ -147,13 +126,25 @@ export const experience: readonly ExperienceItem[] = [
     description:
       "I work on the  academic platform, building intuitive portals for teachers, students, and parents while also developing the internal services that support them. I specialize in turning time-consuming, manual tasks into seamless, automated workflows that make the platform more efficient for everyone.",
     points: [
-      "Developed AI-powered features to assist with lesson planning and student revision, reducing teacher workload and improving learning outcomes.",
-      "Collaborated on the migration of the academic module to a modern technology stack, enhancing platform stability and customer satisfaction.",
-      "Mentored interns and new developers, accelerating onboarding and maintaining high standards for code quality and architecture.",
-      "Designed and implemented an internal subscription management system, automating renewals and access control to reduce operational overhead and improve revenue reliability.",
+      "Developed AI-powered features to assist with lesson planning and student revision, cutting about 15 minutes of manual typing per lesson plan to a roughly one-minute review and reducing time taken by  teacher to prepare for the lessons.",
+      "Collaborated on migrating the academic module to a modern technology stack, which the team and clients noticed as improved stability and a smoother experience.",
+      "Mentored interns through pair programming, code review, business domain knowledge, and architecture walkthroughs, enabling them to ship production-ready features that aligned perfectly with the customer requirements and system architecture",
+      "Designed and implemented an internal subscription management system for ~230 client subscriptions across different products own by the company, automating subscription renewals and access control when the subscription require renewal  which  reduce operational overhead and improve revenue collection.",
       "Built and maintained dashboards to provide actionable insights for teachers, students, parents, and administrators, supporting data-driven decision-making.",
       "Participated in code reviews, architecture discussions, and cross-functional team collaboration to ensure high-quality, maintainable solutions.",
-      "Trained teachers on new product features, increasing adoption and reducing support calls through hands-on enablement and regular feedback sessions",
+      "Trained teachers on new product features through hands-on training  and regular feedback sessions, which the team saw increase in feature adoption and reduce support calls raised by the teachers.",
+    ],
+    metrics: [
+      "Platform serves 150+ schools, ~7,000 teachers, and 100,000 students across 2+ years live.",
+      "AI lesson-development generation cuts about 15 minutes of manual typing per plan to a roughly one-minute review, against the 15 to 30 plans each teacher creates weekly.",
+      "Onboarded interns through pair  programming, code review, business domain knowledge, and architecture walkthroughs.",
+      "Subscription system manages ~230 client subscriptions across different products.",
+    ],
+    impactEvidence: [
+      "Teachers report that students were better prepared for assessments after using the revision material  and taking the  assignment  from the system.",
+      "Automated early reminders with auto lock when the subscription lapse and auto unlock when the payment  is made, reducing  calls made  to clients, reducing late payments and the disputes that made revenue hard to forecast.",
+      "Team and clients noticed improved stability and a smoother experience after the academic-module migration.",
+      "Team saw teacher feature adoption increase and support calls drop following hands-on training and feedback sessions.",
     ],
     state: "blue",
     featured: true,
@@ -172,6 +163,7 @@ export type ProjectLinks = {
   github?: string
   swagger?: string
   web?: string
+  testerGroup?: string
   playStore?: string
   appStore?: string
 }
@@ -179,6 +171,7 @@ export type ProjectLinks = {
 export type ProjectItem = {
   title: string
   blurb: string
+  imageSrc?: string
   /** Primary classifier; does not gate which links are shown. */
   kind: ProjectKind
   /** Free display text, shown alongside the status pill. */
@@ -198,37 +191,34 @@ export const projectStatusMeta: Record<ProjectStatus, { label: string, tone: Sta
 
 export const projects: readonly ProjectItem[] = [
   {
-    title: "Learning Portal Redesign",
-    blurb: "Rebuilt Africa Cloud Space's parent and student portal in Next.js with AI-powered revision tools, personalized learning pathways, analytics, and gamification.",
-    kind: "web",
-    typeLabel: "web app",
-    status: "live",
-    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
+    title: "Chalk App",
+    blurb: "Mobile app for real-time pool game tracking and post-money-match-game calculations for 8-ball and points games. It automates the scoring ledger so players can focus on the table instead of the math. React Native front end backed by an ASP.NET Core API.",
+    imageSrc: "/assets/image/chalk-app.png",
+    kind: "mobile",
+    typeLabel: "mobile + backend",
+    status: "testing",
+    links: {
+      testerGroup: "https://groups.google.com/g/chalk-app-testers",
+      playStore: "https://play.google.com/store/apps/details?id=com.omwenga.ChalkApp",
+    },
+    stack: ["React Native", "Expo Router", "TypeScript", ".NET Core", "EF Core", "Postgres"],
     state: "blue",
     featured: true,
   },
   {
-    title: "eTIMS Integration",
-    blurb: "Integrated Kenya's eTIMS e-invoicing into internal software with .NET Core, improving tax-invoice data accuracy and synchronization for clients.",
-    kind: "backend",
-    typeLabel: "backend",
-    status: "live",
-    stack: [".NET Core", "EF Core", "Postgres"],
-    state: "green",
-    featured: true,
-  },
-  {
-    title: "Portfolio Terminal",
-    blurb: "This site — a themeable, terminal-style portfolio built with React, TypeScript, and Tailwind CSS.",
+    title: "Weather App",
+    blurb: "Weather app that resolves current, daily, and hourly forecasts for any location using the Open-Meteo APIs, with browser geolocation, unit switching between metric and imperial, and a responsive layout across devices.",
+    imageSrc: "/assets/image/Macbook-Air-1559x1138.png",
     kind: "web",
-    typeLabel: "web system",
+    typeLabel: "web app",
     status: "live",
     links: {
-      github: "https://github.com/Samwelomwenga/portfolio-website",
+      github: "https://github.com/Samwelomwenga/weather-app",
+      web: "https://weather-app-chi-plum-29.vercel.app/",
     },
-    stack: ["React", "TypeScript", "Tailwind CSS"],
+    stack: ["React", "TypeScript", "Vite", "Tailwind CSS"],
     state: "cyan",
-    featured: false,
+    featured: true,
   },
 ]
 
