@@ -1,5 +1,6 @@
 import type { ColorMode, EffectiveMode, ThemeName } from "@/lib/theme"
 import { useEffect, useState } from "react"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import {
   MODE_COOKIE,
   normalizeMode,
@@ -29,14 +30,6 @@ function readInitialMode(): ColorMode {
   return normalizeMode(document.documentElement.dataset.mode)
 }
 
-function getSystemMode(): EffectiveMode {
-  if (typeof window.matchMedia !== "function") {
-    return "dark"
-  }
-
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
-}
-
 export type TerminalTheme = {
   theme: ThemeName
   mode: ColorMode
@@ -45,21 +38,14 @@ export type TerminalTheme = {
   setMode: (mode: ColorMode) => void
 }
 
+const ASSUME_LIGHT_WHEN_UNKNOWN = false
+
 export function useTerminalTheme(): TerminalTheme {
   const [theme, setTheme] = useState<ThemeName>(readInitialTheme)
   const [mode, setMode] = useState<ColorMode>(readInitialMode)
-  const [systemMode, setSystemMode] = useState<EffectiveMode>(getSystemMode)
 
-  useEffect(() => {
-    if (typeof window.matchMedia !== "function") {
-      return
-    }
-
-    const media = window.matchMedia("(prefers-color-scheme: light)")
-    const sync = () => setSystemMode(media.matches ? "light" : "dark")
-    media.addEventListener("change", sync)
-    return () => media.removeEventListener("change", sync)
-  }, [])
+  const prefersLight = useMediaQuery("(prefers-color-scheme: light)", ASSUME_LIGHT_WHEN_UNKNOWN)
+  const systemMode: EffectiveMode = prefersLight ? "light" : "dark"
 
   const effectiveMode = resolveEffectiveMode(mode, systemMode)
 

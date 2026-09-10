@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react"
 import { MobileNav } from "@/components/terminal/mobile-nav"
 import { ThemeCurtain } from "@/components/terminal/theme-curtain"
 import { ThemeDialog } from "@/components/terminal/theme-dialog"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import { activeIndicatorTransition, iconButtonMicroInteraction, linkMicroInteraction, pillMicroInteraction } from "@/lib/motion"
 import { getThemeOption } from "@/lib/theme"
 import { cn, stateAccentClass } from "@/lib/utils"
@@ -195,14 +196,6 @@ function getSystemEffectiveMode(): EffectiveMode {
   }
 
   return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
-}
-
-function getCompactMode(): boolean {
-  if (typeof window.matchMedia === "function") {
-    return window.matchMedia("(max-width: 40rem)").matches
-  }
-
-  return window.innerWidth <= 640
 }
 
 type SidebarProps = {
@@ -393,23 +386,12 @@ type ModeSwitchProps = {
 
 // On narrow viewports the switch collapses to just the active mode; tapping it
 // reveals the rest, and picking one (or tapping outside) collapses it again.
+const ASSUME_NARROW_WHEN_UNKNOWN = false
+
 function ModeSwitch({ mode, transitioning, onModeChange }: ModeSwitchProps) {
-  const [compact, setCompact] = useState(getCompactMode)
+  const compact = useMediaQuery("(max-width: 40rem)", ASSUME_NARROW_WHEN_UNKNOWN)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== "function") {
-      const sync = () => setCompact(getCompactMode())
-      window.addEventListener("resize", sync)
-      return () => window.removeEventListener("resize", sync)
-    }
-
-    const query = window.matchMedia("(max-width: 40rem)")
-    const sync = () => setCompact(query.matches)
-    query.addEventListener("change", sync)
-    return () => query.removeEventListener("change", sync)
-  }, [])
 
   useEffect(() => {
     if (!compact) {
