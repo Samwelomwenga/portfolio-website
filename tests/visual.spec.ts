@@ -213,11 +213,14 @@ test.describe("terminal portfolio", () => {
   test("color mode toggle updates the effective mode", async ({ page, isMobile }) => {
     const modeGroup = page.getByRole("group", { name: "Color mode" })
 
+    async function expandModeSwitchOnMobile() {
+      await expect(modeGroup.locator("button:visible")).toHaveCount(1)
+      await modeGroup.locator("button:visible").first().click()
+    }
+
     async function pickMode(label: string) {
-      // On mobile the switch collapses to the active mode; tap the visible
-      // button first to expand it before choosing another mode.
       if (isMobile) {
-        await modeGroup.locator("button:visible").first().click()
+        await expandModeSwitchOnMobile()
       }
       await page.getByRole("button", { name: `Use ${label} mode` }).click()
     }
@@ -284,24 +287,23 @@ test.describe("terminal portfolio", () => {
 
   test("projects section lists the featured cards", async ({ page, isMobile }) => {
     await navigateToSection(page, "projects", isMobile)
-    await expect(page.getByRole("heading", { name: "Learning Portal Redesign" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Chalk App" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Weather App" })).toBeVisible()
   })
 
   test("project cards expose stack badges and configured actions", async ({ page, isMobile }) => {
     await navigateToSection(page, "projects", isMobile)
 
-    const learningCard = page.getByRole("article", { name: "Learning Portal Redesign" })
-    const learningStack = learningCard.getByRole("list", { name: "Learning Portal Redesign tech stack" })
+    const chalkCard = page.getByRole("article", { name: "Chalk App" })
+    const chalkStack = chalkCard.getByRole("list", { name: "Chalk App tech stack" })
 
-    await expect(learningStack.getByText("Next.js", { exact: true })).toBeVisible()
-    await expect(learningStack.locator("[data-project-skill=\"Next.js\"] svg")).toBeVisible()
-    await expect(learningCard.getByRole("link")).toHaveCount(0)
+    await expect(chalkStack.getByText("React Native", { exact: true })).toBeVisible()
+    await expect(chalkStack.locator("[data-project-skill=\"React Native\"] svg")).toBeVisible()
 
-    await page.goto("/#/projects")
+    await page.goto("/projects")
 
-    const portfolioCard = page.getByRole("article", { name: "Portfolio Terminal" })
-    await expect(portfolioCard.getByRole("link", { name: "code" })).toHaveAttribute("href", "https://github.com/Samwelomwenga/portfolio-website")
+    const weatherCard = page.getByRole("article", { name: "Weather App" })
+    await expect(weatherCard.getByRole("link", { name: "code" })).toHaveAttribute("href", "https://github.com/Samwelomwenga/weather-app")
   })
 
   test("contact form exposes labeled fields and a live status region", async ({ page, isMobile }) => {
@@ -317,15 +319,15 @@ test.describe("terminal portfolio", () => {
     await expect(page.getByRole("status")).toBeVisible()
   })
 
-  test("archive route reveals non-featured work", async ({ page }) => {
-    await page.goto("/#/projects")
+  test("project archive lists the full library", async ({ page }) => {
+    await page.goto("/projects")
     await expect(page.getByRole("heading", { name: "Project Library" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "Portfolio Terminal" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "eTIMS Integration" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Chalk App" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Weather App" })).toBeVisible()
   })
 
   test("archive navigation returns to the selected home section", async ({ page, isMobile }) => {
-    await page.goto("/#/projects")
+    await page.goto("/projects")
     await navigateToSection(page, "contact", isMobile)
 
     await expect(page).toHaveURL(/#contact/)
@@ -333,7 +335,7 @@ test.describe("terminal portfolio", () => {
   })
 
   test("blog archive is reachable", async ({ page }) => {
-    await page.goto("/#/blogs")
+    await page.goto("/blogs")
     await expect(page.getByRole("heading", { name: "Blog Library" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "React Native navigation with Expo Router" })).toBeVisible()
   })

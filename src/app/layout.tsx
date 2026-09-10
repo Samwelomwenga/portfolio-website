@@ -1,15 +1,9 @@
 import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
-import { cookies, headers } from "next/headers"
 import { Providers } from "@/app/providers"
+import { TerminalShell } from "@/components/terminal/terminal-shell"
 import { publicEnv } from "@/lib/env"
-import {
-  MODE_COOKIE,
-  normalizeMode,
-  normalizeTheme,
-  resolveEffectiveMode,
-  THEME_COOKIE,
-} from "@/lib/theme"
+import { resolveThemeFromRequest } from "@/lib/theme-server"
 import "@/app/globals.css"
 
 // Self-hosted (drops the render-blocking Google Fonts @import the Vite build used).
@@ -62,14 +56,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [cookieStore, headerStore] = await Promise.all([cookies(), headers()])
-
-  const theme = normalizeTheme(cookieStore.get(THEME_COOKIE)?.value)
-  const mode = normalizeMode(cookieStore.get(MODE_COOKIE)?.value)
-
-  const colorSchemeHint = headerStore.get("sec-ch-prefers-color-scheme")
-  const systemMode = colorSchemeHint === "light" ? "light" : "dark"
-  const effectiveMode = resolveEffectiveMode(mode, systemMode)
+  const { theme, mode, effectiveMode } = await resolveThemeFromRequest()
 
   return (
     <html
@@ -81,7 +68,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <TerminalShell initialTheme={theme} initialMode={mode}>
+            {children}
+          </TerminalShell>
+        </Providers>
       </body>
     </html>
   )
