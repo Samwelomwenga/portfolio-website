@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import { cookies, headers } from "next/headers"
 import { Providers } from "@/app/providers"
+import { publicEnv } from "@/lib/env"
 import {
   MODE_COOKIE,
   normalizeMode,
@@ -20,10 +21,28 @@ const jetBrainsMono = JetBrains_Mono({
   fallback: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
 })
 
+const title = "Samwel Omwenga | Software Engineer Portfolio"
+const description
+  = "Samwel Omwenga — Software Engineer. A terminal-inspired portfolio covering skills, experience, projects, blogs, and contact."
+
 export const metadata: Metadata = {
-  title: "Samwel Omwenga | Software Engineer Portfolio",
-  description:
-    "Samwel Omwenga — Software Engineer. A terminal-inspired portfolio covering skills, experience, projects, blogs, and contact.",
+  metadataBase: new URL(publicEnv.siteUrl),
+  title,
+  description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title,
+    description,
+    url: "/",
+    siteName: "Samwel Omwenga",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
   icons: {
     // Browser tab icons — browsers pick the best match for their tab/bar resolution
     icon: [
