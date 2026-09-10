@@ -38,26 +38,28 @@ test("extension-injected html attributes do not trip hydration", async ({ page }
   })
 
   await page.addInitScript(() => {
-    const markHtml = () => {
+    const markDom = () => {
       document.documentElement?.setAttribute("data-scribe-recorder-ready", "true")
+      document.body?.setAttribute("data-gr-ext-installed", "")
     }
 
-    markHtml()
+    markDom()
 
-    if (!document.documentElement) {
+    if (!document.documentElement || !document.body) {
       const observer = new MutationObserver(() => {
-        markHtml()
+        markDom()
 
-        if (document.documentElement) {
+        if (document.documentElement && document.body) {
           observer.disconnect()
         }
       })
 
-      observer.observe(document, { childList: true })
+      observer.observe(document, { childList: true, subtree: true })
     }
   })
   await page.goto("/")
   await expect(page.locator("html")).toHaveAttribute("data-scribe-recorder-ready", "true")
+  await expect(page.locator("body")).toHaveAttribute("data-gr-ext-installed", "")
   await expect(page.getByRole("main", { name: "Portfolio terminal" })).toBeVisible()
 
   expect(hydrationErrors).toEqual([])

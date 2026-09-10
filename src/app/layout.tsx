@@ -67,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-effective-mode={effectiveMode}
       suppressHydrationWarning
     >
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
           <TerminalShell initialTheme={theme} initialMode={mode}>
             {children}
