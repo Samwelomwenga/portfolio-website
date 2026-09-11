@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react"
+import { useSyncExternalStore } from "react"
 
 /**
  * Subscribes to a CSS media query. `serverValue` is used for the server render
@@ -6,14 +6,14 @@ import { useCallback, useSyncExternalStore } from "react"
  * paint, so there is no hydration mismatch and no effect.
  */
 export function useMediaQuery(query: string, serverValue: boolean): boolean {
-  const subscribe = useCallback((onChange: () => void) => {
+  function subscribe(onChange: () => void) {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
       return () => {}
     }
     const media = window.matchMedia(query)
     media.addEventListener("change", onChange)
     return () => media.removeEventListener("change", onChange)
-  }, [query])
+  }
 
   return useSyncExternalStore(
     subscribe,

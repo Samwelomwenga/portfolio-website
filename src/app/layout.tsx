@@ -6,8 +6,6 @@ import { publicEnv } from "@/lib/env"
 import { resolveThemeFromRequest } from "@/lib/theme-server"
 import "@/app/globals.css"
 
-// Self-hosted (drops the render-blocking Google Fonts @import the Vite build used).
-// Owns the --font-terminal CSS var consumed by body/font-mono/font-sans in globals.css.
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-terminal",

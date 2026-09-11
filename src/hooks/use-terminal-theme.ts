@@ -29,8 +29,8 @@ export type TerminalTheme = {
 }
 
 export function useTerminalTheme(initial: TerminalThemeInitial): TerminalTheme {
-  const [theme, setTheme] = useState<ThemeName>(initial.theme)
-  const [mode, setMode] = useState<ColorMode>(initial.mode)
+  const [themeState, setThemeState] = useState<TerminalThemeInitial>(initial)
+  const { theme, mode } = themeState
 
   const prefersLight = useMediaQuery("(prefers-color-scheme: light)", ASSUME_LIGHT_WHEN_UNKNOWN)
   const systemMode: EffectiveMode = prefersLight ? "light" : "dark"
@@ -45,12 +45,12 @@ export function useTerminalTheme(initial: TerminalThemeInitial): TerminalTheme {
   }, [theme, mode, effectiveMode])
 
   function updateTheme(next: ThemeName) {
-    setTheme(next)
+    setThemeState(prev => ({ ...prev, theme: next }))
     writeCookie(THEME_COOKIE, next)
   }
 
   function updateMode(next: ColorMode) {
-    setMode(next)
+    setThemeState(prev => ({ ...prev, mode: next }))
     writeCookie(MODE_COOKIE, next)
   }
 
