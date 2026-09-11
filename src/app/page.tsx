@@ -1,11 +1,5 @@
-"use client"
-
-import dynamic from "next/dynamic"
-
-const AppRoot = dynamic(() => import("@/app-root").then(mod => mod.AppRoot), {
-  ssr: false,
-})
+import { HomeView } from "@/components/sections/home-view"
 
 export default function Page() {
-  return <AppRoot />
+  return <HomeView />
 }

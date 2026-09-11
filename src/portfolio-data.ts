@@ -22,7 +22,7 @@ export const navItems = [
   { id: "home", tab: "~/home", label: "home", meta: "main · overview", state: "yellow", command: "$ ./introduce", ready: true },
   { id: "about", tab: "~/about", label: "about", meta: "bio · working style", state: "pink", command: "$ cat about.md", ready: true },
   { id: "skills", tab: "~/skills", label: "skills", meta: "stack · grouped", state: "green", command: "$ list --grouped", ready: true },
-  { id: "experience", tab: "~/experience", label: "experience", meta: "timeline · current", state: "blue", command: "$ tail experience.log", ready: true },
+  { id: "experience", tab: "~/experience", label: "experience", meta: "timeline · recent", state: "blue", command: "$ tail experience.log", ready: true },
   { id: "projects", tab: "~/projects", label: "projects", meta: "case studies · visual", state: "cyan", command: "$ open projects.cards", ready: true },
   { id: "blogs", tab: "~/blogs", label: "blogs", meta: "drafts · notes", state: "orange", command: "$ open blog.index", ready: false },
   { id: "contact", tab: "~/contact", label: "contact", meta: "email · socials", state: "green", command: "$ ./contact.sh", ready: true },
@@ -47,7 +47,7 @@ export const assistantSeedPrompt = "Summarize my strongest project work"
 
 export const assistantResponses = {
   recruiter:
-    "Samwel Omwenga is a software engineer at Africa Cloud Space, building scalable web and mobile products with Next.js, React Native, and .NET Core, from responsive UIs to secure APIs and third-party integrations. His work reaches 150+ schools, ~7,000 teachers, and 100,000 students, and includes AI lesson planning that cuts about 15 minutes of manual typing per plan to a roughly one-minute review.",
+    "Samwel Omwenga is a software engineer who worked at Africa Cloud Space, building scalable web and mobile products with Next.js, React Native, and .NET Core, from responsive UIs to secure APIs and third-party integrations. His work there reached 150+ schools, ~7,000 teachers, and 100,000 students, and included AI lesson planning that cuts about 15 minutes of manual typing per plan to a roughly one-minute review.",
   stack:
     "Frontend: React, Next.js, React Native, TypeScript, and Tailwind CSS. Backend: .NET Core, EF Core, and Postgres. Tooling: Supabase, Firebase, Git, and Figma. AWS Certified Cloud Practitioner and KCNA.",
   client:
@@ -121,10 +121,10 @@ export type ExperienceItem = {
 export const experience: readonly ExperienceItem[] = [
   {
     company: "Africa Cloud Space",
-    period: "Present",
+    period: "May 2024 to June 2026",
     role: "Full-Stack Developer",
     description:
-      "I work on the  academic platform, building intuitive portals for teachers, students, and parents while also developing the internal services that support them. I specialize in turning time-consuming, manual tasks into seamless, automated workflows that make the platform more efficient for everyone.",
+      "I worked on the academic platform, building intuitive portals for teachers, students, and parents while also developing the internal services that supported them. I specialized in turning time-consuming, manual tasks into seamless, automated workflows that made the platform more efficient for everyone.",
     points: [
       "Developed AI-powered features to assist with lesson planning and student revision, cutting about 15 minutes of manual typing per lesson plan to a roughly one-minute review and reducing time taken by  teacher to prepare for the lessons.",
       "Collaborated on migrating the academic module to a modern technology stack, which the team and clients noticed as improved stability and a smoother experience.",

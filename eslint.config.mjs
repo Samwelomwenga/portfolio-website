@@ -48,6 +48,7 @@ export default antfu({
       allowedVariables: [
         "NEXT_PUBLIC_RECAPTCHA_SITE_KEY",
         "NEXT_PUBLIC_FORMSPREE_FORM_ID",
+        "NEXT_PUBLIC_SITE_URL",
         "GOOGLE_GENERATIVE_AI_API_KEY",
         "ASSISTANT_MODEL",
         "ASSISTANT_EVAL_LIVE",

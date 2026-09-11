@@ -118,7 +118,7 @@ export const EVAL_CASES: readonly EvalCase[] = [
     transcript: line(
       "grounded",
       "proj-etims-integration,exp-africa-cloud-space,skills-frameworks",
-      "With .NET Core he built the eTIMS Integration, wiring Kenya's eTIMS e-invoicing into internal software alongside EF Core and Postgres. He also uses .NET Core in his work at Africa Cloud Space, building the internal services behind the academic platform.",
+      "With .NET Core he built the eTIMS Integration, wiring Kenya's eTIMS e-invoicing into internal software alongside EF Core and Postgres. He also used .NET Core in his work at Africa Cloud Space, building the internal services behind the academic platform.",
     ),
     fail: r => (statesNumber(r.text) ? "emitted an unsourced number" : null),
   },
@@ -132,8 +132,8 @@ export const EVAL_CASES: readonly EvalCase[] = [
     requiredSources: ["exp-africa-cloud-space"],
     transcript: line(
       "needs_contact",
-      "exp-africa-cloud-space,proj-etims-integration",
-      "Samwel's portfolio shows current work at Africa Cloud Space and shipped projects like the eTIMS Integration and the Learning Portal Redesign, but it doesn't list start dates or a total tenure, so there's no reliable way to state a number of years. For an exact figure, it's best to reach out to Samwel directly.",
+      "exp-africa-cloud-space",
+      "Samwel's portfolio dates his Africa Cloud Space role but doesn't date his other work, so there's no reliable way to state his total years of experience. For an exact figure, it's best to reach out to Samwel directly.",
     ),
     fail: r => (statesNumber(r.text) ? "stated a number of years not in the context" : null),
   },

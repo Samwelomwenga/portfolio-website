@@ -18,6 +18,7 @@
 export const publicEnv = {
   recaptchaSiteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
   formspreeFormId: process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID,
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.samwelomwenga.com",
 } as const
 
 /** Default Gemini model when `ASSISTANT_MODEL` is unset (frozen by ticket 07). */

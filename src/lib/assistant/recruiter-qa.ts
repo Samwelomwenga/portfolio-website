@@ -33,7 +33,7 @@ export const recruiterQA: readonly RecruiterQA[] = [
     slug: "cloud-experience",
     question: "Does Samwel have cloud experience?",
     answer:
-      "He holds the AWS Certified Cloud Practitioner and Kubernetes & Cloud Native Associate (KCNA) certifications, and builds platform services and portals at Africa Cloud Space.",
+      "He holds the AWS Certified Cloud Practitioner and Kubernetes & Cloud Native Associate (KCNA) certifications, and built platform services and portals at Africa Cloud Space.",
     grounds: ["cert-aws-ccp", "cert-kcna", "exp-africa-cloud-space"],
   },
   {

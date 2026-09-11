@@ -1,12 +1,9 @@
 import type { ColorMode, EffectiveMode, ThemeName } from "@/lib/theme"
 import { useEffect, useState } from "react"
-import {
-  MODE_COOKIE,
-  normalizeMode,
-  normalizeTheme,
-  resolveEffectiveMode,
-  THEME_COOKIE,
-} from "@/lib/theme"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { MODE_COOKIE, resolveEffectiveMode, THEME_COOKIE } from "@/lib/theme"
+
+const ASSUME_LIGHT_WHEN_UNKNOWN = false
 
 // One year; theme choice is a durable preference, not a session value.
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
@@ -18,23 +15,9 @@ function writeCookie(name: string, value: string) {
   document.cookie = `${name}=${value}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
 }
 
-// The layout already resolved theme/mode from the cookie (+ client hint) and wrote
-// them onto <html> before paint, so the DOM is the source of truth on mount — no
-// need to re-parse cookies, and nothing to hydrate-mismatch.
-function readInitialTheme(): ThemeName {
-  return normalizeTheme(document.documentElement.dataset.theme)
-}
-
-function readInitialMode(): ColorMode {
-  return normalizeMode(document.documentElement.dataset.mode)
-}
-
-function getSystemMode(): EffectiveMode {
-  if (typeof window.matchMedia !== "function") {
-    return "dark"
-  }
-
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
+export type TerminalThemeInitial = {
+  theme: ThemeName
+  mode: ColorMode
 }
 
 export type TerminalTheme = {
@@ -45,21 +28,12 @@ export type TerminalTheme = {
   setMode: (mode: ColorMode) => void
 }
 
-export function useTerminalTheme(): TerminalTheme {
-  const [theme, setTheme] = useState<ThemeName>(readInitialTheme)
-  const [mode, setMode] = useState<ColorMode>(readInitialMode)
-  const [systemMode, setSystemMode] = useState<EffectiveMode>(getSystemMode)
+export function useTerminalTheme(initial: TerminalThemeInitial): TerminalTheme {
+  const [themeState, setThemeState] = useState<TerminalThemeInitial>(initial)
+  const { theme, mode } = themeState
 
-  useEffect(() => {
-    if (typeof window.matchMedia !== "function") {
-      return
-    }
-
-    const media = window.matchMedia("(prefers-color-scheme: light)")
-    const sync = () => setSystemMode(media.matches ? "light" : "dark")
-    media.addEventListener("change", sync)
-    return () => media.removeEventListener("change", sync)
-  }, [])
+  const prefersLight = useMediaQuery("(prefers-color-scheme: light)", ASSUME_LIGHT_WHEN_UNKNOWN)
+  const systemMode: EffectiveMode = prefersLight ? "light" : "dark"
 
   const effectiveMode = resolveEffectiveMode(mode, systemMode)
 
@@ -71,12 +45,12 @@ export function useTerminalTheme(): TerminalTheme {
   }, [theme, mode, effectiveMode])
 
   function updateTheme(next: ThemeName) {
-    setTheme(next)
+    setThemeState(prev => ({ ...prev, theme: next }))
     writeCookie(THEME_COOKIE, next)
   }
 
   function updateMode(next: ColorMode) {
-    setMode(next)
+    setThemeState(prev => ({ ...prev, mode: next }))
     writeCookie(MODE_COOKIE, next)
   }
 

@@ -1,18 +1,11 @@
 import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
-import { cookies, headers } from "next/headers"
 import { Providers } from "@/app/providers"
-import {
-  MODE_COOKIE,
-  normalizeMode,
-  normalizeTheme,
-  resolveEffectiveMode,
-  THEME_COOKIE,
-} from "@/lib/theme"
+import { TerminalShell } from "@/components/terminal/terminal-shell"
+import { publicEnv } from "@/lib/env"
+import { resolveThemeFromRequest } from "@/lib/theme-server"
 import "@/app/globals.css"
 
-// Self-hosted (drops the render-blocking Google Fonts @import the Vite build used).
-// Owns the --font-terminal CSS var consumed by body/font-mono/font-sans in globals.css.
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-terminal",
@@ -20,10 +13,28 @@ const jetBrainsMono = JetBrains_Mono({
   fallback: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
 })
 
+const title = "Samwel Omwenga | Software Engineer Portfolio"
+const description
+  = "Samwel Omwenga — Software Engineer. A terminal-inspired portfolio covering skills, experience, projects, blogs, and contact."
+
 export const metadata: Metadata = {
-  title: "Samwel Omwenga | Software Engineer Portfolio",
-  description:
-    "Samwel Omwenga — Software Engineer. A terminal-inspired portfolio covering skills, experience, projects, blogs, and contact.",
+  metadataBase: new URL(publicEnv.siteUrl),
+  title,
+  description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title,
+    description,
+    url: "/",
+    siteName: "Samwel Omwenga",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
   icons: {
     // Browser tab icons — browsers pick the best match for their tab/bar resolution
     icon: [
@@ -43,14 +54,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [cookieStore, headerStore] = await Promise.all([cookies(), headers()])
-
-  const theme = normalizeTheme(cookieStore.get(THEME_COOKIE)?.value)
-  const mode = normalizeMode(cookieStore.get(MODE_COOKIE)?.value)
-
-  const colorSchemeHint = headerStore.get("sec-ch-prefers-color-scheme")
-  const systemMode = colorSchemeHint === "light" ? "light" : "dark"
-  const effectiveMode = resolveEffectiveMode(mode, systemMode)
+  const { theme, mode, effectiveMode } = await resolveThemeFromRequest()
 
   return (
     <html
@@ -61,8 +65,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-effective-mode={effectiveMode}
       suppressHydrationWarning
     >
-      <body>
-        <Providers>{children}</Providers>
+      <body suppressHydrationWarning>
+        <Providers>
+          <TerminalShell initialTheme={theme} initialMode={mode}>
+            {children}
+          </TerminalShell>
+        </Providers>
       </body>
     </html>
   )
