@@ -198,7 +198,7 @@ export function AssistantConsole() {
         {messages.map((message) => {
           if (message.role === "user") {
             return (
-              <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-[#E4BF7A]">
+              <div key={message.id} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-2 text-visitor">
                 <span className="font-black">›</span>
                 <p className="min-w-0 font-bold">{messageText(message)}</p>
               </div>

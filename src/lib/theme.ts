@@ -58,6 +58,19 @@ export const themeOptions = [
   { id: "visual-studio-cpp-light", label: "Light (Visual Studio - C/C++)", theme: "visual-studio-cpp", mode: "light", swatches: ["#ffffff", "#007acc", "#a31515"] },
   { id: "visual-studio-cpp-2017-light", label: "2017 Light (Visual Studio - C/C++)", theme: "visual-studio-cpp-2017", mode: "light", swatches: ["#ffffff", "#007acc", "#a31515"] },
   { id: "visual-studio-2019-light", label: "Visual Studio 2019 Light", theme: "visual-studio-2019", mode: "light", swatches: ["#ffffff", "#007acc", "#a31515"] },
+  { id: "terminal-light", label: "terminal light", theme: "terminal", mode: "light", swatches: ["#f1f1f1", "#2867c2", "#007a2a"] },
+  { id: "dracula-alucard", label: "dracula alucard", theme: "dracula", mode: "light", swatches: ["#fffbeb", "#644ac9", "#a3144d"] },
+  { id: "nord-light", label: "nord light", theme: "nord", mode: "light", swatches: ["#eff1f4", "#3a707f", "#587042"] },
+  { id: "vesper-light", label: "vesper light", theme: "vesper", mode: "light", swatches: ["#f1f1f1", "#8f5d31", "#007662"] },
+  { id: "poimandres-light", label: "poimandres light", theme: "poimandres", mode: "light", swatches: ["#f0f1f4", "#466c8f", "#007663"] },
+  { id: "poimandres-storm-light", label: "poimandres-storm light", theme: "poimandres-storm", mode: "light", swatches: ["#f0f1f4", "#466c8f", "#007663"] },
+  { id: "sapphire-light", label: "Sapphire Light", theme: "sapphire", mode: "light", swatches: ["#eff1f4", "#006bb4", "#00783e"] },
+  { id: "sapphire-bright-light", label: "Sapphire (Bright) Light", theme: "sapphire-bright", mode: "light", swatches: ["#eff1f4", "#006bb4", "#00783e"] },
+  { id: "sapphire-dim-light", label: "Sapphire (Dim) Light", theme: "sapphire-dim", mode: "light", swatches: ["#eff1f4", "#006bb4", "#00783e"] },
+  { id: "city-lights-light", label: "City Lights Light", theme: "city-lights", mode: "light", swatches: ["#eff1f3", "#526c80", "#2d7644"] },
+  { id: "winter-is-coming-black-light", label: "Winter is Coming (Dark Black) Light", theme: "winter-is-coming-black", mode: "light", swatches: ["#ffffff", "#236ebf", "#08916a"] },
+  { id: "vue-light", label: "Vue Theme Light", theme: "vue", mode: "light", swatches: ["#edf2f4", "#007383", "#8c5f29"] },
+  { id: "vue-high-contrast-light", label: "Vue Theme High Contrast Light", theme: "vue-high-contrast", mode: "light", swatches: ["#edf2f4", "#007383", "#8c5f29"] },
 ] as const satisfies readonly ThemeOptionDefinition[]
 
 export type ThemeOption = typeof themeOptions[number]
@@ -67,34 +80,34 @@ export type ThemeVariantName = ThemeOption["id"]
 type ThemeFamily = {
   id: ThemeName
   dark: ThemeVariantName
-  light?: ThemeVariantName
+  light: ThemeVariantName
 }
 
-const themeFamilies = [
+export const themeFamilies = [
   { id: "catppuccin", dark: "catppuccin", light: "catppuccin-latte" },
-  { id: "terminal", dark: "terminal" },
+  { id: "terminal", dark: "terminal", light: "terminal-light" },
   { id: "tokyo-night", dark: "tokyo-night", light: "tokyo-night-day" },
-  { id: "dracula", dark: "dracula" },
-  { id: "nord", dark: "nord" },
+  { id: "dracula", dark: "dracula", light: "dracula-alucard" },
+  { id: "nord", dark: "nord", light: "nord-light" },
   { id: "gruvbox", dark: "gruvbox", light: "gruvbox-light" },
   { id: "one-dark", dark: "one-dark", light: "one-light" },
   { id: "solarized", dark: "solarized", light: "solarized-light" },
   { id: "kanagawa", dark: "kanagawa", light: "kanagawa-lotus" },
   { id: "rose-pine", dark: "rose-pine", light: "rose-pine-dawn" },
-  { id: "vesper", dark: "vesper" },
+  { id: "vesper", dark: "vesper", light: "vesper-light" },
   { id: "night-owl", dark: "night-owl", light: "night-owl-light" },
   { id: "better-solarized", dark: "better-solarized", light: "better-solarized-light" },
   { id: "better-selenized", dark: "better-selenized", light: "better-selenized-light" },
-  { id: "poimandres", dark: "poimandres" },
-  { id: "poimandres-storm", dark: "poimandres-storm" },
-  { id: "sapphire", dark: "sapphire" },
-  { id: "sapphire-bright", dark: "sapphire-bright" },
-  { id: "sapphire-dim", dark: "sapphire-dim" },
-  { id: "city-lights", dark: "city-lights" },
+  { id: "poimandres", dark: "poimandres", light: "poimandres-light" },
+  { id: "poimandres-storm", dark: "poimandres-storm", light: "poimandres-storm-light" },
+  { id: "sapphire", dark: "sapphire", light: "sapphire-light" },
+  { id: "sapphire-bright", dark: "sapphire-bright", light: "sapphire-bright-light" },
+  { id: "sapphire-dim", dark: "sapphire-dim", light: "sapphire-dim-light" },
+  { id: "city-lights", dark: "city-lights", light: "city-lights-light" },
   { id: "winter-is-coming", dark: "winter-is-coming", light: "winter-is-coming-light" },
-  { id: "winter-is-coming-black", dark: "winter-is-coming-black" },
-  { id: "vue", dark: "vue" },
-  { id: "vue-high-contrast", dark: "vue-high-contrast" },
+  { id: "winter-is-coming-black", dark: "winter-is-coming-black", light: "winter-is-coming-black-light" },
+  { id: "vue", dark: "vue", light: "vue-light" },
+  { id: "vue-high-contrast", dark: "vue-high-contrast", light: "vue-high-contrast-light" },
   { id: "visual-studio-cpp", dark: "visual-studio-cpp", light: "visual-studio-cpp-light" },
   { id: "visual-studio-cpp-2017", dark: "visual-studio-cpp-2017", light: "visual-studio-cpp-2017-light" },
   { id: "visual-studio-2019", dark: "visual-studio-2019", light: "visual-studio-2019-light" },
@@ -172,7 +185,7 @@ export function resolveEffectiveMode(mode: ColorMode, systemMode: EffectiveMode)
 
 export function getThemeOption(theme: ThemeName, effectiveMode: EffectiveMode): ThemeOption {
   const family: ThemeFamily | undefined = themeFamilies.find(item => item.id === theme)
-  const variant = effectiveMode === "light" && family?.light ? family.light : family?.dark
+  const variant = effectiveMode === "light" ? family?.light : family?.dark
 
   return themeOptions.find(item => item.id === variant) ?? themeOptions[0]
 }
