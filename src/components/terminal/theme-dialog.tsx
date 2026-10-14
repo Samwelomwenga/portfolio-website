@@ -62,12 +62,12 @@ export function ThemeDialog({ theme, effectiveMode, transitioning, onThemeOption
   }, [])
 
   useEffect(() => {
-    if (open) {
-      activeButtonRef.current?.focus()
+    if (!open) {
+      return
     }
-    else {
-      launcherRef.current?.focus()
-    }
+    const launcher = launcherRef.current
+    activeButtonRef.current?.focus()
+    return () => launcher?.focus()
   }, [open])
 
   return (
