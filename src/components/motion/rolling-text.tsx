@@ -56,14 +56,6 @@ function rollWhileOutOfView(container: HTMLSpanElement) {
   return () => observer.disconnect()
 }
 
-/**
- * A "rolling text" reveal: each unit (character or word) sits behind a
- * one-line mask with a duplicate stacked directly below it. The units roll up
- * in a stagger on hover, and optionally when the text scrolls into view.
- *
- * Reduced-motion users get static text. The full string stays in the
- * accessibility tree; the rolling copies are `aria-hidden`.
- */
 export function RollingText(props: RollingTextProps) {
   return props.driven ? <DrivenRollingText {...props} /> : <CssRollingText {...props} />
 }
