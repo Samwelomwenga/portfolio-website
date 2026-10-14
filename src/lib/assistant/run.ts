@@ -44,6 +44,12 @@ class AssistantContractError extends Error {}
 
 const CONTRACT_ERROR = new AssistantContractError("assistant response is missing a valid control line")
 
+class AssistantAbortError extends Error {
+  constructor(reason: string | undefined) {
+    super(`assistant model call aborted before the control line${reason ? `: ${reason}` : ""}`)
+  }
+}
+
 /**
  * A stream transform that consumes the model's leading `⟦meta …⟧` control line:
  * it buffers text deltas until the first newline, parses the line into
@@ -55,19 +61,34 @@ function metaStripper(metaRef: { value: AssistantMeta | null }): StreamTextTrans
   return () => {
     let buffer = ""
     let metaDone = false
-    let errored = false
+    let failed = false
 
     return new TransformStream<TextStreamPart<ToolSet>, TextStreamPart<ToolSet>>({
       transform(part, controller) {
-        if (errored) {
-          // Contract already failed: suppress further answer text, but let
+        if (failed) {
+          // The call already failed: suppress further answer text, but let
           // structural/terminal parts (e.g. `finish`) through so the stream
           // still closes cleanly.
           if (part.type !== "text-delta")
             controller.enqueue(part)
           return
         }
-        if (metaDone || part.type !== "text-delta") {
+        if (metaDone) {
+          controller.enqueue(part)
+          return
+        }
+        if (part.type === "error") {
+          failed = true
+          controller.enqueue(part)
+          return
+        }
+        if (part.type === "abort") {
+          failed = true
+          controller.enqueue({ type: "error", error: new AssistantAbortError(part.reason) })
+          controller.enqueue(part)
+          return
+        }
+        if (part.type !== "text-delta") {
           controller.enqueue(part)
           return
         }
@@ -79,7 +100,7 @@ function metaStripper(metaRef: { value: AssistantMeta | null }): StreamTextTrans
 
         const meta = parseMetaLine(buffer.slice(0, newline))
         if (!meta) {
-          errored = true
+          failed = true
           controller.enqueue({ type: "error", error: CONTRACT_ERROR })
           return
         }
@@ -92,7 +113,7 @@ function metaStripper(metaRef: { value: AssistantMeta | null }): StreamTextTrans
           controller.enqueue({ ...part, text: rest })
       },
       flush(controller) {
-        if (errored || metaDone)
+        if (failed || metaDone)
           return
         // The stream ended before a newline: the whole output was the control
         // line with no answer body. Parse it so metadata is still surfaced.

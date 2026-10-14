@@ -2,6 +2,7 @@ import type { Variants } from "motion/react"
 import { motion, useReducedMotion } from "motion/react"
 
 import { duration, easing, stagger as staggerTokens, viewport } from "@/lib/motion"
+import { cn } from "@/lib/utils"
 
 type RollingTextProps = {
   /** The text to roll. */
@@ -36,24 +37,74 @@ const WHITESPACE = /^\s+$/
 const SPLIT_ON_WHITESPACE = /(\s+)/
 const isWhitespace = (value: string) => WHITESPACE.test(value)
 
-/**
- * A "rolling text" reveal: each unit (character or word) sits behind a
- * one-line mask with a duplicate stacked directly below it, and rolls up in a
- * stagger — on hover, and optionally when it scrolls into view. Recreated from
- * free primitives (masking + `staggerChildren`), no Motion+ `splitText`.
- *
- * The mask's height comes from the first (in-flow) copy; the second copy is
- * absolutely positioned just below it, so it adds no height and stays clipped
- * until the roller translates a full -100%.
- *
- * Reduced-motion users get plain static text. The full string stays in the
- * accessibility tree; the rolling copies are `aria-hidden`.
- */
-export function RollingText({
+function splitIntoKeyedUnits(text: string, split: "chars" | "words") {
+  const units = (split === "words" ? text.split(SPLIT_ON_WHITESPACE) : [...text]).filter(unit => unit !== "")
+  const occurrenceCounts = new Map<string, number>()
+  return units.map((unit) => {
+    const occurrence = occurrenceCounts.get(unit) ?? 0
+    occurrenceCounts.set(unit, occurrence + 1)
+    return { unit, key: `${unit}:${occurrence}` }
+  })
+}
+
+function rollWhileOutOfView(container: HTMLSpanElement) {
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(entry => container.toggleAttribute("data-rolled", !entry.isIntersecting)),
+    { threshold: viewport.amount },
+  )
+  observer.observe(container)
+  return () => observer.disconnect()
+}
+
+export function RollingText(props: RollingTextProps) {
+  return props.driven ? <DrivenRollingText {...props} /> : <CssRollingText {...props} />
+}
+
+function CssRollingText({
   text,
   split = "chars",
   revealOnView = false,
-  driven = false,
+  staggerEach,
+  className,
+  hideFromAccessibility = false,
+}: RollingTextProps) {
+  const each = staggerEach ?? (split === "words" ? staggerTokens.base : 0.03)
+  let rollIndex = 0
+
+  return (
+    <span
+      ref={revealOnView ? rollWhileOutOfView : undefined}
+      className={cn("group/roll", className)}
+      data-rolled={revealOnView ? "" : undefined}
+      aria-hidden={hideFromAccessibility || undefined}
+      aria-label={hideFromAccessibility ? undefined : text}
+    >
+      {!hideFromAccessibility && <span className="sr-only">{text}</span>}
+      {splitIntoKeyedUnits(text, split).map(({ unit, key }) => {
+        if (isWhitespace(unit))
+          return unit
+        const delay = rollIndex++ * each
+        return (
+          <span key={key} className="relative inline-block overflow-hidden align-bottom">
+            <span
+              data-roll-unit
+              data-text={unit}
+              aria-hidden="true"
+              style={{ transitionDelay: `${delay}s` }}
+              className="block transition-transform duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] after:absolute after:left-0 after:top-full after:content-[attr(data-text)] motion-safe:group-hover/roll:-translate-y-full motion-safe:group-data-rolled/roll:-translate-y-full"
+            >
+              {unit}
+            </span>
+          </span>
+        )
+      })}
+    </span>
+  )
+}
+
+function DrivenRollingText({
+  text,
+  split = "chars",
   staggerEach,
   className,
   hideFromAccessibility = false,
@@ -65,27 +116,10 @@ export function RollingText({
   }
 
   const each = staggerEach ?? (split === "words" ? staggerTokens.base : 0.03)
-  // Keep whitespace as its own unit so word wrapping still happens between words.
-  const units = (split === "words" ? text.split(SPLIT_ON_WHITESPACE) : [...text]).filter(unit => unit !== "")
-  const occurrenceCounts = new Map<string, number>()
-  const keyedUnits = units.map((unit) => {
-    const occurrence = occurrenceCounts.get(unit) ?? 0
-    occurrenceCounts.set(unit, occurrence + 1)
-    return { unit, key: `${unit}:${occurrence}` }
-  })
-
   const containerVariants: Variants = {
     rest: { transition: { staggerChildren: each } },
     rolled: { transition: { staggerChildren: each } },
   }
-
-  const selfProps = driven
-    ? {}
-    : {
-        initial: revealOnView ? "rolled" : "rest",
-        whileHover: "rolled",
-        ...(revealOnView ? { whileInView: "rest", viewport } : {}),
-      }
 
   return (
     <motion.span
@@ -93,10 +127,9 @@ export function RollingText({
       variants={containerVariants}
       aria-hidden={hideFromAccessibility || undefined}
       aria-label={hideFromAccessibility ? undefined : text}
-      {...selfProps}
     >
       {!hideFromAccessibility && <span className="sr-only">{text}</span>}
-      {keyedUnits.map(({ unit, key }) =>
+      {splitIntoKeyedUnits(text, split).map(({ unit, key }) =>
         isWhitespace(unit)
           ? (
               <span key={`${key}:space`} aria-hidden="true">{unit}</span>

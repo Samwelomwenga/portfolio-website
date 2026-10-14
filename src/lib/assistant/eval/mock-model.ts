@@ -84,3 +84,18 @@ export function createFailingModel(): LanguageModel {
     doStream: async () => ({ stream: convertArrayToReadableStream(parts) }),
   })
 }
+
+export function createStalledModel(): LanguageModel {
+  return new MockLanguageModelV4({
+    doStream: async ({ abortSignal }) => ({
+      stream: new ReadableStream<StreamPart>({
+        start(controller) {
+          controller.enqueue({ type: "stream-start", warnings: [] })
+          controller.enqueue({ type: "reasoning-start", id: "0" })
+          controller.enqueue({ type: "reasoning-delta", id: "0", delta: "thinking" })
+          abortSignal?.addEventListener("abort", () => controller.error(abortSignal.reason))
+        },
+      }),
+    }),
+  })
+}

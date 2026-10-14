@@ -2,7 +2,6 @@ import type { ReactNode } from "react"
 import { useForm, ValidationError } from "@formspree/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 
 import { RollingText } from "@/components/motion/rolling-text"
 import { Input } from "@/components/ui/input"
@@ -10,8 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { publicEnv } from "@/lib/env"
 import { buttonMicroInteraction, duration, easing, spring } from "@/lib/motion"
+import { getRecaptchaTokenOrEmpty, loadRecaptcha } from "@/lib/recaptcha"
 
 const formId = publicEnv.formspreeFormId as string
+const recaptchaSiteKey = publicEnv.recaptchaSiteKey
 
 const labelClass = "text-[0.6875rem] font-extrabold uppercase tracking-[0.08em] text-muted"
 const fieldClass = "min-h-[2.875rem] rounded-sm border-border bg-panel px-3 text-fg shadow-none focus-visible:border-line focus-visible:ring-0"
@@ -53,12 +54,18 @@ function Field({ children }: { children: ReactNode }) {
   )
 }
 
+function preloadRecaptchaOnEngage() {
+  if (recaptchaSiteKey)
+    loadRecaptcha(recaptchaSiteKey).catch(() => {})
+}
+
 export function ContactForm() {
-  const { executeRecaptcha } = useGoogleReCaptcha()
   // Formspree resolves this function at submit time and sends the token as the
   // g-recaptcha-response field (verified against the Custom reCAPTCHA secret).
   const [state, handleSubmit] = useForm(formId, {
-    data: { "g-recaptcha-response": executeRecaptcha },
+    data: recaptchaSiteKey
+      ? { "g-recaptcha-response": () => getRecaptchaTokenOrEmpty(recaptchaSiteKey) }
+      : {},
   })
   const hasErrors = Array.isArray(state.errors) ? state.errors.length > 0 : Boolean(state.errors)
   // Submit lifecycle: idle → submitting → success/error. Motion swaps the message
@@ -80,6 +87,7 @@ export function ContactForm() {
       aria-label="Contact form"
       className="grid gap-3.5 rounded-md border border-border bg-surface p-[clamp(1.125rem,2.4vw,1.75rem)]"
       onSubmit={handleSubmit}
+      onFocus={preloadRecaptchaOnEngage}
     >
       <Field>
         <Label htmlFor="name" className={labelClass}>name</Label>
