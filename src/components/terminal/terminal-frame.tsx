@@ -4,7 +4,7 @@ import type { ColorMode, EffectiveMode, ThemeName, ThemeOption } from "@/lib/the
 
 import type { SectionId, StateColor } from "@/portfolio-data"
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons"
-import { Linkedin, Monitor, Moon, Sun } from "lucide-react"
+import { Check, Linkedin, Monitor, Moon, Sun } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { MobileNav } from "@/components/terminal/mobile-nav"
@@ -270,7 +270,8 @@ function TreeLink({ state, main, meta, active, href, icon, suffix, onClick }: Tr
     "relative grid min-h-12 w-full items-center gap-x-2 gap-y-px overflow-hidden rounded-sm px-2 py-1.5 text-left text-muted transition-colors hover:bg-surface/70 hover:text-fg data-[active=true]:text-fg",
     hasEndSlot ? "grid-cols-[0.625rem_minmax(0,1fr)_auto]" : "grid-cols-[0.625rem_minmax(0,1fr)]",
   )
-  const indicator = active && !href
+  const isCurrentSection = active && !href
+  const indicator = isCurrentSection
     ? (
         <motion.span
           layoutId="sidebar-active-section"
@@ -281,12 +282,14 @@ function TreeLink({ state, main, meta, active, href, icon, suffix, onClick }: Tr
       )
     : null
 
-  const dot = (
-    <span
-      aria-hidden="true"
-      className="relative z-10 row-span-2 mt-2 size-2 self-start rounded-full bg-[color:var(--card-accent)]"
-    />
-  )
+  const dot = isCurrentSection
+    ? <Check aria-hidden="true" className="relative z-10 row-span-2 mt-0.5 size-3 self-start text-state-green [stroke-width:3]" />
+    : (
+        <span
+          aria-hidden="true"
+          className="relative z-10 row-span-2 mt-2 size-2 self-start rounded-full bg-[color:var(--card-accent)]"
+        />
+      )
   const body = (
     <>
       <span className="relative z-10 col-start-2 truncate text-[0.8125rem] leading-tight font-extrabold text-fg">{main}</span>
