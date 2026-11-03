@@ -196,9 +196,8 @@ export const projects: readonly ProjectItem[] = [
     imageSrc: "/assets/image/chalk-app.png",
     kind: "mobile",
     typeLabel: "mobile + backend",
-    status: "testing",
+    status: "live",
     links: {
-      testerGroup: "https://groups.google.com/g/chalk-app-testers",
       playStore: "https://play.google.com/store/apps/details?id=com.omwenga.ChalkApp",
     },
     stack: ["React Native", "Expo Router", "TypeScript", ".NET Core", "EF Core", "Postgres"],

@@ -301,6 +301,9 @@ test.describe("terminal portfolio", () => {
 
     await expect(chalkStack.getByText("React Native", { exact: true })).toBeVisible()
     await expect(chalkStack.locator("[data-project-skill=\"React Native\"] svg")).toBeVisible()
+    await expect(chalkCard.getByText("live", { exact: true })).toBeVisible()
+    await expect(chalkCard.getByRole("link", { name: "Play Store", exact: true })).toHaveAttribute("href", "https://play.google.com/store/apps/details?id=com.omwenga.ChalkApp")
+    await expect(chalkCard.getByRole("link", { name: "Join tester group" })).toHaveCount(0)
 
     await page.goto("/projects")
 
