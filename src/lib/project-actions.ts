@@ -14,13 +14,13 @@ const liveActionMeta = {
   github: { label: "code", Icon: SiGithub, iconClass: "text-fg" },
   swagger: { label: "API docs", Icon: SiSwagger, iconClass: "text-[#85EA2D]" },
   web: { label: "live site", Icon: Globe, iconClass: "text-accent" },
-  playStore: { label: "Play Store", Icon: SiGoogleplay, iconClass: "text-[#414141]" },
+  playStore: { label: "Play Store", Icon: SiGoogleplay, iconClass: "text-[#00A0FF]" },
   appStore: { label: "App Store", Icon: SiAppstore, iconClass: "text-[#0D96F6]" },
 } satisfies Partial<Record<ProjectActionKey, ActionMeta>>
 
 const testingActionMeta = {
   testerGroup: { label: "Join tester group", Icon: Users, iconClass: "text-fg" },
-  playStore: { label: "Join Android testing", Icon: SiGoogleplay, iconClass: "text-[#414141]" },
+  playStore: { label: "Join Android testing", Icon: SiGoogleplay, iconClass: "text-[#00A0FF]" },
   appStore: { label: "Join TestFlight", Icon: SiAppstore, iconClass: "text-[#0D96F6]" },
 } satisfies Partial<Record<ProjectActionKey, ActionMeta>>
 
