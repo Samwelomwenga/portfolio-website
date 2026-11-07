@@ -110,5 +110,5 @@ pnpm test:e2e
 ## Author
 
 - GitHub - [@samwelomwenga](https://github.com/samwelomwenga)
-- LinkedIn - [Samwel Omwenga](https://www.linkedin.com/in/samwelomwenga)
+- LinkedIn - [Samwel Omwenga](https://www.linkedin.com/in/samwel-omwenga-7339b8215/)
 - X - [@Samwel_codes](https://x.com/Samwel_codes)

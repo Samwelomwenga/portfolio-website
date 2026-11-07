@@ -6,7 +6,7 @@ export const profile = {
   shortName: "Samwel",
   title: "Software Engineer",
   githubUrl: "https://github.com/samwelomwenga",
-  linkedinUrl: "https://www.linkedin.com/in/samwelomwenga",
+  linkedinUrl: "https://www.linkedin.com/in/samwel-omwenga-7339b8215/",
   xUrl: "https://x.com/Samwel_codes",
   location: "Nairobi, Kenya",
   workspaceMeta: "portfolio / main / software-engineer",
@@ -276,6 +276,6 @@ export const blogs: readonly BlogItem[] = [
 
 export const contactCommands = [
   { command: "open github.com/samwelomwenga", action: "github", href: profile.githubUrl },
-  { command: "open linkedin.com/in/samwelomwenga", action: "linkedin", href: profile.linkedinUrl },
+  { command: "open linkedin.com/in/samwel-omwenga-7339b8215", action: "linkedin", href: profile.linkedinUrl },
   { command: "open x.com/Samwel_codes", action: "x", href: profile.xUrl },
 ] as const
