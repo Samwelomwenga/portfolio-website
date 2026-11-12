@@ -53,7 +53,7 @@ describe("getProjectActions", () => {
     expect(store.primary).toBe(true)
   })
 
-  it("uses live labels and standard styling for live projects", () => {
+  it("leads live projects with a verb-labelled primary link to the live product", () => {
     const actions = getProjectActions(project({
       status: "live",
       links: {
@@ -62,8 +62,19 @@ describe("getProjectActions", () => {
       },
     }))
 
-    expect(actions.map(a => a.label)).toEqual(["code", "live site"])
+    expect(actions.map(a => a.label)).toEqual(["Visit live site", "View code"])
+    expect(actions.map(a => a.primary)).toEqual([true, false])
     expect(actions.every(a => !a.testingCta)).toBe(true)
+  })
+
+  it("makes a live Play Store link the primary download CTA", () => {
+    const [store] = getProjectActions(project({
+      status: "live",
+      links: { playStore: "https://play.google.com/store/apps/details?id=com.omwenga.ChalkApp" },
+    })) as [ProjectAction]
+
+    expect(store.label).toBe("Download on Play Store")
+    expect(store.primary).toBe(true)
   })
 
   it("ignores a tester group on a live project", () => {
@@ -73,5 +84,18 @@ describe("getProjectActions", () => {
     }))
 
     expect(actions.map(a => a.key)).toEqual(["web"])
+  })
+
+  it.each([
+    ["live", { github: "g", swagger: "s", web: "w", playStore: "p", appStore: "a" }, ["Download on Play Store", "Download on the App Store", "Visit live site", "Read API docs", "View code"]],
+    ["live", { github: "g", swagger: "s" }, ["Read API docs", "View code"]],
+    ["live", { github: "g" }, ["View code"]],
+    ["testing", { testerGroup: "t", playStore: "p", appStore: "a", github: "g" }, ["Join tester group", "Open on Play Store", "Join TestFlight", "View code"]],
+    ["testing", { appStore: "a", web: "w" }, ["Join TestFlight", "Visit live site"]],
+  ] as const)("gives a %s project with %o one primary link and verb labels", (status, links, labels) => {
+    const actions = getProjectActions(project({ status, links }))
+
+    expect(actions.map(a => a.label)).toEqual(labels)
+    expect(actions.map(a => a.primary)).toEqual(labels.map((_, i) => i === 0))
   })
 })

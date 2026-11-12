@@ -1,5 +1,6 @@
 import type { ProjectAction } from "@/lib/project-actions"
 import type { ProjectItem } from "@/portfolio-data"
+import { ArrowUpRight } from "lucide-react"
 import { motion } from "motion/react"
 import Image from "next/image"
 import { RollingText } from "@/components/motion/rolling-text"
@@ -152,26 +153,13 @@ function ProjectActionList({ project, actions }: { project: ProjectItem, actions
 }
 
 const actionVariantClass = {
-  "standard": "border-border bg-shell text-fg hover:border-fg",
-  "testing-primary": "border-[color:var(--card-accent)] bg-[color:var(--card-accent)] text-[color:var(--bg)]",
-  "testing-secondary": "border-[color:var(--card-accent)] bg-transparent text-[color:var(--card-accent)]",
+  primary: "border-[color:var(--card-accent)] bg-[color:var(--card-accent)] text-[color:var(--bg)] hover:brightness-110",
+  secondary: "border-[color:var(--card-accent)] bg-transparent text-[color:var(--card-accent)] hover:bg-shell",
 } as const
-
-const actionVariantIconClass = {
-  "testing-primary": "text-[color:var(--bg)]",
-  "testing-secondary": "text-[color:var(--card-accent)]",
-} as const
-
-function actionVariant(action: ProjectAction): keyof typeof actionVariantClass {
-  if (!action.testingCta) {
-    return "standard"
-  }
-  return action.primary ? "testing-primary" : "testing-secondary"
-}
 
 function ProjectActionLink({ action }: { action: ProjectAction }) {
   const Icon = action.Icon
-  const variant = actionVariant(action)
+  const variant = action.primary ? "primary" : "secondary"
 
   return (
     <motion.a
@@ -180,21 +168,19 @@ function ProjectActionLink({ action }: { action: ProjectAction }) {
       rel="noreferrer"
       aria-label={action.label}
       className={cn(
-        "inline-flex min-h-8 max-w-full items-center justify-center gap-1.5 rounded-sm border px-2.5 text-xs font-extrabold transition-colors",
+        "inline-flex min-h-10 max-w-full items-center justify-center gap-2 rounded-sm border-2 px-3.5 text-[0.8125rem] font-extrabold transition-[color,background-color,filter]",
         actionVariantClass[variant],
       )}
       {...buttonMicroInteraction}
     >
       <Icon
         aria-hidden="true"
-        className={cn(
-          "size-3.5 shrink-0",
-          variant === "standard" ? action.iconClass : actionVariantIconClass[variant],
-        )}
+        className={cn("size-4 shrink-0", variant === "primary" ? "text-[color:var(--bg)]" : action.iconClass)}
         focusable="false"
         title=""
       />
       <span className="min-w-0 truncate">{action.label}</span>
+      <ArrowUpRight aria-hidden="true" className="size-4 shrink-0" />
     </motion.a>
   )
 }
