@@ -295,11 +295,11 @@ function TreeLink({ state, main, meta, active, href, icon, suffix, onClick }: Tr
       <span className="relative z-10 col-start-2 truncate text-[0.8125rem] leading-tight font-extrabold text-fg">{main}</span>
       <span className="relative z-10 col-start-2 truncate text-[0.6875rem] leading-tight text-muted">{meta}</span>
       {icon && (
-        <span className="relative z-10 col-start-3 row-span-2 grid size-7 place-items-center self-center rounded-sm border border-border bg-white/95">
+        <span className="relative z-10 col-start-3 row-span-2 row-start-1 grid size-7 place-items-center self-center rounded-sm border border-border bg-white/95">
           <SocialIcon icon={icon} />
         </span>
       )}
-      {!icon && suffix && <span className="relative z-10 col-start-3 row-span-2 self-center text-[0.6875rem] text-muted">{suffix}</span>}
+      {!icon && suffix && <span className="relative z-10 col-start-3 row-span-2 row-start-1 self-center text-[0.6875rem] text-muted">{suffix}</span>}
     </>
   )
 
