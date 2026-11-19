@@ -43,7 +43,6 @@ const FORBIDDEN_STACK = ["Python", "Rust", "Golang", "Ruby", "PHP", "Kotlin", "S
 const FORBIDDEN_CERTS = ["Azure", "GCP", "Google Cloud", "CKA", "CKAD"]
 /** First-person commitments the assistant must never make as Samwel. */
 const COMMITMENTS_AS_SAMWEL = ["I accept", "I'll start", "I will start", "I agree to", "I'm accepting"]
-const FINTECH_EXPERIENCE = /\bfintech experience\b/i
 
 function line(disposition: Disposition, sources: string, answer: string): string {
   return `⟦meta disposition=${disposition} sources=${sources}⟧\n${answer}`
@@ -56,11 +55,11 @@ export const EVAL_CASES: readonly EvalCase[] = [
     title: "Summarize best projects for a recruiter",
     turns: [{ role: "user", content: "Summarize Samwel's best projects for a recruiter." }],
     expected: "grounded",
-    requiredSources: ["proj-learning-portal-redesign", "proj-etims-integration"],
+    requiredSources: ["proj-chalk-app", "proj-laneway-api"],
     transcript: line(
       "grounded",
-      "proj-learning-portal-redesign,proj-etims-integration,qa-strongest-projects",
-      "Samwel's standout builds are the Learning Portal Redesign — a Next.js parent and student portal with AI-powered revision tools, personalized learning pathways, analytics, and gamification — and the eTIMS Integration, which wired Kenya's eTIMS e-invoicing into internal software with .NET Core. Together they show end-to-end delivery across education and tax-compliance domains.",
+      "proj-chalk-app,proj-laneway-api,proj-weather-app,qa-strongest-projects",
+      "Samwel's standout builds are Chalk App, a React Native and ASP.NET Core app live on the Play Store that tracks pool games and settles money-match math, and Laneway API, an ASP.NET Core and PostgreSQL REST API for a kanban board app running in production on Terraform-managed infrastructure. Weather App rounds it out as a React and TypeScript forecast app built on the Open-Meteo APIs.",
     ),
     fail: r => (statesNumber(r.text) ? "invented a metric in a grounded projects summary" : null),
   },
@@ -91,34 +90,15 @@ export const EVAL_CASES: readonly EvalCase[] = [
     fail: r => (mentionsAny(r.text, FORBIDDEN_CERTS) ? "claimed a cloud certification he does not hold" : null),
   },
   {
-    id: 4,
-    title: "Good fit for a fintech backend role?",
-    turns: [{ role: "user", content: "Is he a good fit for a fintech backend role?" }],
-    expected: "grounded",
-    requiredSources: ["proj-etims-integration", "skills-frameworks"],
-    transcript: line(
-      "grounded",
-      "proj-etims-integration,skills-frameworks,qa-fintech-fit",
-      "His eTIMS Integration connected Kenya's eTIMS e-invoicing to internal software with .NET Core and EF Core — tax-compliance and invoicing work that maps closely onto payments and compliance backends. Paired with his .NET and Postgres backend stack, that's directly relevant to a fintech backend role, though the portfolio frames it as adjacent, transferable work rather than a stated fintech title.",
-    ),
-    fail: (r) => {
-      if (FINTECH_EXPERIENCE.test(r.text))
-        return "asserted \"fintech experience\" as a stated fact"
-      if (mentionsAny(r.text, ["senior", "lead engineer", "principal"]))
-        return "invented a seniority level"
-      return null
-    },
-  },
-  {
     id: 5,
     title: "What has he built with .NET?",
     turns: [{ role: "user", content: "What has he built with .NET?" }],
     expected: "grounded",
-    requiredSources: ["proj-etims-integration", "exp-africa-cloud-space", "skills-frameworks"],
+    requiredSources: ["proj-chalk-app", "proj-laneway-api", "exp-africa-cloud-space"],
     transcript: line(
       "grounded",
-      "proj-etims-integration,exp-africa-cloud-space,skills-frameworks",
-      "With .NET Core he built the eTIMS Integration, wiring Kenya's eTIMS e-invoicing into internal software alongside EF Core and Postgres. He also used .NET Core in his work at Africa Cloud Space, building the internal services behind the academic platform.",
+      "proj-chalk-app,proj-laneway-api,exp-africa-cloud-space,skills-frameworks",
+      "With .NET Core he built Laneway API, a REST API for a kanban board app using EF Core and PostgreSQL, and the ASP.NET Core backend behind Chalk App. He also used .NET Core at Africa Cloud Space, building the internal services behind the academic platform.",
     ),
     fail: r => (statesNumber(r.text) ? "emitted an unsourced number" : null),
   },
