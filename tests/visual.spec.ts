@@ -290,6 +290,7 @@ test.describe("terminal portfolio", () => {
   test("projects section lists the featured cards", async ({ page, isMobile }) => {
     await navigateToSection(page, "projects", isMobile)
     await expect(page.getByRole("heading", { name: "Chalk App" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Laneway API" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "Weather App" })).toBeVisible()
   })
 
@@ -302,13 +303,17 @@ test.describe("terminal portfolio", () => {
     await expect(chalkStack.getByText("React Native", { exact: true })).toBeVisible()
     await expect(chalkStack.locator("[data-project-skill=\"React Native\"] svg")).toBeVisible()
     await expect(chalkCard.getByText("live", { exact: true })).toBeVisible()
-    await expect(chalkCard.getByRole("link", { name: "Play Store", exact: true })).toHaveAttribute("href", "https://play.google.com/store/apps/details?id=com.omwenga.ChalkApp")
+    await expect(chalkCard.getByRole("link", { name: "Download on Play Store", exact: true })).toHaveAttribute("href", "https://play.google.com/store/apps/details?id=com.omwenga.ChalkApp")
     await expect(chalkCard.getByRole("link", { name: "Join tester group" })).toHaveCount(0)
 
     await page.goto("/projects")
 
     const weatherCard = page.getByRole("article", { name: "Weather App" })
     await expect(weatherCard.getByRole("link", { name: "code" })).toHaveAttribute("href", "https://github.com/Samwelomwenga/weather-app")
+
+    const lanewayCard = page.getByRole("article", { name: "Laneway API" })
+    await expect(lanewayCard.getByRole("link", { name: "View code" })).toHaveAttribute("href", "https://github.com/Samwelomwenga/laneway-api")
+    await expect(lanewayCard.getByRole("link", { name: "Read API docs" })).toHaveAttribute("href", "https://laneway-api.samwelomwenga.com/scalar/v1")
   })
 
   test("contact form exposes labeled fields and a live status region", async ({ page, isMobile }) => {

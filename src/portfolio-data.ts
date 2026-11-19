@@ -205,6 +205,27 @@ export const projects: readonly ProjectItem[] = [
     featured: true,
   },
   {
+    title: "Laneway API",
+    blurb: "REST API for a kanban board app. It handles workspaces, boards, lists, and cards, plus members with roles, comments, attachments, and an activity history. Built with ASP.NET Core and PostgreSQL, and deployed to an Oracle Cloud VM behind a Cloudflare Tunnel.",
+    imageSrc: "/assets/image/laneway-api.png",
+    kind: "backend",
+    typeLabel: "REST API",
+    status: "live",
+    links: {
+      github: "https://github.com/Samwelomwenga/laneway-api",
+      swagger: "https://laneway-api.samwelomwenga.com/scalar/v1",
+    },
+    stack: [".NET Core", "EF Core", "Postgres", "Docker", "Terraform"],
+    proofPoints: [
+      "Integration tests run against a real Postgres database in Testcontainers, and the access tests call every route once for each kind of caller.",
+      "Auth targets OWASP ASVS 5.0 Level 2, and every unmet item is listed with the reason.",
+      "Every PR runs CodeQL, Trivy, gitleaks, a vulnerable package check, and zizmor.",
+      "Terraform manages the VM and the Grafana alert rules, and each alert links to a runbook.",
+    ],
+    state: "green",
+    featured: true,
+  },
+  {
     title: "Weather App",
     blurb: "Weather app that resolves current, daily, and hourly forecasts for any location using the Open-Meteo APIs, with browser geolocation, unit switching between metric and imperial, and a responsive layout across devices.",
     imageSrc: "/assets/image/Macbook-Air-1559x1138.png",

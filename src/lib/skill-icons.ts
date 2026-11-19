@@ -1,5 +1,6 @@
 import {
   SiCss,
+  SiDocker,
   SiDotnet,
   SiExpo,
   SiFigma,
@@ -13,6 +14,7 @@ import {
   SiReact,
   SiSupabase,
   SiTailwindcss,
+  SiTerraform,
   SiTypescript,
 } from "@icons-pack/react-simple-icons"
 import { Database } from "lucide-react"
@@ -42,4 +44,6 @@ export const skillIcons: Record<string, SkillIconEntry> = {
   "Figma": { Icon: SiFigma, iconClass: "text-[#F24E1E]" },
   "Supabase": { Icon: SiSupabase, iconClass: "text-[#3FCF8E]" },
   "Firebase": { Icon: SiFirebase, iconClass: "text-[#DD2C00]" },
+  "Docker": { Icon: SiDocker, iconClass: "text-[#2496ED]" },
+  "Terraform": { Icon: SiTerraform, iconClass: "text-[#844FBA]" },
 }

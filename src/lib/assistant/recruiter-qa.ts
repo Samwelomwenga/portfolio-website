@@ -26,21 +26,14 @@ export const recruiterQA: readonly RecruiterQA[] = [
     slug: "strongest-projects",
     question: "What are Samwel's strongest projects for a recruiter?",
     answer:
-      "His two featured builds are the Learning Portal Redesign — a Next.js parent and student portal with AI-powered revision tools, personalized learning pathways, analytics, and gamification — and the eTIMS Integration, which wired Kenya's eTIMS e-invoicing into internal software with .NET Core.",
-    grounds: ["proj-learning-portal-redesign", "proj-etims-integration"],
+      "His featured projects are Chalk App, a React Native and ASP.NET Core app live on the Play Store that tracks pool games and settles money-match math; Laneway API, an ASP.NET Core and PostgreSQL REST API for a kanban board app, running in production on Terraform-managed infrastructure; and Weather App, a React and TypeScript forecast app built on the Open-Meteo APIs.",
+    grounds: ["proj-chalk-app", "proj-laneway-api", "proj-weather-app"],
   },
   {
     slug: "cloud-experience",
     question: "Does Samwel have cloud experience?",
     answer:
-      "He holds the AWS Certified Cloud Practitioner and Kubernetes & Cloud Native Associate (KCNA) certifications, and built platform services and portals at Africa Cloud Space.",
-    grounds: ["cert-aws-ccp", "cert-kcna", "exp-africa-cloud-space"],
-  },
-  {
-    slug: "fintech-fit",
-    question: "Is Samwel a fit for a fintech or payments backend role?",
-    answer:
-      "His eTIMS Integration connected Kenya's eTIMS e-invoicing to internal software with .NET Core, EF Core, and Postgres — tax-compliance and invoicing domain work that overlaps payments and compliance backends. He has not listed a role titled fintech, so treat this as adjacent, transferable experience rather than a stated fintech background.",
-    grounds: ["proj-etims-integration", "skills-frameworks"],
+      "He holds the AWS Certified Cloud Practitioner and Kubernetes & Cloud Native Associate (KCNA) certifications, built platform services and portals at Africa Cloud Space, and runs Laneway API on an Oracle Cloud VM provisioned with Terraform.",
+    grounds: ["cert-aws-ccp", "cert-kcna", "exp-africa-cloud-space", "proj-laneway-api"],
   },
 ]
